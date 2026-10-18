@@ -26,7 +26,8 @@ min_version = "2026.10.13"
 # AGENTS.md here is pi's global instruction file, so it is deployed.
 "~/.config/pi/agent" = { source = "pi/agent", mode = "symlink-each", exclude = [".DS_Store", "/prompts", "/subagent-manager", "/themes"] }
 "~/.config/pi/agent/prompts" = { source = "pi/agent/prompts", mode = "symlink" }
-"~/.config/pi/agent/subagent-manager" = { source = "pi/agent/subagent-manager", mode = "symlink" }
+# pi-subagent-manager refuses symlinked state, so this one is copied. Capture its own edits with `mise dot add`.
+"~/.config/pi/agent/subagent-manager" = { source = "pi/agent/subagent-manager", mode = "copy", exclude = [".import-offered", ".DS_Store"] }
 "~/.config/pi/agent/themes" = { source = "pi/agent/themes", mode = "symlink" }
 # Espanso reloads and installs packages inside these directories, so link them whole.
 "~/Library/Application Support/espanso/config" = { source = "espanso/config", mode = "symlink" }

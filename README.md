@@ -11,7 +11,7 @@ jj（与 Git 共存）管版本，`mise dot` 管部署，`mise bootstrap` 管软
 | btop | `~/.config/btop/` | btop 会改写 `btop.conf`，改动直接进仓库 |
 | Espanso | `~/Library/Application Support/espanso/{config,match,script}` | 整目录链接 |
 | Fish | `~/.config/fish/` | 独立命令在 `functions/<name>.fish`（不用 `funcsave`），按功能分组的在 `conf.d/<功能>.fish`；密钥在 Git 忽略的 `conf.d/secrets.fish` |
-| pi | `~/.config/pi/agent/` | 需要 fish 设置的 `PI_CODING_AGENT_DIR`。只链接配置；`auth.json`、`sessions/`、`npm/`、`git/` 和缓存留在本机。扩展和 skills 来自 git 包 `github.com/sidkang/pi-stuff`，由 `bootstrap` 任务的 `pi update --extensions` 安装。`sessions/` 由 Syncthing 原地同步，不进 Git |
+| pi | `~/.config/pi/agent/` | 需要 fish 设置的 `PI_CODING_AGENT_DIR`。只链接配置（`subagent-manager/` 例外：插件拒绝软链接，改为复制；插件自己改动后用 `mise dot add ~/.config/pi/agent/subagent-manager` 收回仓库）；`auth.json`、`sessions/`、`npm/`、`git/` 和缓存留在本机。扩展和 skills 来自 git 包 `github.com/sidkang/pi-stuff`，由 `bootstrap` 任务的 `pi update --extensions` 安装。`sessions/` 由 Syncthing 原地同步，不进 Git |
 | Git | `~/.config/git/` | 不使用 `~/.gitconfig` |
 
 新增程序：建 `<程序>/` 目录，在 `[dotfiles]` 加一行，在 `[bootstrap.packages]` 声明软件。
