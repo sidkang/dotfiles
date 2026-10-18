@@ -1,0 +1,40 @@
+# espanso match file
+global_vars:
+  - name: today
+    type: date
+    params:
+      format: "%Y-%m-%d"
+  - name: yesterday
+    type: date
+    params:
+      format: "%Y-%m-%d"
+      offset: -86400
+  - name: tomorrow
+    type: date
+    params:
+      format: "%Y-%m-%d"
+      offset: 86400
+  - name: now_time
+    type: date
+    params:
+      format: "%H:%M"
+
+# For a complete introduction, visit the official docs at: https://espanso.org/docs/
+
+# You can use this file to define the base matches (aka snippets)
+# that will be available in every application when using espanso.
+
+# Matches are substitution rules: when you type the "trigger" string
+# it gets replaced by the "replace" string.
+matches:
+  - trigger: ":today"
+    replace: "{{today}}"
+
+  - trigger: ":yest"
+    replace: "{{yesterday}}"
+
+  - trigger: ":tomo"
+    replace: "{{tomorrow}}"
+
+  - trigger: ":now"
+    replace: "{{now_time}}"

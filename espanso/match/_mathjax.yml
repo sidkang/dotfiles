@@ -1,0 +1,15 @@
+matches:
+  - trigger: ":bbox"
+    replace: "\\bbox[5px, border: 2px solid red]{$|$}"
+  
+  - trigger: ":align"
+    replace: "$$\n\\begin{align*}\n$|$\n\\end{align*}\n$$\n"
+  
+  - trigger: ":cases"
+    replace: "$$\n\\begin{cases}\n$|$\n\\end{cases}\n$$\n"
+
+  - trigger: ":array"
+    replace: "$$\n\\begin{array}{$|$}\n\n\\end{array}\n$$\n"
+
+  - trigger: ":tt"
+    replace: "\\text{$|$}"

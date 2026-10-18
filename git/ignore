@@ -1,0 +1,16 @@
+# Global ignores: only OS, editor, and tool caches.
+# Project build outputs and lockfiles belong in each project's .gitignore.
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Quarto
+.quarto/
+
+# rustfmt backups
+**/*.rs.bk

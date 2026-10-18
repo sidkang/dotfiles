@@ -1,0 +1,16 @@
+---
+matches:
+  - trigger: :mise_py
+    replace: |-
+      VIRTUAL_ENV = "\{\{ env.CENTRAL_VENV_DIR \}\}/\{\{ env.VENV_NAME \}\}"
+      _.python.venv = { python = '3.12', create = true, path = "\{\{ env.VIRTUAL_ENV \}\}", uv_create_args = ['--seed'] }
+      UV_PROJECT_ENVIRONMENT = "\{\{ env.VIRTUAL_ENV \}\}"
+      UV_PYTHON = "\{\{ env.VIRTUAL_ENV \}\}/bin/python"
+      VENV_ACTIVE = true
+  - trigger: :uv_py
+    replace: "{{venv}}"
+    vars:
+      - name: venv
+        type: shell
+        params:
+          cmd: echo "$CENTRAL_VENV_DIR"

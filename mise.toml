@@ -1,0 +1,44 @@
+min_version = "2026.10.13"
+
+[bootstrap.packages]
+"brew:bat" = { os = "macos" }
+"brew:btop" = { os = "macos" }
+"brew:fish" = { os = "macos" }
+"brew:git" = { os = "macos" }
+"brew:hunk" = { os = "macos" }
+"brew:pi-coding-agent" = { os = "macos" }
+"brew:starship" = { os = "macos" }
+"brew:yqrashawn/goku/goku" = { os = "macos" }
+"brew-cask:espanso" = { os = "macos" }
+"brew-cask:karabiner-elements" = { os = "macos" }
+
+[dotfiles]
+"~/.config/aerospace" = { source = "aerospace", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/bat" = { source = "bat", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/bottom" = { source = "bottom", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/btop" = { source = "btop", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/fish" = { source = "fish", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/git" = { source = "git", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/karabiner.edn" = { source = "goku/karabiner.edn", mode = "symlink" }
+"~/.config/starship.toml" = { source = "starship/starship.toml", mode = "symlink" }
+# pi (PI_CODING_AGENT_DIR, set in fish): config files are linked one by one so local state
+# (auth.json, sessions/, npm/, git/, caches) stays out of the repo.
+# AGENTS.md here is pi's global instruction file, so it is deployed.
+"~/.config/pi/agent" = { source = "pi/agent", mode = "symlink-each", exclude = [".DS_Store", "/prompts", "/subagent-manager", "/themes"] }
+"~/.config/pi/agent/prompts" = { source = "pi/agent/prompts", mode = "symlink" }
+"~/.config/pi/agent/subagent-manager" = { source = "pi/agent/subagent-manager", mode = "symlink" }
+"~/.config/pi/agent/themes" = { source = "pi/agent/themes", mode = "symlink" }
+# Espanso reloads and installs packages inside these directories, so link them whole.
+"~/Library/Application Support/espanso/config" = { source = "espanso/config", mode = "symlink" }
+"~/Library/Application Support/espanso/match" = { source = "espanso/match", mode = "symlink" }
+"~/Library/Application Support/espanso/script" = { source = "espanso/script", mode = "symlink" }
+
+[tasks.bootstrap]
+description = "Install packages mise cannot declare, then build caches"
+run = [
+  # AeroSpace is only in its own tap, which mise cannot evaluate without Ruby 3.
+  "brew list --cask aerospace >/dev/null 2>&1 || brew install --cask nikitabobko/tap/aerospace",
+  "bat cache --build",
+  # pi: install the packages declared in settings.json, including github.com/sidkang/pi-stuff.
+  "PI_CODING_AGENT_DIR=~/.config/pi/agent pi update --extensions",
+]

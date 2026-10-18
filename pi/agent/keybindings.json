@@ -1,0 +1,14 @@
+{
+  "tui.editor.pageUp": ["pageUp"],
+  "tui.editor.pageDown": ["pageDown"],
+  "tui.input.newLine": ["ctrl+j"],
+  "app.suspend": [],
+  "app.editor.external": [],
+  "app.models.clearAll": [],
+  "app.models.enableAll": [],
+  "app.model.select": [],
+  "app.model.cycleForward": ["ctrl+r"],
+  "app.model.cycleBackward": [],
+  "app.thinking.cycle": ["ctrl+t"],
+  "app.thinking.toggle": []
+}

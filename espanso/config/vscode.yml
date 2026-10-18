@@ -1,0 +1,5 @@
+filter_exec: Visual Studio Code
+
+extra_includes:
+  - "../match/_dev.yml"
+  - "../match/_mathjax.yml"

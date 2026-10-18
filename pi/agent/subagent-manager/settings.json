@@ -1,0 +1,6 @@
+{
+  "maxConcurrent": 8,
+  "subagentExtensions": true,
+  "toolFiltering": "allowed",
+  "modelSelection": "pick-first-available"
+}

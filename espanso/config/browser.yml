@@ -1,0 +1,6 @@
+filter_exec: "Safari|Google Chrome|Firefox"
+enable: true
+
+extra_includes:
+  - "../match/_search.yml"
+  - "../match/prompts.yml.yml"

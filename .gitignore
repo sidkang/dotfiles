@@ -1,0 +1,12 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+*.local.toml
+
+# Private or third-party files that stay local (Syncthing still copies them)
+espanso/match/mine.yml
+espanso/match/packages/
+fish/conf.d/secrets.fish
+pi/agent/models.json
+pi/agent/subagent-manager/.import-offered

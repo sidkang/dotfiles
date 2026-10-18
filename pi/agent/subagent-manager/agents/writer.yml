@@ -1,0 +1,15 @@
+models:
+  - gemini/gemini-3.8-flash
+tools:
+  allow:
+    - read
+    - edit
+    - write
+    - grep
+    - find
+    - ls
+    - codemode
+    - fffind
+    - ffgrep
+    - agent_update
+    - agent_pause

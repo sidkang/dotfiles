@@ -1,0 +1,23 @@
+models:
+  - codex/gpt-6-astra
+tools:
+  allow:
+    - read
+    - grep
+    - find
+    - ls
+    - bash
+    - codemode
+    - fffind
+    - ffgrep
+    - web_search
+    - fetch_content
+    - agent_update
+    - agent_pause
+    - agent_types
+    - agent_spawn
+    - agent_wait
+    - agent_status
+    - agent_output
+    - agent_steer
+    - agent_stop

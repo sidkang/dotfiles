@@ -1,0 +1,41 @@
+matches:
+  - trigger: ":fas"
+    replace: "{{output}}"
+    vars:
+      - name: output
+        type: script
+        params:
+          args:
+            - /usr/bin/env
+            - python3
+            - "%CONFIG%/script/formatAsSnippet.py"
+
+  - trigger: ":64"
+    replace: "{{output}}"
+    vars:
+      - name: form
+        type: form
+        params:
+          layout: |
+            [[content]]
+      - name: output
+        type: script
+        params:
+          args:
+            - /usr/bin/env
+            - python3
+            - "%CONFIG%/script/encodeToBase64.py"
+
+  - trigger: ":conv"
+    replace: "{{output}}"
+    vars:
+      - name: clipboard
+        type: clipboard
+      - name: output
+        type: script
+        params:
+          args:
+            - /usr/bin/env
+            - python3
+            - "%CONFIG%/script/fixGbkMojibake.py"
+            - "{{clipboard}}"

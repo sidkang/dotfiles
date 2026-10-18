@@ -1,0 +1,22 @@
+[user]
+	name = sidkang
+	email = sidskang@gmail.com
+[alias]
+  # `git log` with patches shown with difftastic.
+  dl = -c diff.external=difft log -p --ext-diff
+
+  # Show the most recent commit with difftastic.
+  ds = -c diff.external=difft show --ext-diff
+
+  # `git diff` with difftastic.
+  dft = -c diff.external=difft diff
+
+  # Difftastic aliases, so `git dlog` is `git log` with difftastic and so on.
+  dlog = -c diff.external=difft log --ext-diff
+  dshow = -c diff.external=difft show --ext-diff
+  ddiff = -c diff.external=difft diff
+[core]
+	quotepath = false
+	pager = hunk pager
+[credential]
+	helper = osxkeychain

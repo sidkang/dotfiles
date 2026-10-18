@@ -1,0 +1,345 @@
+{:profiles
+ {:goku
+  {:default true :sim 50 :delay 180 :alone 150 :held 140}}
+ :templates {:alfred "osascript -e 'tell application \"Alfred 4\" to run trigger \"%s\" in workflow \"%s\" with argument \"%s\"'"
+             :open "open \"%s\""
+             :kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
+             :kitty-py "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';python3 $HOME/.config/kitty/kitty-action.py %s"
+             :as "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';aerospace %s"
+             :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
+             :sh "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';%s"
+             :hs "open -g \"hammerspoon://%s\""
+             :hs-notify "open -g \"hammerspoon://notify?msg=%s\""
+             :m1ddc "/opt/homebrew/bin/m1ddc %s"
+             :beep "osascript -e 'beep 1'"
+             :kitty-hotkey-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten send-text --match session:hotkey %s"}
+ :simlayers {:z-mode {:key :z}
+             :f-mode {:key :f}
+             :w-mode {:key :w}
+             :t-mode {:key :t}}
+ :layers {}
+ :applications {:chrome ["^com\\.google\\.Chrome$"]
+                :logseq ["^com\\.electron\\.logseq$"]
+                :safari ["^com\\.apple\\.Safari$"]
+                :telegram ["^ru\\.keepcoder\\.Telegram$"]
+                :terminals ["^com\\.googlecode\\.iterm2$" "^net\\.kovidgoyal\\.kitty$"]
+                :kitty ["^net\\.kovidgoyal\\.kitty$"]
+                :vscode ["^com\\.microsoft\\.VSCode$"]
+                :wechat ["^com\\.tencent\\.xinWeChat$"]
+                :chatgpt-app ["^com\\.openai\\.chat$"]
+                :office ["^com\\.microsoft\\.Word$" "^com\\.microsoft\\.Excel$"]}
+ :input-sources {:cn {:language "^zh\\-Hans$" :input_source_id "Shuangpin$"}
+                 :en {:language "^en$"}
+                 :ja {:language "^ja$"}}
+ :main [{:des "ASRF translation"
+         :rules [[:left_shift [:sh "open -g asrf://start?mode=translation"] ["fn-mode" 1]]]}
+        {:des "Fn as internal layer; Fn alone still sends Fn"
+         :rules [[:##fn ["fn-mode" 1] nil {:afterup ["fn-mode" 0] :alone :fn}]
+
+                 :fn-mode
+                 [:f1 :display_brightness_decrement]
+                 [:f2 :display_brightness_increment]
+                 [:f7 :rewind]
+                 [:f8 :play_or_pause]
+                 [:f9 :fast_forward]
+                 [:f10 :mute]
+                 [:f11 :volume_decrement]
+                 [:f12 :volume_increment]]}
+        {:des "input methods: cn us jp"
+         :rules [[:##right_command :##right_command :!cn {:alone [:hs "switchIME?to=cn"]}]
+                 [:##right_option :##right_option :!ja {:alone [:hs "switchIME?to=ja"]}]
+                 [:##left_command :##left_command nil {:alone {:input :en}}]]}
+        {:des "KeyCode Swap: :-; \"-'"
+         :rules [[:semicolon :!Ssemicolon]
+                 [:!Ssemicolon :semicolon]
+                 [:!Squote :quote]
+                 [:quote
+                  [["aerospace-mode" 1] [:hs "whichkey?action=show&group=aerospace-mode"]]
+                  nil
+                  {:afterup [["aerospace-mode" 0] [:hs "whichkey?action=hide&group=aerospace-mode"]] :alone :!Squote}]]}
+
+        {:des "aerospace quote"
+         :rules [[:escape [:as-py "app toggle obsidian"] ["escape-mode" 1]]
+                 [:escape
+                  ["escape-mode" 1]
+                  nil
+                  {:delayed {:invoked [[:as-py "kitty toggle-hotkey"] ["escape-mode" 0]]
+                             :canceled ["escape-mode" 0]}}]
+
+                 [:f1 [:as "focus-back-and-forth"]]
+
+                 [:f2 [:as "macos-native-fullscreen"] ["f2-mode" 1]]
+                 [:f2 ["f2-mode" 1] nil {:delayed {:invoked [[:as "fullscreen"] ["f2-mode" 0]] :canceled ["f2-mode" 0]}}]
+
+                 [:f3 [:as "move-node-to-monitor --wrap-around --focus-follows-window next"]]
+                 [:f4 [:as "focus-monitor --wrap-around next"]]
+
+                 :aerospace-mode
+                 [:r [["as-send-ws" 1] [:hs "whichkey?action=show&group=as-send-ws"]]]
+                 [:t [["as-toggle" 1] [:hs "whichkey?action=show&group=as-toggle"]]]
+                 [:f [["as-open" 1] [:hs "whichkey?action=show&group=as-open"]]]
+                 [:g [["as-go" 1] [:hs "whichkey?action=show&group=as-go"]]]
+                 [:s [["as-swap" 1] [:hs "whichkey?action=show&group=as-swap"]]]
+                 [:z [["z-mode" 1] [:hs "whichkey?action=show&group=z-mode"]]]
+
+                 [:v [:as "close"]]
+
+                 [:h [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop left"]]
+                 [:j [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop down"]]
+                 [:k [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
+                 [:l [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop right"]]
+
+                 [:!Th [:as "join-with left"]]
+                 [:!Tj [:as "join-with down"]]
+                 [:!Tk [:as "join-with up"]]
+                 [:!Tl [:as "join-with right"]]
+
+                 [:!Sh [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop left"]]
+                 [:!Sj [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop down"]]
+                 [:!Sk [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
+                 [:!Sl [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop right"]]
+
+                 [:1 [:as "workspace 1"]]
+                 [:2 [:as "workspace 2"]]
+                 [:3 [:as "workspace 3"]]
+                 [:4 [:as "workspace 4"]]
+                 [:5 [:as "workspace 5"]]
+
+                 :as-send-ws
+                 [:caps_lock [["as-send-ws" 0] [:hs "whichkey?action=hide&group=as-send-ws"]]]
+                 [:1 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 1"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:2 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 2"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:3 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 3"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:4 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 4"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:5 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 5"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:q [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window Q"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:w [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window W"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:e [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window E"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:a [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window A"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:s [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window S"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:d [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window D"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+
+                 :as-toggle
+                 [:caps_lock [["as-toggle" 0] [:hs "whichkey?action=hide&group=as-toggle"]]]
+                 [:j [["as-toggle" 0] [:as "layout tiles accordion"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:k [["as-toggle" 0] [:as "layout horizontal vertical"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:f [["as-toggle" 0] [:as "layout floating tiling"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:e [["as-toggle" 0] [:sh "killall AeroSpace borders;open -a AeroSpace"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:b [["as-toggle" 0] [:as "balance-sizes"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:r [["as-toggle" 0] [:as "reload-config"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:g [["as-toggle" 0] [:as-py "window move-ghost"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:c [["as-toggle" 0] [:hs "floatwindow?action=move&target=center"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+
+                 :as-open
+                 [:caps_lock [["as-open" 0] [:hs "whichkey?action=hide&group=as-open"]]]
+                 [:f [["as-open" 0] [:sh "osascript -e 'tell application \"Finder\" to make new Finder window'"]] nil {:afterup [:hs "whichkey?action=hide&group=as-open"]}]
+                 [:w [["as-open" 0] [:as-py "app toggle wechat"]] nil {:afterup [:hs "whichkey?action=hide&group=as-open"]}]
+                 [:t [["as-open" 0] [:as-py "app toggle telegram"]] nil {:afterup [:hs "whichkey?action=hide&group=as-open"]}]
+                 [:g [["as-open" 0] [:as-py "app toggle chrome"]] nil {:afterup [:hs "whichkey?action=hide&group=as-open"]}]
+
+                 :as-go
+                 [:caps_lock [["as-go" 0] [:hs "whichkey?action=hide&group=as-go"]]]
+                 [:1 [["as-go" 0] [:as "workspace 1"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:2 [["as-go" 0] [:as "workspace 2"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:3 [["as-go" 0] [:as "workspace 3"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:4 [["as-go" 0] [:as "workspace 4"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:5 [["as-go" 0] [:as "workspace 5"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+
+                 [:q [["as-go" 0] [:as "workspace Q"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:w [["as-go" 0] [:as "workspace W"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:e [["as-go" 0] [:as "workspace E"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+
+                 [:a [["as-go" 0] [:as "workspace A"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:s [["as-go" 0] [:as "workspace S"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:d [["as-go" 0] [:as "workspace D"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:t [["as-go" 0] [:as "workspace T"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+
+                 :as-swap
+                 [:caps_lock [["as-swap" 0] [:hs "whichkey?action=hide&group=as-swap"]]]
+                 [:h [["as-swap" 0] [:as "swap left"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:j [["as-swap" 0] [:as "swap down"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:k [["as-swap" 0] [:as "swap up"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:l [["as-swap" 0] [:as "swap right"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]]}
+        {:des "aerospace []"
+         :rules [[:open_bracket ["bracket-l-mode" 1] nil {:afterup ["bracket-l-mode" 0] :alone :open_bracket}]
+                 [:close_bracket ["bracket-r-mode" 1] nil {:afterup ["bracket-r-mode" 0] :alone :close_bracket}]
+
+                 :bracket-l-mode
+                 [:a [:as-py "window cycle-app prev"]]
+                 [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin prev"]]
+                 [:s [:as "workspace prev --no-stdin"]]
+                 [:h [:as "resize width -50"]]
+                 [:v [:as "resize height -50"]]
+                 [:d :delete_or_backspace]
+                 [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around prev"]]
+
+                 :bracket-r-mode
+                 [:a [:as-py "window cycle-app next"]]
+                 [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin next"]]
+                 [:s [:as "workspace next --no-stdin"]]
+                 [:h [:as "resize width +50"]]
+                 [:v [:as "resize height +50"]]
+                 [:d :delete_forward]
+                 [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around next"]]]}
+        {:des "common ,./"
+         :rules [[:slash ["app-mode" 1] :!z-mode {:afterup ["app-mode" 0] :alone :slash}]
+
+                 [:condi :chrome :app-mode]
+                 [:1 [:!C1]]
+                 [:2 [:!C2]]
+                 [:3 [:!C3]]
+                 [:4 [:!C4]]
+                 [:5 [:!C5]]
+                 [:6 [:!C6]]
+                 [:r :!Cr]
+                 [:!Sr :!CSr]
+                 [:c :!SCt]
+                 [:x :!Cw]
+                 [:t :!Ct]
+                 [:a :!CSa]
+                 [:comma :!CSopen_bracket]
+                 [:period :!CSclose_bracket]
+
+                 [:condi :kitty :app-mode]
+                 [:1 [:kitty-do "focus-tab --match index:0"]]
+                 [:2 [:kitty-do "focus-tab --match index:1"]]
+                 [:3 [:kitty-do "focus-tab --match index:2"]]
+                 [:4 [:kitty-do "focus-tab --match index:3"]]
+                 [:5 [:kitty-do "focus-tab --match index:4"]]
+                 [:6 [:kitty-do "focus-tab --match index:5"]]
+                 [:7 [:kitty-do "focus-tab --match index:6"]]
+                 [:8 [:kitty-do "focus-tab --match index:7"]]
+                 [:comma  [:kitty-do "action previous_tab"]]
+                 [:period [:kitty-do "action next_tab"]]
+                 [:up_arrow [:kitty-do "action -m state:focused scroll_to_prompt -1"]]
+                 [:down_arrow [:kitty-do "action -m state:focused scroll_to_prompt 1"]]
+                 [:p [:kitty-do "action -m state:focused command_palette"]]
+                 [:v [:kitty-do "launch --match state:focused --type window --location vsplit --cwd=current"]]
+                 [:s [:kitty-do "launch --match state:focused --type window --location hsplit --cwd=current"]]
+                 [:t [:kitty-do "launch --match state:focused --type tab --cwd=current"]]
+                 [:f [:kitty-do "action -m state:focused focus_visible_window"]]
+                 [:!St [:kitty-do "action -m state:focused set_tab_title"]]
+                 [:g [:kitty-do "action -m state:focused swap_with_window"]]
+                 [:h [:kitty-do "focus-window --match state:focused --match neighbor:left"]]
+                 [:j [:kitty-do "focus-window --match state:focused --match neighbor:bottom"]]
+                 [:k [:kitty-do "focus-window --match state:focused --match neighbor:top"]]
+                 [:l [:kitty-do "focus-window --match state:focused --match neighbor:right"]]
+                 [:!Sh [:kitty-do "action -m state:focused move_window left"]]
+                 [:!Sj [:kitty-do "action -m state:focused move_window down"]]
+                 [:!Sk [:kitty-do "action -m state:focused move_window up"]]
+                 [:!Sl [:kitty-do "action -m state:focused move_window right"]]
+                 [:!Oh [:kitty-do "resize-window --match state:focused --axis horizontal --increment -5"]]
+                 [:!Oj [:kitty-do "resize-window --match state:focused --axis vertical --increment 5"]]
+                 [:!Ok [:kitty-do "resize-window --match state:focused --axis vertical --increment -5"]]
+                 [:!Ol [:kitty-do "resize-window --match state:focused --axis horizontal --increment 5"]]
+                 [:r [:kitty-do "action -m state:focused layout_action rotate"]]
+                 [:equal_sign [:kitty-do "action -m state:focused layout_action equalize"]]
+                 [:!Sr [:kitty-do "action -m state:focused next_layout"]]
+                 [:m [:kitty-py "toggle worker"]]
+                 [:x [:kitty-do "close-window --match state:focused"]]
+                 [:z [:kitty-do "action -m state:focused toggle_layout stack"]]
+
+                 [:condi :chatgpt-app :app-mode]
+                 [:1 [:!C1]]
+                 [:2 [:!C2]]
+                 [:3 [:!C3]]
+                 [:4 [:!C4]]
+                 [:5 [:!C5]]
+                 [:6 [:!C6]]
+
+                 [:condi :office :app-mode]
+                 [:h :!CSh]
+
+                 :caps-mode
+                 [:return_or_enter :!CTreturn_or_enter :caps-mode]
+
+                 :logseq
+                 [:!Ck [:!Ck {:input :en}]]
+                 [:y :return_or_enter ["caps-mode" 1]]
+
+                 [:condi]
+                 [:x :!Cw :app-mode]]}
+        {:des "Mouse mode"
+         :rules [:f-mode
+                 [:n {:pkey :button1}]
+                 [:m [["mouse-mode" 1] [:noti :mmode "Hit caps_lock to quit Mouse Mode"]]]
+                 :mouse-mode
+                 [:caps_lock [["mouse-mode" 0] [:noti :mmode]]]
+                 [:h {:mkey {:x -3000}}]
+                 [:j {:mkey {:y 3000}}]
+                 [:k {:mkey {:y -3000}}]
+                 [:l {:mkey {:x 3000}}]
+                 [:!Sh {:mkey {:x -1000}}]
+                 [:!Sj {:mkey {:y 1000}}]
+                 [:!Sk {:mkey {:y -1000}}]
+                 [:!Sl {:mkey {:x 1000}}]
+                 [:##n {:pkey :button1}]
+                 [:##m {:pkey :button2}]]}
+
+        {:des "mouse mode f + hjkl as arrow keys"
+         :rules [:f-mode
+                 [:h :left_arrow]
+                 [:j :down_arrow]
+                 [:k :up_arrow]
+                 [:l :right_arrow]
+                 [:u :page_up]
+                 [:i :home]
+                 [:o :end]
+                 [:p :page_down]]}
+
+        {:des "window & tab"
+         :rules [:w-mode
+                 [:q :!Cw]
+                 [:h :!CSgrave_accent_and_tilde]
+                 [:l :!Cgrave_accent_and_tilde]
+                 :t-mode
+                 [:n :!Ct]
+                 [:q :!Cw]
+                 [:h :!CSopen_bracket]
+                 [:l :!CSclose_bracket]]}
+
+        {:des "z mode"
+         :rules [:z-mode
+                 [:caps_lock [["z-mode" 0] [:hs "whichkey?action=hide"]]]
+                 [:1 [:m1ddc "set input 16"]]
+                 [:2 [:m1ddc "set input 15"]]
+                 [:3 [:m1ddc "set input 17"]]
+
+                 [:q [["m1ddc-pbp" 1] [:hs "whichkey?action=show&group=m1ddc-pbp"]]]
+                 :m1ddc-pbp
+                 [:caps_lock [["m1ddc-pbp" 0] [:hs "whichkey?action=hide"]]]
+                 [:1 [["m1ddc-pbp" 0] [:m1ddc "set input 16"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:2 [["m1ddc-pbp" 0] [:m1ddc "set input 15"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:3 [["m1ddc-pbp" 0] [:m1ddc "set input 17"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:q [["m1ddc-pbp" 0] [:m1ddc "set pbp-input 16"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:w [["m1ddc-pbp" 0] [:m1ddc "set pbp-input 15"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:e [["m1ddc-pbp" 0] [:m1ddc "set pbp-input 17"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:a [["m1ddc-pbp" 0] [:m1ddc "set pbp 0"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:s [["m1ddc-pbp" 0] [:m1ddc "set pbp 33"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:d [["m1ddc-pbp" 0] [:m1ddc "set pbp 34"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 [:f [["m1ddc-pbp" 0] [:m1ddc "set pbp 36"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+
+                 :z-mode
+                 [:o [:hs "callBob?action=selectionTranslate"]]
+                 [:p [:hs "callBob?action=snipTranslate"]]
+                 [:9 [:hs "openConsole"]]
+                 [:0 [:hs "reloadConfig"]]
+
+                 [:equal_sign [:hs-notify "-1&level=error"]]
+                 [:slash [:hs "scpt?name=xnip_capture"]]]}
+
+        {:des "caps-mode"
+         :rules [[:caps_lock :left_control :terminals {:alone :escape}]
+                 [:caps_lock :left_control :vscode {:alone :escape}]
+                 [:caps_lock ["caps-mode" 1] nil {:afterup ["caps-mode" 0] :alone :escape}]]}
+
+        {:des "Press right_shift twice to enter double shift mode, press any undefined key to leave it"
+         :rules [[:right_shift ["right_shift_double_mode" 1] ["right_shift_single_mode" 1]]
+                 [:right_shift [["right_shift_single_mode" 1] :right_shift] ["right_shift_double_mode" 0] {:delayed {:invoked ["right_shift_single_mode" 0] :canceled ["right_shift_single_mode" 0]}}]
+                 :right_shift_double_mode
+                 [:right_shift ["right_shift_double_mode" 0]]
+
+                 [:a ["say 'know we are in double shift mode'" ["right_shift_double_mode" 0]]]
+                 [:b [:c ["right_shift_double_mode" 0]]]
+
+                 [{:any :key_code :modi :any} ["right_shift_double_mode" 0]]]}]}

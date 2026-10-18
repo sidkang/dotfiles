@@ -1,0 +1,17 @@
+models:
+  - claude/sonnet-5.5
+  - codex/gpt-6.1-sol
+tools:
+  allow:
+    - read
+    - bash
+    - edit
+    - write
+    - grep
+    - find
+    - ls
+    - codemode
+    - fffind
+    - ffgrep
+    - agent_update
+    - agent_pause

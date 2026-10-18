@@ -1,0 +1,18 @@
+matches:
+  - trigger: :ch
+    replace: site:chiphell.com
+
+  - trigger: :v2
+    replace: num=100 site:v2ex.com
+
+  - trigger: :syt
+    replace: num=100 site:youtube.com
+
+  - trigger: :ty
+    replace: after:{{year}}-01-01
+    vars:
+      - name: year
+        type: date
+        params:
+          format: "%Y"
+

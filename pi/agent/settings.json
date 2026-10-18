@@ -1,0 +1,136 @@
+{
+  "lastChangelogVersion": "1.3.0",
+  "theme": "catppuccin-latte-custom",
+  "defaultProvider": "codex",
+  "defaultModel": "gpt-6.1-sol",
+  "defaultThinkingLevel": "medium",
+  "modelThinkingLevels": {
+    "gemini/gemini-3.8-flash": "high"
+  },
+  "editorPaddingX": 1,
+  "enabledModels": [
+    "codex/gpt-6.1-sol",
+    "codex/gpt-6-astra",
+    "claude/sonnet-5.5",
+    "claude/opus-5.5",
+    "xai/grok-4.7-fast",
+    "gemini/gemini-3.8-flash"
+  ],
+  "packages": [
+    "npm:@ff-labs/pi-fff",
+    "https://github.com/fitchmultz/pi-cursor-sdk",
+    "git:github.com/sidkang/pi-subagent-manager",
+    {
+      "source": "git:github.com/sidkang/pi-stuff",
+      "skills": [
+        "!extensions/pi-image-gen/skills/sprite-gen"
+      ]
+    }
+  ],
+  "enableInstallTelemetry": false,
+  "markdown": {
+    "codeBlockIndent": ""
+  },
+  "terminal": {
+    "clearOnShrink": true
+  },
+  "defaultTools": [
+    "+codemode"
+  ],
+  "treeFilterMode": "no-tools",
+  "steeringMode": "all",
+  "transport": "sse",
+  "retry": {
+    "baseDelayMs": 3000,
+    "provider": {
+      "maxRetryDelayMs": 30000
+    }
+  },
+  "compaction": {
+    "reserveTokens": 16320
+  },
+  "showHardwareCursor": true,
+  "showCacheMissNotices": true,
+  "webAccess": {
+    "openai": {
+      "model": "codex/gpt-6-luna:medium"
+    },
+    "xai": {
+      "model": "xai/grok-4.6:low"
+    },
+    "merge": {
+      "enabled": false,
+      "model": "xai/grok-4.5:low"
+    },
+    "fetch": {
+      "extract": {
+        "kernel": "firecrawl",
+        "model": "xai/grok-4.5:low"
+      }
+    }
+  },
+  "codexTools": {
+    "fastMode": {
+      "eligibleModels": [
+        "gpt-6-astra",
+        "gpt-6.1-sol",
+        "gpt-6-luna"
+      ],
+      "defaultEnabledModels": [
+        "gpt-6-luna"
+      ]
+    },
+    "responsesCompaction": {
+      "enabled": true,
+      "providers": [
+        "codex"
+      ]
+    }
+  },
+  "pi-image-gen": {
+    "defaultProvider": "pi-codex",
+    "defaultModel": "gpt-image-2.5-flare",
+    "requestTimeoutMs": 300000,
+    "openRouterDiscovery": false,
+    "spriteGeneration": {
+      "enabled": false
+    },
+    "customProviders": {
+      "pi-codex": {
+        "api": "openai",
+        "piProvider": {
+          "provider": "codex",
+          "model": "gpt-6.1-sol"
+        },
+        "models": [
+          {
+            "id": "gpt-image-2.5-flare",
+            "capabilities": {
+              "qualityValues": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "auto"
+              ]
+            }
+          },
+          {
+            "id": "gpt-image-2.5-sunburst",
+            "capabilities": {
+              "qualityValues": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "auto"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
