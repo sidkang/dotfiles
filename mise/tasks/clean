@@ -1,0 +1,74 @@
+#!/usr/bin/env fish
+#MISE description="清理当前目录中的 macOS、Windows、Python 缓存和本地虚拟环境"
+
+set -l target_dir $MISE_ORIGINAL_CWD
+
+set_color --bold cyan
+echo "📂 目标目录: $target_dir"
+echo "🧹 开始扫描并清理垃圾文件..."
+set_color normal
+
+# 切换物理路径，确保 find 命令的作用域正确
+cd $target_dir
+
+# --- 内部辅助函数 ---
+function verbose_clean -a label pattern type
+    set_color blue
+    echo "🔍 正在检查 $label..."
+    set_color normal
+
+    if test "$type" = dir
+        # 查找目录：先打印，再递归强制删除，-v 显示细节
+        # 注意：使用 -prune 是为了防止删除了父目录后 find 还去尝试进入子目录报错
+        find . -type d -name "$pattern" -prune -print -exec rm -rvf {} +
+    else
+        # 查找文件：先打印，再删除
+        find . -type f -name "$pattern" -print -delete
+    end
+end
+
+function verbose_clean_python_venvs
+    set_color blue
+    echo "🔍 正在检查 Python 本地虚拟环境..."
+    set_color normal
+
+    set -l venv_names .venv venv env ENV virtualenv .virtualenv
+
+    for cfg in (find . -type f -name pyvenv.cfg -print)
+        set -l dir (dirname "$cfg")
+        set -l name (basename "$dir")
+
+        if contains -- "$name" $venv_names
+            echo "$dir"
+            rm -rvf "$dir"
+        end
+    end
+end
+
+# --- 2. 执行清理任务 ---
+
+# macOS 垃圾
+verbose_clean "macOS 系统文件" ".DS_Store" file
+verbose_clean "macOS 属性文件" ".AppleDouble" file
+verbose_clean "macOS 覆盖文件" ".LSOverride" file
+
+# Windows 垃圾
+verbose_clean "Windows 缩略图" "Thumbs.db" file
+verbose_clean "Windows 配置" "Desktop.ini" file
+
+# Python 缓存与本地虚拟环境
+verbose_clean_python_venvs
+verbose_clean "Python 编译缓存" __pycache__ dir
+verbose_clean "Python 字节码" "*.py[co]" file
+verbose_clean "Pytest 缓存" ".pytest_cache" dir
+verbose_clean "Mypy 缓存" ".mypy_cache" dir
+verbose_clean "Python 轮子缓存" "*.egg-info" dir
+
+# MyST / Jupyter 缓存
+verbose_clean "Jupyter 执行缓存" ".jupyter_cache" dir
+# verbose_clean "Jupyter 检查点" ".ipynb_checkpoints" dir
+verbose_clean "MyST/Sphinx 构建输出" _build dir
+
+set_color --bold green
+echo "✨ 环境清理完成"
+set_color normal

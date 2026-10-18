@@ -6,11 +6,15 @@ min_version = "2026.10.13"
 "brew:fish" = { os = "macos" }
 "brew:git" = { os = "macos" }
 "brew:hunk" = { os = "macos" }
+"brew:neovim" = { os = "macos" }
 "brew:pi-coding-agent" = { os = "macos" }
 "brew:starship" = { os = "macos" }
 "brew:yqrashawn/goku/goku" = { os = "macos" }
+"brew:zellij" = { os = "macos" }
 "brew-cask:espanso" = { os = "macos" }
+"brew-cask:hammerspoon" = { os = "macos" }
 "brew-cask:karabiner-elements" = { os = "macos" }
+"brew-cask:kitty" = { os = "macos" }
 
 [dotfiles]
 "~/.config/aerospace" = { source = "aerospace", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
@@ -19,7 +23,15 @@ min_version = "2026.10.13"
 "~/.config/btop" = { source = "btop", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/fish" = { source = "fish", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/git" = { source = "git", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/hammerspoon" = { source = "hammerspoon", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/hunk/config.toml" = { source = "hunk/config.toml", mode = "symlink" }
 "~/.config/karabiner.edn" = { source = "goku/karabiner.edn", mode = "symlink" }
+"~/.config/kitty" = { source = "kitty", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store", "__pycache__", "research"] }
+# mise reads and runs these globally; config.local.toml stays local.
+"~/.config/mise/config.toml" = { source = "mise/config.toml", mode = "symlink" }
+"~/.config/mise/tasks" = { source = "mise/tasks", mode = "symlink" }
+# lazy-lock.json and the uv .venv stay local.
+"~/.config/nvim" = { source = "nvim", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store", "readme.md"] }
 "~/.config/starship.toml" = { source = "starship/starship.toml", mode = "symlink" }
 # pi (PI_CODING_AGENT_DIR, set in fish): config files are linked one by one so local state
 # (auth.json, sessions/, npm/, git/, caches) stays out of the repo.
@@ -30,6 +42,9 @@ min_version = "2026.10.13"
 "~/.config/pi/agent/subagent-manager" = { source = "pi/agent/subagent-manager", mode = "copy", exclude = [".import-offered", ".DS_Store"] }
 "~/.config/pi/agent/themes" = { source = "pi/agent/themes", mode = "symlink" }
 # Espanso reloads and installs packages inside these directories, so link them whole.
+"~/.config/tmux/tmux.conf" = { source = "tmux/tmux.conf", mode = "symlink" }
+# zjstatus loads from its pinned GitHub release URL; zellij caches it.
+"~/.config/zellij" = { source = "zellij", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 "~/Library/Application Support/espanso/config" = { source = "espanso/config", mode = "symlink" }
 "~/Library/Application Support/espanso/match" = { source = "espanso/match", mode = "symlink" }
 "~/Library/Application Support/espanso/script" = { source = "espanso/script", mode = "symlink" }

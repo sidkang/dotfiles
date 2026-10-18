@@ -1,0 +1,15 @@
+{
+	"pyvenv": {
+		"prefix": "pyvenv",
+		"body": [
+			"VENV_NAME = \"${1}\"",
+			"",
+			"VIRTUAL_ENV=\"{{ env.CENTRAL_VENV_DIR }}/{{ env.VENV_NAME }}\"",
+			"_.python.venv = { python = '3.12', create = true, path = \"{{ env.VIRTUAL_ENV }}\", uv_create_args = ['--seed'] }",
+			"UV_PROJECT_ENVIRONMENT=\"{{ env.VIRTUAL_ENV }}\"",
+			"UV_PYTHON=\"{{ env.VIRTUAL_ENV }}/bin/python\"",
+			"VENV_ACTIVE=true"
+		],
+		"description": "Sets up mise.toml venv config"
+	}
+}

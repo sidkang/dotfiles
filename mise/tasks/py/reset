@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#MISE description="Recreate the current uv project environment"
+
+set -euo pipefail
+
+usage() {
+    echo "Usage: mise py:reset" >&2
+}
+
+if [ "$#" -ne 0 ]; then
+    usage
+    exit 2
+fi
+
+project_dir=${MISE_ORIGINAL_CWD:-$PWD}
+cd "$project_dir"
+
+echo "Recreating uv environment from $project_dir"
+uv venv --clear
+uv sync
+echo "Reset uv environment"
+

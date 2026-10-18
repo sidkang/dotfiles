@@ -1,0 +1,5 @@
+.git/
+.python-version
+.DS_Store
+lazy-lock.json
+uv.lock

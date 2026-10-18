@@ -1,0 +1,40 @@
+{
+	"setup": {
+		"prefix": ["setup", "template"],
+		"body": [
+			"<template>",
+			"\t$1",
+			"</template>",
+			"",
+			"<script lang=\"ts\" setup>",
+			"\t$2",
+			"</script>",
+			"",
+			"<style lang=\"sass\">",
+			"\t$3",
+			"</style>",
+			""
+		],
+		"description": "My standard setup Vue3 + TS"
+	},
+	"ggjt": {
+		"prefix": ["ggjt"],
+		"body": [
+			"${1:$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE} * \"公共交通\" \"${2|下班 公交,下班 地铁,上班 公交,上班 地铁|}\" ${3|#ysf,#applepay, |}",
+			"\ttime: \"${4:$CURRENT_HOUR:$CURRENT_MINUTE}\"",
+			"\tExpenses:Transport:PublicTransit \t\t\t ${6:5.00} CNY",
+			"\t$0"
+		],
+		"description": "公共交通"
+	},
+	"nhfx": {
+		"prefix": ["nhfx"],
+		"body": [
+			"${1:$CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE} * \"农行\" \"返现\"",
+			"\ttime: \"${2:$CURRENT_HOUR:$CURRENT_MINUTE}\"",
+			"\tExpenses:Voucher:ABC \t\t\t ${3} CNY",
+			"\t$0"
+		],
+		"description": "农行返现"
+	}
+}

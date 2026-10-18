@@ -1,0 +1,107 @@
+#!/usr/bin/env -S uv run --script
+#MISE description="Initialize Python env settings in mise.toml"
+# /// script
+# dependencies = ["Pillow"]
+# ///
+
+
+"""
+桌面壁纸处理脚本：
+1. 按比例居中裁切照片到 2560×1606
+2. 照片四角做 10px 圆角，圆角外透明
+3. 放在 2560×1664 画布的 y=58 位置，顶部 58px 为透明区域
+4. 导出为 PNG，同文件夹
+"""
+
+import sys
+from pathlib import Path
+
+from PIL import Image, ImageDraw
+
+# ============ 可调变量 ============
+CANVAS_WIDTH = 2560
+CANVAS_HEIGHT = 1664
+BAR_HEIGHT = 60
+PHOTO_WIDTH = CANVAS_WIDTH  # 2560
+PHOTO_HEIGHT = CANVAS_HEIGHT - BAR_HEIGHT  # 1606
+CORNER_RADIUS = 18
+TRANSPARENT = (0, 0, 0, 0)
+OUTPUT_SUFFIX = "_processed"
+# ==================================
+
+
+def crop_center(img: Image.Image, target_w: int, target_h: int) -> Image.Image:
+    """按目标比例居中裁切，再缩放到目标尺寸。"""
+    src_w, src_h = img.size
+    target_ratio = target_w / target_h
+    src_ratio = src_w / src_h
+
+    if src_ratio > target_ratio:
+        new_w = int(src_h * target_ratio)
+        left = (src_w - new_w) // 2
+        img = img.crop((left, 0, left + new_w, src_h))
+    else:
+        new_h = int(src_w / target_ratio)
+        top = (src_h - new_h) // 2
+        img = img.crop((0, top, src_w, top + new_h))
+
+    return img.resize((target_w, target_h), Image.LANCZOS)
+
+
+def make_rounded_mask(w: int, h: int, radius: int) -> Image.Image:
+    """生成圆角遮罩（白色=保留，黑色=透明）。使用 4x 超采样抗锯齿。"""
+    scale = 4
+    sw, sh, sr = w * scale, h * scale, radius * scale
+
+    mask = Image.new("L", (sw, sh), 255)
+    draw = ImageDraw.Draw(mask)
+
+    # 左上
+    draw.rectangle([0, 0, sr, sr], fill=0)
+    draw.pieslice([0, 0, sr * 2, sr * 2], 180, 270, fill=255)
+    # 右上
+    draw.rectangle([sw - sr, 0, sw, sr], fill=0)
+    draw.pieslice([sw - sr * 2, 0, sw, sr * 2], 270, 360, fill=255)
+    # 左下
+    draw.rectangle([0, sh - sr, sr, sh], fill=0)
+    draw.pieslice([0, sh - sr * 2, sr * 2, sh], 90, 180, fill=255)
+    # 右下
+    draw.rectangle([sw - sr, sh - sr, sw, sh], fill=0)
+    draw.pieslice([sw - sr * 2, sh - sr * 2, sw, sh], 0, 90, fill=255)
+
+    return mask.resize((w, h), Image.LANCZOS)
+
+
+def process_image(input_path: str) -> None:
+    path = Path(input_path)
+    img = Image.open(path).convert("RGBA")
+
+    # 1. 按比例居中裁切到照片尺寸
+    img = crop_center(img, PHOTO_WIDTH, PHOTO_HEIGHT)
+
+    # 2. 圆角处理
+    mask = make_rounded_mask(PHOTO_WIDTH, PHOTO_HEIGHT, CORNER_RADIUS)
+    photo = Image.new("RGBA", (PHOTO_WIDTH, PHOTO_HEIGHT), TRANSPARENT)
+    photo.paste(img, (0, 0), mask)
+
+    # 3. 放到纯黑画布上
+    canvas = Image.new("RGBA", (CANVAS_WIDTH, CANVAS_HEIGHT), (0, 0, 0, 255))
+    canvas.paste(photo, (0, BAR_HEIGHT), photo)
+
+    # 4. 导出 PNG
+    output_path = path.parent / f"{path.stem}{OUTPUT_SUFFIX}.png"
+    canvas.save(str(output_path), "PNG")
+    print(f"已保存: {output_path}")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("用法: ./process_image.py <图片路径> [图片路径2] ...")
+        print("  支持批量处理: ./process_image.py *.jpg")
+        sys.exit(1)
+
+    for filepath in sys.argv[1:]:
+        try:
+            process_image(filepath)
+        except Exception as e:
+            print(f"处理失败 [{filepath}]: {e}")

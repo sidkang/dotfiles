@@ -1,0 +1,127 @@
+#!/usr/bin/env python3
+#MISE description="Enable uv centralized project environments in mise.toml"
+
+from __future__ import annotations
+
+import argparse
+import os
+from pathlib import Path
+
+
+UV_PREVIEW_KEY = "UV_PREVIEW_FEATURES"
+UV_PREVIEW_ASSIGNMENT = f'{UV_PREVIEW_KEY} = "centralized-project-envs"'
+
+
+def load_lines(path: Path) -> list[str]:
+    return path.read_text(encoding="utf-8").splitlines()
+
+
+def section_bounds(lines: list[str], name: str) -> tuple[int | None, int | None]:
+    start = None
+    for index, line in enumerate(lines):
+        if line.strip() == name:
+            start = index
+            break
+
+    if start is None:
+        return None, None
+
+    end = len(lines)
+    for index in range(start + 1, len(lines)):
+        stripped = lines[index].strip()
+        if stripped.startswith("[") and stripped.endswith("]"):
+            end = index
+            break
+
+    return start, end
+
+
+def assignment_key(line: str) -> str | None:
+    stripped = line.strip()
+    if not stripped or stripped.startswith("#") or "=" not in stripped:
+        return None
+    return stripped.split("=", 1)[0].strip()
+
+
+def ensure_uv_preview(lines: list[str]) -> list[str]:
+    if not lines:
+        return ["[env]", UV_PREVIEW_ASSIGNMENT]
+
+    start, end = section_bounds(lines, "[env]")
+    if start is None:
+        return ["[env]", UV_PREVIEW_ASSIGNMENT, ""] + lines
+
+    updated = lines.copy()
+    for index in range(start + 1, end):
+        if assignment_key(updated[index]) == UV_PREVIEW_KEY:
+            updated[index] = UV_PREVIEW_ASSIGNMENT
+            return updated
+
+    return updated[: start + 1] + [UV_PREVIEW_ASSIGNMENT] + updated[start + 1 :]
+
+
+def format_output(lines: list[str]) -> str:
+    return "\n".join(lines) + "\n"
+
+
+def update_target(target: Path) -> str:
+    original_exists = target.exists()
+    existing_lines = load_lines(target) if original_exists else []
+    new_lines = ensure_uv_preview(existing_lines)
+
+    original_text = format_output(existing_lines) if original_exists else None
+    new_text = format_output(new_lines)
+    if original_text == new_text:
+        return "unchanged"
+
+    target.write_text(new_text, encoding="utf-8")
+    return "created" if not original_exists else "updated"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Enable uv centralized project environments in mise.toml."
+    )
+    parser.add_argument(
+        "--target",
+        default=None,
+        help="Path to the target mise.toml file.",
+    )
+    return parser.parse_args()
+
+
+def project_dir() -> Path:
+    return Path(os.environ.get("MISE_ORIGINAL_CWD", Path.cwd())).resolve()
+
+
+def default_target() -> Path:
+    return project_dir() / "mise.toml"
+
+
+def resolve_target(target: str | None) -> Path:
+    if target is None:
+        return default_target()
+
+    path = Path(target)
+    if not path.is_absolute():
+        path = project_dir() / path
+    return path.resolve()
+
+
+def main() -> int:
+    args = parse_args()
+    target = resolve_target(args.target)
+
+    result = update_target(target)
+    messages = {
+        "created": f"Created {target}",
+        "updated": f"Updated {target}",
+        "unchanged": f"No changes needed for {target}",
+    }
+    print(messages[result])
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+

@@ -1,0 +1,13 @@
+{
+	"sample01": {
+		"prefix": "tet",
+		"body": [
+			"{1}ewrjwierjwieji$1we rjewirjiew {2} 342342$2d3j423i {3}$3 432rewe"
+		],
+		"description": "a gloabal test marco"
+	},
+	"venv_python_path": {
+		"prefix": "venv_python_path",
+		"body": ["${env:UV_PYTHON}"]
+	}
+}

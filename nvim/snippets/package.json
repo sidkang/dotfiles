@@ -1,0 +1,19 @@
+{
+  "name": "user snippets",
+  "engines": {
+    "vscode": "^1.11.0"
+  },
+  "contributes": {
+    "snippets": [
+      {
+        "language": "beancount",
+        "path": "./beancount.json"
+      },
+      {
+        "language": "all",
+        "path": "./global.json"
+      }
+    ]
+  }
+}
+

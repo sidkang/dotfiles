@@ -1,0 +1,172 @@
+[settings]
+minimum_release_age = "7d"
+minimum_release_age_excludes = ["npm:prettier", "npm:@earendil-works/pi-coding-agent", "github:cli/cli"]
+experimental = true
+idiomatic_version_file_enable_tools = []
+
+[env]
+
+[hooks]
+# enter = """
+# echo 'ENTER'
+# set -e MYVAR 12666
+# """
+# leave = 'echo "LEAVE"'
+# cd = 'echo "CD"'
+# preinstall = 'echo "PREINSTALL"'
+# postinstall = 'echo "POSTINSTALL"'
+
+[tasks.name]
+description = "获取py项目名称"
+run = "yq '.project.name' pyproject.toml"
+
+[tasks."jupy:enable"]
+description = "为当前 venv 启用 Jupyter kernel"
+shell = "bash -c"
+run = """
+set -euo pipefail
+
+if [ -f .venv-name ]; then
+    VENV_NAME=$(tr -d '[:space:]' < .venv-name)
+else
+    VENV_NAME=$(basename "$PWD")
+fi
+
+if [ -z "$VENV_NAME" ]; then
+    echo "无法确定 kernel 名称" >&2
+    exit 1
+fi
+
+uv add --raw ipykernel
+python -m ipykernel install --user --name "$VENV_NAME" --display-name "$VENV_NAME"
+"""
+
+[tasks."jupy:disable"]
+description = "为当前 venv 禁用 Jupyter kernel"
+shell = "bash -c"
+run = """
+set -euo pipefail
+
+if [ -n "${1:-}" ]; then
+    VENV_NAME="$1"
+else
+    if [ -f .venv-name ]; then
+        VENV_NAME=$(tr -d '[:space:]' < .venv-name)
+    else
+        VENV_NAME=$(basename "$PWD")
+    fi
+fi
+
+if [ -z "$VENV_NAME" ]; then
+    echo "kernel 名称为空" >&2
+    exit 1
+fi
+
+jupyter kernelspec remove "$VENV_NAME"
+"""
+
+[tasks."jupy:list"]
+description = "列出已安装的 Jupyter kernels"
+run = "jupyter kernelspec list"
+
+[tasks."jupy:setup"]
+description = "安装并更新 JupyterLab tool 环境"
+shell = "bash -c"
+run = """
+set -euo pipefail
+
+uv tool upgrade --python 3.13 jupyterlab || uv tool install --python 3.13 jupyterlab
+uv tool upgrade --python 3.13 notebook || uv tool install --python 3.13 notebook
+"""
+
+[tasks."jupy:lab"]
+description = "在 127.0.0.1:7077 启动 JupyterLab"
+shell = "bash -c"
+run = """
+set -euo pipefail
+
+ROOT_DIR="$PWD"
+LOG_DIR="/tmp/mise"
+LOG_FILE="$LOG_DIR/lab-$(basename "$ROOT_DIR").log"
+mkdir -p "$LOG_DIR"
+
+EXISTING=$(ps -ax -o pid= -o command= | rg "jupyter lab" | rg -F -- "--ServerApp.root_dir=$ROOT_DIR" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
+if [ -n "$EXISTING" ]; then
+    echo "JupyterLab 已在当前路径运行: $EXISTING"
+    exit 0
+fi
+
+nohup uv tool run --from jupyterlab jupyter lab \
+    --ServerApp.ip=127.0.0.1 \
+    --ServerApp.port=7077 \
+    --ServerApp.port_retries=0 \
+    --ServerApp.open_browser=False \
+    --ServerApp.root_dir="$ROOT_DIR" \
+    --IdentityProvider.token='' \
+    --PasswordIdentityProvider.hashed_password='' \
+    > "$LOG_FILE" 2>&1 < /dev/null &
+
+echo "JupyterLab 已在后台启动"
+echo "URL: http://127.0.0.1:7077/lab"
+echo "日志: $LOG_FILE"
+"""
+
+[tasks."jupy:notebook"]
+description = "在 127.0.0.1:7077 启动 Jupyter Notebook"
+shell = "bash -c"
+run = """
+set -euo pipefail
+
+ROOT_DIR="$PWD"
+LOG_DIR="/tmp/mise"
+LOG_FILE="$LOG_DIR/notebook-$(basename "$ROOT_DIR").log"
+mkdir -p "$LOG_DIR"
+
+EXISTING=$(ps -ax -o pid= -o command= | rg "jupyter notebook" | rg -F -- "--ServerApp.root_dir=$ROOT_DIR" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
+if [ -n "$EXISTING" ]; then
+    echo "Jupyter Notebook 已在当前路径运行: $EXISTING"
+    exit 0
+fi
+
+nohup uv tool run --from notebook jupyter notebook \
+    --ServerApp.ip=127.0.0.1 \
+    --ServerApp.port=7077 \
+    --ServerApp.port_retries=0 \
+    --ServerApp.open_browser=False \
+    --ServerApp.root_dir="$ROOT_DIR" \
+    --IdentityProvider.token='' \
+    --PasswordIdentityProvider.hashed_password='' \
+    > "$LOG_FILE" 2>&1 < /dev/null &
+
+echo "Jupyter Notebook 已在后台启动"
+echo "URL: http://127.0.0.1:7077/tree"
+echo "日志: $LOG_FILE"
+"""
+
+[tasks."jupy:kill"]
+description = "停止 Jupyter 服务"
+shell = "bash -c"
+run = """
+set -euo pipefail
+
+PIDS=$(ps -ax -o pid= -o command= | rg "jupyter (lab|notebook)" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
+
+if [ -z "$PIDS" ]; then
+    echo "没有匹配到运行中的 Jupyter 服务"
+    exit 0
+fi
+
+printf '%s\n' "$PIDS" | xargs kill
+echo "已停止 Jupyter 服务: $PIDS"
+"""
+
+[tools]
+bun = "latest"
+node = "latest"
+"npm:@larksuite/cli" = "latest"
+"npm:cf" = "latest"
+"npm:microsandbox" = "latest"
+"npm:wrangler" = "latest"
+# idiomatic_version_file_enable_tools = []
+
+# TODO 未来根据这条添加hook https://github.com/astral-sh/uv/issues/6204

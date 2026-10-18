@@ -1,0 +1,38 @@
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="https://github.com/dj95/zjstatus/releases/download/v0.23.0/zjstatus.wasm" {
+                format_left  "{mode}#[fg=#8C8FA1] • {tabs}"
+                format_right "#[fg=#8C8FA1]{swap_layout}#[fg=#8C8FA1] • #[fg=#DC8A78,bold]{session}"
+                format_space " "
+
+                mode_normal       "#[fg=#179299,bold]{name}"
+                mode_locked       "#[fg=#D20F39,bold]{name}"
+                mode_resize       "#[fg=#FE640B,bold]{name}"
+                mode_pane         "#[fg=#209FB5,bold]{name}"
+                mode_tab          "#[fg=#8839EF,bold]{name}"
+                mode_scroll       "#[fg=#04A5E5,bold]{name}"
+                mode_enter_search "#[fg=#EA76CB,bold]{name}"
+                mode_search       "#[fg=#EA76CB,bold]{name}"
+                mode_rename_tab   "#[fg=#DF8E1D,bold]{name}"
+                mode_rename_pane  "#[fg=#DF8E1D,bold]{name}"
+                mode_session      "#[fg=#DC8A78,bold]{name}"
+                mode_move         "#[fg=#7287FD,bold]{name}"
+                mode_tmux         "#[fg=#40A02B,bold]{name}"
+                mode_default_to_mode "normal"
+
+                tab_normal "#[fg=#5C5F77]{name}{sync_indicator}{fullscreen_indicator}{floating_indicator}"
+                tab_active "#[fg=#209FB5,bold]{name}{sync_indicator}{fullscreen_indicator}{floating_indicator}"
+                tab_separator "#[fg=#8C8FA1] / "
+
+                tab_sync_indicator       " ↹"
+                tab_fullscreen_indicator " □"
+                tab_floating_indicator   " ◇"
+
+                swap_layout_format        "#[fg=#7287FD]{name}"
+                swap_layout_hide_if_empty "true"
+            }
+        }
+    }
+}

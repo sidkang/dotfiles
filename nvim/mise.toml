@@ -1,0 +1,10 @@
+[tools]
+
+[env]
+VENV_NAME = "{% set venv_name_file = [config_root, '.venv-name'] | join_path %}{% if venv_name_file is file %}{{ read_file(path=venv_name_file) | trim }}{% else %}{{ config_root | basename }}{% endif %}"
+
+VIRTUAL_ENV = "{{ env.CENTRAL_VENV_DIR }}/{{ env.VENV_NAME }}"
+_.python.venv = { python = '3.13', create = true, path = '{{ env.VIRTUAL_ENV }}', uv_create_args = ['--seed'] }
+UV_PROJECT_ENVIRONMENT = "{{ env.VIRTUAL_ENV }}"
+UV_PYTHON = "{{ env.VIRTUAL_ENV }}/bin/python"
+VENV_ACTIVE = true
