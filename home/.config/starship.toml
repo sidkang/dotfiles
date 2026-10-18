@@ -1,0 +1,341 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Active palette — synchronized with kitty/catppuccin-latte-custom.conf.
+palette = "catppuccin_latte_custom"
+# Official Latte is "catppuccin_latte"; alternatives: "alabaster", "everforest_light", "iceberg_light", "rose_pine_dawn", "dawnfox", "noctis_lux", or "tomorrow_default"
+
+# Module formats own trailing spaces; keep the top-level format delimiter-free.
+
+add_newline = false
+format = """
+$username$hostname$directory$custom$python$battery$time$line_break\
+$character
+"""
+
+command_timeout = 1000
+scan_timeout = 1000
+
+[battery]
+disabled = false
+format = "with [$symbol$percentage]($style) "
+full_symbol = "󰁹 "
+charging_symbol = "󰂄 "
+discharging_symbol = "󰂂 "
+unknown_symbol = "󰂑 "
+empty_symbol = "󰂎 "
+
+[[battery.display]]
+threshold = 10
+# Catppuccin Latte: style = "bold #d20f39"
+style = "bold red"
+discharging_symbol = "󰁺 "
+
+[[battery.display]]
+threshold = 20
+# Catppuccin Latte: style = "bold #dc3f34"
+style = "bold red"
+discharging_symbol = "󰁻 "
+
+[[battery.display]]
+threshold = 30
+# Catppuccin Latte: style = "bold #e76e2e"
+style = "bold yellow"
+discharging_symbol = "󰁼 "
+
+[[battery.display]]
+threshold = 40
+# Catppuccin Latte: style = "bold #df8e1d"
+style = "bold yellow"
+discharging_symbol = "󰁽 "
+
+[[battery.display]]
+threshold = 50
+# Catppuccin Latte: style = "bold #c5a120"
+style = "bold yellow"
+discharging_symbol = "󰁾 "
+
+[[battery.display]]
+threshold = 60
+# Catppuccin Latte: style = "bold #a8af23"
+style = "bold green"
+discharging_symbol = "󰁿 "
+
+[[battery.display]]
+threshold = 70
+# Catppuccin Latte: style = "bold #40a02b"
+style = "bold green"
+discharging_symbol = "󰂀 "
+
+[[battery.display]]
+threshold = 75
+# Catppuccin Latte: style = "bold #40a02b"
+style = "bold green"
+discharging_symbol = "󰂁 "
+
+[character] # The name of the module we are configuring is "character"
+format = "$symbol  "
+success_symbol = "[󱞩](bold green)"
+error_symbol = "[✖](bold red)"
+vimcmd_symbol = "[↖](bold yellow)"
+vimcmd_visual_symbol = "[↑](bold blue)"
+vimcmd_replace_symbol = "[←](bold purple)"
+
+[docker_context]
+disabled = true
+
+[hostname]
+ssh_only = true
+format = "on [$hostname](bold red) "
+# format = '[$ssh_symbol](bold blue) on [$hostname](bold red) '
+trim_at = ".companyname.com"
+disabled = false
+
+[lua]
+disabled = true
+
+[line_break]
+disabled = false
+
+[directory]
+truncation_length = 5
+style = "bold cyan"
+
+[cmd_duration]
+disabled = true
+
+[aws]
+disabled = true
+
+[python]
+symbol = "󰌠"
+format = 'via [$symbol $version](yellow)( [\[$virtualenv\]](yellow)) '
+python_binary = [["uv", "run", "--no-python-downloads", "python"]]
+
+[time]
+disabled = true
+format = '[$time]($style)'
+# Catppuccin Latte: style = "bold italic #acb0be"
+style = "bold italic muted"
+time_format = "%H:%M"
+# time_format = "%H:%M:%S"
+# time_range = "16:00:00-9:00:00"
+
+[package]
+disabled = true
+
+[quarto]
+disabled = true
+
+[username]
+show_always = false
+disabled = false
+format = "[$user]($style) "
+
+# custom module for jj status
+# Keep per-field colors in the jj template; Starship custom modules only style the whole output.
+# Nerd Font icons used here:
+# - symbol: nf-md-source_branch (󰘬)
+# - dirty/non-empty: nf-md-plus_minus_variant (󱓉)
+# - conflict: nf-md-alert (󰀦)
+# - divergent: nf-md-call_split (󰃻)
+# - hidden: nf-md-eye_off (󰈉)
+# - immutable: nf-md-lock (󰌾)
+[custom.jj]
+description = "The current jj status"
+when = "d=$PWD; while [ \"$d\" != / ]; do [ -e \"$d/.jj\" ] && exit 0; d=${d%/*}; [ -n \"$d\" ] || d=/; done; exit 1"
+shell = ["sh"]
+symbol = "󰘬"
+format = "on [$symbol](bold purple) $output "
+command = '''
+jj show @ --no-patch --ignore-working-copy --color always --template '
+  separate(" ",
+    raw_escape_sequence("\x1b[1;35m") ++ change_id.shortest(4) ++ raw_escape_sequence("\x1b[0m"),
+    bookmarks,
+    concat(
+      if(!empty, raw_escape_sequence("\x1b[33m") ++ "󱓉" ++ raw_escape_sequence("\x1b[0m")),
+      if(conflict, "󰀦"),
+      if(divergent, "󰃻"),
+      if(hidden, "󰈉"),
+      if(immutable, "󰌾"),
+    ),
+    if(
+      description,
+      raw_escape_sequence("\x1b[1;32m") ++ truncate_end(50, description.first_line(), "…") ++ raw_escape_sequence("\x1b[0m"),
+      raw_escape_sequence("\x1b[2m") ++ "(no desc)" ++ raw_escape_sequence("\x1b[0m"),
+    ),
+  )
+'
+'''
+
+# Show git modules only outside jj repositories.
+[git_status]
+disabled = true
+
+[git_commit]
+disabled = true
+
+[git_branch]
+disabled = true
+symbol = "󰘬"
+format = "on [$symbol $branch(:$remote_branch)]($style) "
+
+[custom.git]
+description = "Show git modules only outside jj repositories"
+when = "d=$PWD; while [ \"$d\" != / ]; do [ -e \"$d/.jj\" ] && exit 1; [ -e \"$d/.git\" ] && exit 0; d=${d%/*}; [ -n \"$d\" ] || d=/; done; exit 1"
+shell = ["sh"]
+format = "$output "
+command = "starship module git_branch; starship module git_commit; starship module git_status"
+
+[palettes.everforest_light]
+foreground = "#5c6a72"
+background = "#fdf6e3"
+muted = "#939f91"
+red = "#f85552"
+green = "#8da101"
+yellow = "#dfa000"
+blue = "#3a94c5"
+purple = "#df69ba"
+cyan = "#35a77c"
+white = "#f4f0d9"
+
+[palettes.rose_pine_dawn]
+foreground = "#575279"
+background = "#fffaf3"
+muted = "#797593"
+red = "#b4637a"
+green = "#286983"
+yellow = "#ea9d34"
+blue = "#56949f"
+purple = "#907aa9"
+cyan = "#d7827e"
+white = "#f2e9e1"
+
+[palettes.dawnfox]
+foreground = "#575279"
+background = "#faf4ed"
+muted = "#5f5695"
+red = "#b4637a"
+green = "#618774"
+yellow = "#ea9d34"
+blue = "#286983"
+purple = "#907aa9"
+cyan = "#56949f"
+white = "#e5e9f0"
+
+[palettes.noctis_lux]
+foreground = "#005661"
+background = "#f6edda"
+muted = "#8ca6a6"
+red = "#e34e1c"
+green = "#00b368"
+yellow = "#f49725"
+blue = "#0094f0"
+purple = "#ff5792"
+cyan = "#00bdd6"
+white = "#bbc3c4"
+
+# Official Catppuccin Latte tokens, plus the generic aliases used by this shared config.
+[palettes.catppuccin_latte]
+rosewater = "#dc8a78"
+flamingo = "#dd7878"
+pink = "#ea76cb"
+mauve = "#8839ef"
+red = "#d20f39"
+maroon = "#e64553"
+peach = "#fe640b"
+yellow = "#df8e1d"
+green = "#40a02b"
+teal = "#179299"
+sky = "#04a5e5"
+sapphire = "#209fb5"
+blue = "#1e66f5"
+lavender = "#7287fd"
+text = "#4c4f69"
+subtext1 = "#5c5f77"
+subtext0 = "#6c6f85"
+overlay2 = "#7c7f93"
+overlay1 = "#8c8fa1"
+overlay0 = "#9ca0b0"
+surface2 = "#acb0be"
+surface1 = "#bcc0cc"
+surface0 = "#ccd0da"
+base = "#eff1f5"
+mantle = "#e6e9ef"
+crust = "#dce0e8"
+foreground = "#4c4f69"
+background = "#eff1f5"
+muted = "#6c6f85"
+purple = "#8839ef"
+cyan = "#179299"
+white = "#bcc0cc"
+
+# Custom Latte differs from the official palette only in blue.
+[palettes.catppuccin_latte_custom]
+rosewater = "#dc8a78"
+flamingo = "#dd7878"
+pink = "#ea76cb"
+mauve = "#8839ef"
+red = "#d20f39"
+maroon = "#e64553"
+peach = "#fe640b"
+yellow = "#df8e1d"
+green = "#40a02b"
+teal = "#179299"
+sky = "#04a5e5"
+sapphire = "#209fb5"
+blue = "#2d75c7"
+lavender = "#7287fd"
+text = "#4c4f69"
+subtext1 = "#5c5f77"
+subtext0 = "#6c6f85"
+overlay2 = "#7c7f93"
+overlay1 = "#8c8fa1"
+overlay0 = "#9ca0b0"
+surface2 = "#acb0be"
+surface1 = "#bcc0cc"
+surface0 = "#ccd0da"
+base = "#eff1f5"
+mantle = "#e6e9ef"
+crust = "#dce0e8"
+foreground = "#4c4f69"
+background = "#eff1f5"
+muted = "#6c6f85"
+purple = "#8839ef"
+cyan = "#179299"
+white = "#bcc0cc"
+
+[palettes.tomorrow_default]
+foreground = "#4d4d4c"
+background = "#ffffff"
+muted = "#8e908c"
+red = "#c82829"
+green = "#718c00"
+yellow = "#eab700"
+blue = "#4271ae"
+purple = "#8959a8"
+cyan = "#3e999f"
+white = "#ffffff"
+
+[palettes.iceberg_light]
+foreground = "#33374c"
+background = "#e8e9ec"
+muted = "#8389a3"
+red = "#cc517a"
+green = "#668e3d"
+yellow = "#c57339"
+blue = "#2d539e"
+purple = "#7759b4"
+cyan = "#3f83a6"
+white = "#dcdfe7"
+
+[palettes.alabaster]
+foreground = "#000000"
+background = "#f7f7f7"
+muted = "#777777"
+red = "#aa3731"
+green = "#448c37"
+yellow = "#cb9000"
+blue = "#325cc0"
+purple = "#7a3e9d"
+cyan = "#0083b2"
+white = "#f7f7f7"
