@@ -18,7 +18,6 @@
   ],
   "packages": [
     "npm:@ff-labs/pi-fff",
-    "https://github.com/fitchmultz/pi-cursor-sdk",
     "git:github.com/sidkang/pi-subagent-manager",
     {
       "source": "git:github.com/sidkang/pi-stuff",

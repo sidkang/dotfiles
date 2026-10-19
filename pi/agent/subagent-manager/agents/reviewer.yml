@@ -1,6 +1,7 @@
 models:
   - codex/gpt-6-astra
   - codex/gpt-6.1-sol
+  - ds/deepseek-flash
 tools:
   allow:
     - read

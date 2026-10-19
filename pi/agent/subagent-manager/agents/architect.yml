@@ -1,5 +1,6 @@
 models:
   - codex/gpt-6-astra
+  - claude/fable-5.1
 tools:
   allow:
     - read

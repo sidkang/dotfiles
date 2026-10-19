@@ -170,7 +170,7 @@ abbr -a conv --set-cursor=! "echo '!' | iconv -f UTF-8-Mac -t latin1 | iconv -f 
 abbr -a reload_fish source ~/.config/fish/config.fish
 
 if command -q pi
-    abbr -a pisbx 'PI_CODING_AGENT_DIR=$HOME/.pi/sbx-agent pi'
+    abbr -a pisbx 'PI_CODING_AGENT_DIR=(path dirname "$PI_CODING_AGENT_DIR")/sbx-agent pi'
 end
 
 if command -q eza
