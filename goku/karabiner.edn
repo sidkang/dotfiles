@@ -6,7 +6,7 @@
              :kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
              :kitty-py "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';python3 $HOME/.config/kitty/kitty-action.py %s"
              :as "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';aerospace %s"
-             :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
+             :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";/opt/homebrew/bin/python3.14 $HOME/.config/aerospace/as.py %s"
              :sh "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';%s"
              :hs "open -g \"hammerspoon://%s\""
              :hs-notify "open -g \"hammerspoon://notify?msg=%s\""
