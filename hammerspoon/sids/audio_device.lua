@@ -7,6 +7,8 @@ local config = {
 		outputDeviceUID = "BuiltInSpeakerDevice",
 		outputDeviceName = "MacBook Air Speakers",
 		volume = 0,
+		graceSeconds = 15,
+		snoozeSetting = "audioDevice.quietUntil",
 	},
 
 	preferredInput = {
@@ -17,6 +19,12 @@ local config = {
 local state = {
 	wifiWatcher = nil,
 	audioWatcherStarted = false,
+	wakeWatcher = nil,
+	pendingQuiet = nil,
+	snoozeTimer = nil,
+	initialized = false,
+	lastSSID = nil,
+	lastOutputUID = nil,
 }
 
 local function notify(title, message)
@@ -52,16 +60,125 @@ local function isQuietOutputDevice(device)
 	return device:uid() == config.quietOnWifi.outputDeviceUID or device:name() == config.quietOnWifi.outputDeviceName
 end
 
-local function quietOutputOnWifi()
-	if not isQuietHost() then return end
-	if currentSSID() ~= config.quietOnWifi.ssid then return end
+local function quietOutputDevice()
+	if not isQuietHost() then return nil end
+	if currentSSID() ~= config.quietOnWifi.ssid then return nil end
 
-	local outputDevice = hs.audiodevice.defaultOutputDevice()
-	if not isQuietOutputDevice(outputDevice) then return end
-	if outputDevice:volume() == config.quietOnWifi.volume then return end
+	local device = hs.audiodevice.defaultOutputDevice()
+	if not isQuietOutputDevice(device) then return nil end
+	if device:volume() == config.quietOnWifi.volume then return nil end
 
-	outputDevice:setVolume(config.quietOnWifi.volume)
-	notify("Audio Device", "Quieted MacBook Air speakers on " .. config.quietOnWifi.ssid)
+	return device
+end
+
+local function cancelPendingQuiet()
+	local pending = state.pendingQuiet
+	if pending == nil then return end
+
+	state.pendingQuiet = nil
+	if pending.timer ~= nil then pending.timer:stop() end
+	if pending.notification ~= nil then pending.notification:withdraw() end
+end
+
+local quietOutputOnWifi
+
+local function scheduleSnoozeCheck()
+	if state.snoozeTimer ~= nil then
+		state.snoozeTimer:stop()
+		state.snoozeTimer = nil
+	end
+
+	local deadline = hs.settings.get(config.quietOnWifi.snoozeSetting)
+	if type(deadline) ~= "number" then return false end
+
+	local remaining = deadline - hs.timer.secondsSinceEpoch()
+	if remaining <= 0 then
+		hs.settings.clear(config.quietOnWifi.snoozeSetting)
+		return false
+	end
+
+	state.snoozeTimer = hs.timer.doAfter(remaining, function()
+		state.snoozeTimer = nil
+		quietOutputOnWifi()
+	end)
+	return true
+end
+
+local function finishPendingQuiet(pending)
+	if state.pendingQuiet ~= pending then return end
+	-- Delivery to Notification Center alone does not mean the alert was shown.
+	-- Never change the volume silently when macOS suppresses the notification.
+	local presented = pending.notification:delivered() and pending.notification:presented()
+	cancelPendingQuiet()
+	if not presented then
+		print("Audio Device: skipped quieting because macOS did not confirm notification presentation")
+		return
+	end
+
+	local device = quietOutputDevice()
+	if device == nil then return end
+	if device:setVolume(config.quietOnWifi.volume) == false then
+		notify("Audio Device", "无法将内置扬声器音量归零，请手动检查。")
+	end
+end
+
+quietOutputOnWifi = function()
+	if scheduleSnoozeCheck() then
+		cancelPendingQuiet()
+		return
+	end
+
+	if quietOutputDevice() == nil then
+		cancelPendingQuiet()
+		return
+	end
+
+	if state.pendingQuiet ~= nil then
+		if hs.timer.secondsSinceEpoch() >= state.pendingQuiet.deadline then
+			finishPendingQuiet(state.pendingQuiet)
+		end
+		return
+	end
+
+	local pending = { deadline = hs.timer.secondsSinceEpoch() + config.quietOnWifi.graceSeconds }
+	state.pendingQuiet = pending
+	local durations = { ["30 min"] = 30 * 60, ["1 hour"] = 60 * 60 }
+	pending.notification = hs.notify.new(function(notification)
+		if state.pendingQuiet ~= pending then return end
+		if hs.timer.secondsSinceEpoch() >= pending.deadline then
+			finishPendingQuiet(pending)
+			return
+		end
+
+		local activation = notification:activationType()
+		local duration
+		if activation == hs.notify.activationTypes.actionButtonClicked then
+			duration = 10 * 60
+		elseif activation == hs.notify.activationTypes.additionalActionClicked then
+			duration = durations[notification:additionalActivationAction()]
+		end
+		if duration == nil then return end
+
+		local device = quietOutputDevice()
+		cancelPendingQuiet()
+		if device == nil then return end
+
+		hs.settings.set(config.quietOnWifi.snoozeSetting, hs.timer.secondsSinceEpoch() + duration)
+		scheduleSnoozeCheck()
+	end, {
+		title = "内置扬声器即将静音",
+		informativeText = "当前连接 " .. config.quietOnWifi.ssid .. "，15 秒后音量归零。需要外放请选择允许使用的时长。",
+		hasActionButton = true,
+		actionButtonTitle = "10 min",
+		additionalActions = { "30 min", "1 hour" },
+		alwaysShowAdditionalActions = true,
+		-- Honor the system presentation decision so presented() is meaningful.
+		alwaysPresent = false,
+		autoWithdraw = false,
+		withdrawAfter = 0,
+	})
+	pending.notification:send()
+	pending.timer = hs.timer.doAfter(config.quietOnWifi.graceSeconds, function() finishPendingQuiet(pending) end)
 end
 
 local function preferredInputDevice()
@@ -79,16 +196,37 @@ local function selectPreferredInput()
 	notify("Audio Device", "Selected input: " .. inputDevice:name())
 end
 
+local function currentOutputUID()
+	local device = hs.audiodevice.defaultOutputDevice()
+	return device and device:uid() or nil
+end
+
 local function handleWifiChange()
+	local ssid = currentSSID()
+	if ssid == state.lastSSID then return end
+
+	state.lastSSID = ssid
 	quietOutputOnWifi()
 end
 
 local function handleAudioDeviceChange()
-	quietOutputOnWifi()
+	local uid = currentOutputUID()
+	if uid ~= state.lastOutputUID then
+		state.lastOutputUID = uid
+		quietOutputOnWifi()
+	end
 	selectPreferredInput()
 end
 
 function M.setup()
+	-- Capture the initial environment before starting watchers so duplicate
+	-- events and input-device changes do not restart the quiet countdown.
+	if not state.initialized then
+		state.lastSSID = currentSSID()
+		state.lastOutputUID = currentOutputUID()
+		state.initialized = true
+	end
+
 	if state.wifiWatcher == nil then
 		state.wifiWatcher = hs.wifi.watcher.new(handleWifiChange)
 		state.wifiWatcher:start()
@@ -98,6 +236,13 @@ function M.setup()
 		hs.audiodevice.watcher.setCallback(handleAudioDeviceChange)
 		hs.audiodevice.watcher.start()
 		state.audioWatcherStarted = true
+	end
+
+	if state.wakeWatcher == nil then
+		state.wakeWatcher = hs.caffeinate.watcher.new(function(event)
+			if event == hs.caffeinate.watcher.systemDidWake then quietOutputOnWifi() end
+		end)
+		state.wakeWatcher:start()
 	end
 
 	quietOutputOnWifi()
