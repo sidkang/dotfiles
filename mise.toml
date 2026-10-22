@@ -11,6 +11,7 @@ min_version = "2026.10.13"
 "brew:jj" = { os = "macos" }
 "brew:nebula" = { os = "macos" }
 "brew:neovim" = { os = "macos" }
+"brew:neurosnap/tap/zmx" = { os = "macos" }
 "brew:pi-coding-agent" = { os = "macos" }
 "brew:starship" = { os = "macos" }
 "brew:yqrashawn/goku/goku" = { os = "macos" }
@@ -50,6 +51,7 @@ min_version = "2026.10.13"
 # pi-subagent-manager refuses symlinked state, so this one is copied. Capture its own edits with `mise dot add`.
 "~/.config/pi/agent/subagent-manager" = { source = "pi/agent/subagent-manager", mode = "copy", exclude = [".import-offered", ".DS_Store"] }
 "~/.config/pi/agent/themes" = { source = "pi/agent/themes", mode = "symlink" }
+"~/.config/fish/conf.d/zmx.fish" = { source = "zmx/zmx.fish", mode = "symlink" }
 "~/.config/yazi" = { source = "yazi", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 # zjstatus loads from its pinned GitHub release URL; zellij caches it.
 "~/.config/zellij" = { source = "zellij", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
