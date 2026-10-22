@@ -1,0 +1,20 @@
+["kitty:install"]
+description = "Install only kitty dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/kitty/Brewfile\""
+
+["kitty:plan"]
+description = "Preview only kitty deployment"
+run = "mise dot apply --dry-run \"~/.config/kitty\" \"~/Library/LaunchAgents/com.sid.kitten.plist\""
+
+["kitty:apply"]
+description = "Deploy only kitty configuration; no installation or setup"
+run = "mise dot apply \"~/.config/kitty\" \"~/Library/LaunchAgents/com.sid.kitten.plist\""
+
+["kitty:start"]
+description = "Start Kitty background service if stopped (does not restart)"
+run = "launchctl print \"gui/$(id -u)/com.sid.kitten\" >/dev/null 2>&1 || launchctl bootstrap \"gui/$(id -u)\" \"$HOME/Library/LaunchAgents/com.sid.kitten.plist\""
+
+["kitty:reload"]
+description = "Reload Kitty LaunchAgent; restarts Kitty"
+confirm = "Restart the Kitty background instance?"
+run = "bash \"{{ config_root }}/scripts/kitty-reload.sh\""

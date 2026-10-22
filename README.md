@@ -1,76 +1,90 @@
 # dotfiles
 
-jj 管版本，`mise dot` 管部署，`mise bootstrap` 管软件安装和初始化。软件、部署映射及 bootstrap 任务统一写在根目录 `mise.toml`。
+jj 管版本，`mise dot` 管部署。根 `mise.toml` 保存部署映射；各应用的安装要求和操作放在自己的目录。
 
-需要注意的配置：
+## 按应用操作
 
-- **Bat**：修改主题后运行 `bat cache --build`。
-- **btop**：运行时会回写 `btop.conf`，改动直接进入仓库。
-- **Kitty**：`kitty/com.sid.kitten.plist` 软链接到 `~/Library/LaunchAgents/`，bootstrap 加载后台保活服务。修改 plist 后，先 `mise dot apply`，再用 `launchctl bootout "gui/$(id -u)/com.sid.kitten"` 和 `launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.sid.kitten.plist"` 重新加载；这会重启 Kitty。
-- **Hammerspoon**：bootstrap 设置 `MJConfigFile` 指向 `~/.config/hammerspoon/init.lua`；更改入口后需重启应用。
+支持 macOS，需 Git、Homebrew 和 mise（最低版本见 `mise.toml`）。新机器先通过 Homebrew 安装 `git`、`jj`、`mise`，克隆后审查配置并运行 `mise trust`。
+
+每个应用包含：
+
+- `Brewfile`：该应用的安装依赖，共享依赖由各使用方重复声明，Homebrew 去重。
+- `tasks.toml`：该应用独立的安装、部署和维护任务。
+
+以 Kitty 为例：
+
+```sh
+# 先看依赖，再看命令与实际部署差异；这些步骤都不安装。
+less kitty/Brewfile
+mise run --dry-run kitty:install
+mise kitty:plan
+
+# 按需要分别执行，没有自动串联。
+mise kitty:install
+mise kitty:apply
+
+# 服务操作另外选择；apply 不启动、不重启。
+mise kitty:start
+mise kitty:reload          # 要求确认，会重启后台实例
+```
+
+其他应用使用相同的 `<app>:install`、`<app>:plan`、`<app>:apply` 命名。只有软件、没有部署映射的目录仅提供安装任务。`mise tasks` 查看全部任务。
+
+**不要为了单个配置运行全量 bootstrap 或通配符安装任务。** 没有全局包安装 hook，也没有通用 bootstrap 初始化任务。`mise dot apply` 不带目标仍会部署全部映射，日常优先用应用的 `:plan` / `:apply`。
+
+系统包只调用真正的 `brew bundle install --no-upgrade`。缺少 Homebrew、安装失败或 tap 未获信任时停止，不使用 mise 的 Homebrew 后端，不自动信任 tap，不切换安装器。任务执行、`mise exec` 和命令缺失均禁止自动安装工具。显式运行 `mise install` 仍是安装行为，不属于检查。
+
+每个应用只维护一份 `Brewfile`，包含该配置所用的安装依赖，不再区分默认和 extras。`:install` 会安装该文件里的全部项目，执行前先审查；只补某一项时可直接用 `brew install <package>`。
+
+## 配置与维护
+
+多数配置是软链接，编辑源文件会立即影响本机。新增文件或改映射后，先运行对应应用的 `:plan`，再选择 `:apply`。遇到目标冲突先处理，不加 `--force`。
+
+下列操作与部署分开，必须显式执行：
+
+| 任务 | 副作用 |
+|---|---|
+| `mise bat:cache` | 重建 Bat 缓存 |
+| `mise hammerspoon:setup` | 修改 Hammerspoon 的 `MJConfigFile` 偏好 |
+| `mise kitty:start` | 后台服务未运行时启动 Kitty |
+| `mise kitty:reload` | 重启 Kitty 后台实例，要求确认 |
+| `mise pi:extensions` | 更新 Pi 扩展，可能执行 npm 生命周期脚本，要求确认 |
+
+安装任务本身也可能执行 Homebrew formula/cask 的安装脚本；应用首次启动还可能由 Lazy、Mason、SpoonInstall 等下载插件。任务拆分不代表这些操作天然安全。
+
+- 新增程序：建 `<app>/Brewfile` 和 `<app>/tasks.toml`；有配置部署时在根 `[dotfiles]` 增加映射。不要把安装元数据部署到应用配置目录。
+- Node、Go、uv 默认由 Homebrew 提供；mise 只保留需要时由项目显式选择的旧版 Node。其他现有 mise 工具选择见 `mise/config.toml`，不随任务自动安装。
 - **IPython**：Fish 设置 `IPYTHONDIR=~/.config/ipython`；只部署默认 profile 的配置，历史数据库和其他运行状态留在本机。启动时尝试加载 `icecream.ic`，未安装则跳过。
-- **pi**：依赖 fish 设置的 `PI_CODING_AGENT_DIR`。只链接配置，认证、会话和缓存留在本机；会话由 Syncthing 同步。`subagent-manager/` 采用复制，插件修改后用 `mise dot add ~/.config/pi/agent/subagent-manager` 收回仓库。
-- **本机文件**：mise 覆盖配置写到 `~/.config/mise/config.local.toml`，Fish 密钥只放 `fish/conf.d/secrets.fish`；其他私有文件见 `.gitignore`。
-- **SSH**：仅用 age 加密同步 `~/.ssh/config`，不管理私钥或公钥。修改后运行 `mise ssh:save`，发布前运行 `mise ssh:check`；恢复见 [ssh/README.md](ssh/README.md)。
-- **tmux**：`tmux/` 只归档，不安装或部署。
+- pi 的 `subagent-manager/` 使用复制；本机修改后用 `mise dot add ~/.config/pi/agent/subagent-manager` 收回仓库。部署前检查，不自动覆盖。
+- SSH 只保存 age 密文，恢复、保存、检查都是[显式操作](ssh/README.md)，不随部署执行。
+- `mise dot unapply` 不会恢复部署前的文件。
 
-配置纳管与排除偏好见 [CONFIG-POLICY.md](CONFIG-POLICY.md)；检查遗漏前先看该文件，避免重复建议已决定不纳管的程序。
-
-新增程序：建 `<程序>/`，在 `mise.toml` 的 `[dotfiles]` 添加映射，在 `[bootstrap.packages]` 声明软件。
-
-## 新机器
-
-支持 macOS，需 Git、Homebrew 和 mise（最低版本见 `mise.toml` 的 `min_version`）。
-
-```sh
-brew install jj
-jj git clone https://github.com/sidkang/dotfiles.git ~/config/dotfiles
-cd ~/config/dotfiles
-mise trust                 # 先审查 mise.toml
-mise bootstrap --only packages,dotfiles,task --dry-run
-mise bootstrap --only packages,dotfiles,task
-mise dot status
-```
-
-遇到目标文件冲突时先备份处理，不要直接加 `--force`。
-
-## 日常修改
-
-编辑已链接的源文件会直接影响本机配置。新增、删除文件或修改映射后：
-
-```sh
-mise dot diff
-mise dot apply --dry-run
-mise dot apply
-```
-
-解除部署用 `mise dot unapply`，不会恢复部署前的文件。
+依赖审计及待决定项见 [DEPENDENCIES.md](DEPENDENCIES.md)。纳管例外和私有数据边界见 [CONFIG-POLICY.md](CONFIG-POLICY.md)。
 
 ## 发布
 
 ```sh
 jj status
 jj diff
-mise exec gitleaks@8.30.1 -- gitleaks dir . --redact
-mise exec gitleaks@8.30.1 -- gitleaks git . --redact
+# 若缺少检查依赖，先审查 scripts/Brewfile，再显式 mise scripts:install。
+mise check                 # 任务校验、SSH 密文比对、工作树及历史泄密扫描
 jj commit -m "feat(<程序>): ..."
 jj bookmark move master --to @-
 jj git push
 ```
 
-私有文件先加入 `.gitignore`，再运行 jj。凭据泄露后需轮换，仅删文件不够。
+私有文件先加入 `.gitignore`，再运行 jj。SSH 配置修改后先运行 `mise ssh:save`；`check` 不自动保存，可能要求 Touch ID。泄密检查直接使用已有 `gitleaks`，不自动安装。
 
 ## 获取更新
 
-rebase 会影响已链接的配置，先审查差异：
+rebase 会影响已链接的配置，先审查差异并确认，再执行变基：
 
 ```sh
 jj git fetch
 jj log -r '@-..master'
 jj diff --from @- --to master
-jj rebase -d master
-mise dot apply --dry-run
-mise dot apply
+# 确认后才执行 jj rebase -d master
+# 根据实际变更选择相应 <app>:plan / :install / :apply。
 ```
 
 ## 第三方内容

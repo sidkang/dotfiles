@@ -1,0 +1,4 @@
+brew "imagemagick"
+cask "hammerspoon"
+# sids.aerospace_window_hints invokes the aerospace CLI.
+cask "nikitabobko/tap/aerospace"

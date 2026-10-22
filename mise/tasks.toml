@@ -1,0 +1,11 @@
+["mise:install"]
+description = "Install only mise dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/mise/Brewfile\""
+
+["mise:plan"]
+description = "Preview only mise deployment"
+run = "mise dot apply --dry-run \"~/.config/mise/config.toml\" \"~/.config/mise/tasks\""
+
+["mise:apply"]
+description = "Deploy only mise configuration; no installation or setup"
+run = "mise dot apply \"~/.config/mise/config.toml\" \"~/.config/mise/tasks\""

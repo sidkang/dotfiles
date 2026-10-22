@@ -1,0 +1,11 @@
+["git:install"]
+description = "Install only git dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/git/Brewfile\""
+
+["git:plan"]
+description = "Preview only git deployment"
+run = "mise dot apply --dry-run \"~/.config/git\""
+
+["git:apply"]
+description = "Deploy only git configuration; no installation or setup"
+run = "mise dot apply \"~/.config/git\""

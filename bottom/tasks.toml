@@ -1,0 +1,11 @@
+["bottom:install"]
+description = "Install only bottom dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/bottom/Brewfile\""
+
+["bottom:plan"]
+description = "Preview only bottom deployment"
+run = "mise dot apply --dry-run \"~/.config/bottom\""
+
+["bottom:apply"]
+description = "Deploy only bottom configuration; no installation or setup"
+run = "mise dot apply \"~/.config/bottom\""

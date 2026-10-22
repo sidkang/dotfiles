@@ -2,11 +2,11 @@
 
 - Before auditing unmanaged configuration, read `CONFIG-POLICY.md`. Do not report recorded exclusions as omissions or suggest managing them unless the user asks to reconsider. Never collect private data; ask the user about new, undecided configuration.
 - Use jj (colocated with Git) in this public repository; publish through bookmark `master`.
-- Root `mise.toml` declares packages, deployment entries, and bootstrap setup. To add a program, create `<program>/` and add its `[dotfiles]` and `[bootstrap.packages]` entries there.
+- Root `mise.toml` declares deployment mappings and discovers `<app>/tasks.toml`. Keep all installation requirements beside each app in one `<app>/Brewfile`; do not split out optional package files or extras tasks. Shared dependencies may be repeated at each consumer. Use the Homebrew CLI only for system packages; never use mise `brew:` / `brew-cask:` backends or fallback downloads/build runtimes. Missing tools must fail, not auto-install.
 - Most deployments are symlinks: source edits and revision changes may immediately affect live configuration. `pi/agent/subagent-manager/` uses copy mode.
-- `symlink-each` entries exclude `README.md`, `AGENTS.md`, and `.DS_Store`; `pi/agent/AGENTS.md` is an exception and must be deployed.
+- `symlink-each` entries exclude `README.md`, `AGENTS.md`, `.DS_Store`, `Brewfile` and `tasks.toml`; `pi/agent/AGENTS.md` is an exception and must be deployed. Never deploy package/task metadata into app configuration.
 - `tmux/` is archived; do not install or deploy it.
-- Preview with `mise dot diff` or `mise dot apply --dry-run` before `mise dot apply`. For packages and setup, use `mise bootstrap --only packages,dotfiles,task`.
+- Select the affected app, not the whole bootstrap: review `<app>/Brewfile`, preview with `mise run --dry-run <app>:install` and `mise <app>:plan`, then explicitly run only the required `<app>:install` / `<app>:apply`. Installation, deployment, plugin updates, cache builds, and service starts/restarts must remain separate tasks without automatic dependencies. Do not run full bootstrap or wildcard install/apply tasks for a scoped change. A dry run of tasks only prints commands; `<app>:plan` actually asks mise to preview the deployment.
 - Do not use `mode = "track"`, `mise dot save/origin/sync/pull`, the history watcher, Stow, or chezmoi.
 - Add private files to `.gitignore` before running jj. Fish secrets belong only in git-ignored `fish/conf.d/secrets.fish`. Never print private files; refer to secrets by variable name. Never commit plaintext credentials or private keys, sessions, logs, or caches. Explicitly approved age ciphertext is allowed; decryption identities must stay outside the repository. Before publishing, review every changed file and run gitleaks on the tree and history.
 - Do not force overwrites, prune, rewrite published history, or force-push without explicit approval. Do not commit, move bookmarks, or push unless asked.

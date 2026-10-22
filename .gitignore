@@ -11,3 +11,7 @@ fish/conf.d/secrets.fish
 pi/agent/models.json
 pi/agent/subagent-manager/.import-offered
 __pycache__/
+# SwiftBar local helpers must never enter the public repository.
+swiftbar/secrets.py
+swiftbar/pbcopy
+swiftbar/.venv/

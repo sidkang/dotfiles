@@ -1,0 +1,39 @@
+["swiftbar:install"]
+description = "Install only SwiftBar dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/swiftbar/Brewfile\""
+
+["swiftbar:plan"]
+description = "Preview only SwiftBar deployment"
+run = "mise dot apply --dry-run \"~/.config/swiftbar\""
+
+["swiftbar:apply"]
+description = "Deploy only SwiftBar configuration; no installation or setup"
+run = "mise dot apply \"~/.config/swiftbar\""
+
+["swiftbar:setup"]
+description = "Explicitly set SwiftBar plugin directory; does not restart the app"
+run = "defaults write com.ameba.SwiftBar PluginDirectory -string \"$HOME/.config/swiftbar\""
+
+["swiftbar:reload"]
+description = "Explicitly reload SwiftBar plugins"
+run = "open -g \"swiftbar://refreshall\""
+
+["swiftbar:restart"]
+description = "Explicitly restart SwiftBar after changing its plugin directory"
+run = '''
+set -eu
+osascript -e 'tell application "SwiftBar" to quit'
+for attempt in $(seq 1 50); do
+  if ! pgrep -x SwiftBar >/dev/null; then
+    open -a SwiftBar
+    exit 0
+  fi
+  sleep 0.1
+done
+echo "SwiftBar did not quit; refusing to force termination" >&2
+exit 1
+'''
+
+["swiftbar:test"]
+description = "Run SwiftBar tests with synthetic data only"
+run = "PYTHONDONTWRITEBYTECODE=1 /opt/homebrew/bin/python3.14 -m unittest discover -s \"{{ config_root }}/swiftbar\" -p \"test_*.py\""

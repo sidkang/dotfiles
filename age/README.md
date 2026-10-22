@@ -6,15 +6,15 @@
 
 `recipients.txt` 只保存公开 recipient，每行一个，可用注释标明机器或恢复用途。首次加密前，先加入所有需要解密的机器和恢复 recipient。
 
-同一文件加密给多个 recipient 后，任何一个对应的 identity 都能单独解密，不需要其他接收者参与。只分发 recipient 不能解密；各机器必须持有自己的 identity，插件型 identity 还需要对应插件和硬件。
+任一接收者的 identity 均可独立解密；公开 recipient 不能解密。插件型 identity 还依赖对应插件和硬件。
 
-当前已记录本机现有 SOPS Secure Enclave identity 的公开 recipient。它由以下命令派生，不能用 `age-keygen -y` 替代：
+本机使用 SOPS Secure Enclave identity，公开 recipient 通过以下命令派生（不能用 `age-keygen -y`）：
 
 ```sh
 age-plugin-se recipients -i ~/.config/sops/age/keys.txt
 ```
 
-SE identity 绑定生成它的 Mac；复制 identity 文件到另一台 Mac 不能替代那台 Mac 自己的 identity。其他机器应只提供它们的公开 recipient，不传私钥。
+SE identity 绑定生成它的 Mac，复制文件不能迁移解密能力。其他机器只提供公开 recipient，不传私钥。
 
 ## 使用
 
@@ -46,4 +46,3 @@ mise ssh:save -- --reencrypt
 
 `restore` 不覆盖不同的现有文件，不替换软链接；相同文件不改动。新文件以 `0600` 原子安装，父目录要求为 `0700` 或更严格，不存在时会创建。明文恢复临时文件只在目标目录中创建，权限为 `0600`，结束后删除。
 
-不启用 JJ/Git hook 或 watcher；由调用任务显式指定管理范围。

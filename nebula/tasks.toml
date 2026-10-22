@@ -1,0 +1,11 @@
+["nebula:install"]
+description = "Install only nebula dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/nebula/Brewfile\""
+
+["nebula:plan"]
+description = "Preview only nebula deployment"
+run = "mise dot apply --dry-run \"~/.config/nebula\""
+
+["nebula:apply"]
+description = "Deploy only nebula configuration; no installation or setup"
+run = "mise dot apply \"~/.config/nebula\""

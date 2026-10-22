@@ -1,0 +1,6 @@
+brew "fzf"
+brew "jq"
+brew "python@3.14"
+cask "kitty"
+cask "font-sarasa-ss17-sc-nerd-font"
+cask "font-braille-spinner-kitty-term"

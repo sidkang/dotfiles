@@ -1,0 +1,6 @@
+["google-chrome:install"]
+description = "Install Google Chrome and pin it against Homebrew upgrades"
+run = [
+  'brew bundle install --no-upgrade --file="{{ config_root }}/google-chrome/Brewfile"',
+  "brew pin --cask google-chrome",
+]

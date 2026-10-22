@@ -1,0 +1,11 @@
+["fish:install"]
+description = "Install only fish dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/fish/Brewfile\""
+
+["fish:plan"]
+description = "Preview only fish deployment"
+run = "mise dot apply --dry-run \"~/.config/fish\""
+
+["fish:apply"]
+description = "Deploy only fish configuration; no installation or setup"
+run = "mise dot apply \"~/.config/fish\""

@@ -1,0 +1,11 @@
+["ipython:install"]
+description = "Install only IPython dependencies; no deployment or setup"
+run = 'brew bundle install --no-upgrade --file="{{ config_root }}/ipython/Brewfile"'
+
+["ipython:plan"]
+description = "Preview only IPython configuration deployment"
+run = 'mise dot apply --dry-run "~/.config/ipython/profile_default/ipython_config.py"'
+
+["ipython:apply"]
+description = "Deploy only IPython configuration; no installation or setup"
+run = 'mise dot apply "~/.config/ipython/profile_default/ipython_config.py"'

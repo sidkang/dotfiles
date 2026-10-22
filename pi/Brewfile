@@ -1,0 +1,4 @@
+brew "pi-coding-agent"
+brew "node"
+# Required by the interactive Fish wrapper; no implicit installation.
+brew "neurosnap/tap/zmx"

@@ -1,7 +1,9 @@
 # Pi + zmx
 
-zmx is installed from the Homebrew formula `neurosnap/tap/zmx`, declared in root
-`mise.toml`. `zmx.fish` sets one private socket directory for local and SSH Fish
+zmx is installed from the Homebrew formula `neurosnap/tap/zmx`, declared in
+`zmx/Brewfile`. Run `mise zmx:install` explicitly; preview configuration with
+`mise zmx:plan`, then deploy with `mise zmx:apply`. The Pi Fish wrapper is deployed
+separately with `mise fish:apply`. `zmx.fish` sets one private socket directory for local and SSH Fish
 shells: `~/.local/state/zmx`.
 
 ## Use

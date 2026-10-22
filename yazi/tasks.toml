@@ -1,0 +1,11 @@
+["yazi:install"]
+description = "Install only yazi dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/yazi/Brewfile\""
+
+["yazi:plan"]
+description = "Preview only yazi deployment"
+run = "mise dot apply --dry-run \"~/.config/yazi\""
+
+["yazi:apply"]
+description = "Deploy only yazi configuration; no installation or setup"
+run = "mise dot apply \"~/.config/yazi\""

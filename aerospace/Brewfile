@@ -1,0 +1,6 @@
+brew "felixkratz/formulae/borders"
+brew "python@3.14"
+# exec-on-workspace-change invokes Fish and the Hammerspoon URL handler.
+brew "fish"
+cask "hammerspoon"
+cask "nikitabobko/tap/aerospace"

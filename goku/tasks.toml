@@ -1,0 +1,11 @@
+["goku:install"]
+description = "Install only goku dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/goku/Brewfile\""
+
+["goku:plan"]
+description = "Preview only goku deployment"
+run = "mise dot apply --dry-run \"~/.config/karabiner.edn\""
+
+["goku:apply"]
+description = "Deploy only goku configuration; no installation or setup"
+run = "mise dot apply \"~/.config/karabiner.edn\""

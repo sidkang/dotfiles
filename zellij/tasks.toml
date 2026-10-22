@@ -1,0 +1,11 @@
+["zellij:install"]
+description = "Install only zellij dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/zellij/Brewfile\""
+
+["zellij:plan"]
+description = "Preview only zellij deployment"
+run = "mise dot apply --dry-run \"~/.config/zellij\""
+
+["zellij:apply"]
+description = "Deploy only zellij configuration; no installation or setup"
+run = "mise dot apply \"~/.config/zellij\""

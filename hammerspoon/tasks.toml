@@ -1,0 +1,15 @@
+["hammerspoon:install"]
+description = "Install only hammerspoon dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/hammerspoon/Brewfile\""
+
+["hammerspoon:plan"]
+description = "Preview only hammerspoon deployment"
+run = "mise dot apply --dry-run \"~/.config/hammerspoon\""
+
+["hammerspoon:apply"]
+description = "Deploy only hammerspoon configuration; no installation or setup"
+run = "mise dot apply \"~/.config/hammerspoon\""
+
+["hammerspoon:setup"]
+description = "Explicitly set Hammerspoon entry point"
+run = "defaults write org.hammerspoon.Hammerspoon MJConfigFile -string \"$HOME/.config/hammerspoon/init.lua\""

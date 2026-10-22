@@ -3,6 +3,13 @@ minimum_release_age = "7d"
 minimum_release_age_excludes = ["npm:prettier", "npm:@earendil-works/pi-coding-agent", "github:cli/cli"]
 experimental = true
 idiomatic_version_file_enable_tools = []
+# Missing tools must fail, not download while running unrelated commands.
+auto_install = false
+exec_auto_install = false
+not_found_auto_install = false
+
+[settings.task]
+run_auto_install = false
 
 [env]
 
@@ -20,8 +27,12 @@ idiomatic_version_file_enable_tools = []
 description = "获取py项目名称"
 run = "yq '.project.name' pyproject.toml"
 
+[tasks."jupy:kernel-install"]
+description = "显式为当前项目安装 ipykernel（修改项目依赖）"
+run = "uv add --no-python-downloads --raw ipykernel"
+
 [tasks."jupy:enable"]
-description = "为当前 venv 启用 Jupyter kernel"
+description = "为已安装 ipykernel 的当前 venv 注册 Jupyter kernel"
 shell = "bash -c"
 run = """
 set -euo pipefail
@@ -37,7 +48,7 @@ if [ -z "$VENV_NAME" ]; then
     exit 1
 fi
 
-uv add --raw ipykernel
+python -c 'import ipykernel' >/dev/null 2>&1 || { echo "Missing project ipykernel; run mise jupy:kernel-install explicitly" >&2; exit 1; }
 python -m ipykernel install --user --name "$VENV_NAME" --display-name "$VENV_NAME"
 """
 
@@ -75,8 +86,8 @@ shell = "bash -c"
 run = """
 set -euo pipefail
 
-uv tool upgrade --python 3.13 jupyterlab || uv tool install --python 3.13 jupyterlab
-uv tool upgrade --python 3.13 notebook || uv tool install --python 3.13 notebook
+uv tool install --upgrade --python /opt/homebrew/bin/python3.14 --no-python-downloads jupyterlab
+uv tool install --upgrade --python /opt/homebrew/bin/python3.14 --no-python-downloads notebook
 """
 
 [tasks."jupy:lab"]
@@ -84,19 +95,21 @@ description = "在 127.0.0.1:7077 启动 JupyterLab"
 shell = "bash -c"
 run = """
 set -euo pipefail
+command -v rg >/dev/null || { echo "Missing ripgrep; review jupyter/Brewfile" >&2; exit 1; }
 
 ROOT_DIR="$PWD"
 LOG_DIR="/tmp/mise"
 LOG_FILE="$LOG_DIR/lab-$(basename "$ROOT_DIR").log"
 mkdir -p "$LOG_DIR"
 
-EXISTING=$(ps -ax -o pid= -o command= | rg "jupyter lab" | rg -F -- "--ServerApp.root_dir=$ROOT_DIR" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
+EXISTING=$(ps -ax -o pid= -o command= | rg "jupyter(-| )lab" | rg -F -- "--ServerApp.root_dir=$ROOT_DIR" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
 if [ -n "$EXISTING" ]; then
     echo "JupyterLab 已在当前路径运行: $EXISTING"
     exit 0
 fi
 
-nohup uv tool run --from jupyterlab jupyter lab \
+command -v jupyter-lab >/dev/null || { echo "Missing JupyterLab; run mise jupy:setup explicitly" >&2; exit 1; }
+nohup jupyter-lab \
     --ServerApp.ip=127.0.0.1 \
     --ServerApp.port=7077 \
     --ServerApp.port_retries=0 \
@@ -116,19 +129,21 @@ description = "在 127.0.0.1:7077 启动 Jupyter Notebook"
 shell = "bash -c"
 run = """
 set -euo pipefail
+command -v rg >/dev/null || { echo "Missing ripgrep; review jupyter/Brewfile" >&2; exit 1; }
 
 ROOT_DIR="$PWD"
 LOG_DIR="/tmp/mise"
 LOG_FILE="$LOG_DIR/notebook-$(basename "$ROOT_DIR").log"
 mkdir -p "$LOG_DIR"
 
-EXISTING=$(ps -ax -o pid= -o command= | rg "jupyter notebook" | rg -F -- "--ServerApp.root_dir=$ROOT_DIR" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
+EXISTING=$(ps -ax -o pid= -o command= | rg "jupyter(-| )notebook" | rg -F -- "--ServerApp.root_dir=$ROOT_DIR" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
 if [ -n "$EXISTING" ]; then
     echo "Jupyter Notebook 已在当前路径运行: $EXISTING"
     exit 0
 fi
 
-nohup uv tool run --from notebook jupyter notebook \
+command -v jupyter-notebook >/dev/null || { echo "Missing Notebook; run mise jupy:setup explicitly" >&2; exit 1; }
+nohup jupyter-notebook \
     --ServerApp.ip=127.0.0.1 \
     --ServerApp.port=7077 \
     --ServerApp.port_retries=0 \
@@ -148,8 +163,9 @@ description = "停止 Jupyter 服务"
 shell = "bash -c"
 run = """
 set -euo pipefail
+command -v rg >/dev/null || { echo "Missing ripgrep; review jupyter/Brewfile" >&2; exit 1; }
 
-PIDS=$(ps -ax -o pid= -o command= | rg "jupyter (lab|notebook)" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
+PIDS=$(ps -ax -o pid= -o command= | rg "jupyter(-| )(lab|notebook)" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
 
 if [ -z "$PIDS" ]; then
     echo "没有匹配到运行中的 Jupyter 服务"
@@ -162,7 +178,8 @@ echo "已停止 Jupyter 服务: $PIDS"
 
 [tools]
 bun = "latest"
-node = "latest"
+# Node, Go and uv default to Homebrew; do not select them globally here.
+# Older Node versions may be explicitly selected in individual projects.
 "npm:@larksuite/cli" = "latest"
 "npm:cf" = "latest"
 "npm:microsandbox" = "latest"

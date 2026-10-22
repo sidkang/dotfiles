@@ -1,0 +1,12 @@
+.venv
+__pycache__
+.swiftbarignore
+Brewfile
+tasks.toml
+README.md
+AGENTS.md
+.DS_Store
+test_*.py
+pbcopy
+secrets.py
+swiftbar_menu.py

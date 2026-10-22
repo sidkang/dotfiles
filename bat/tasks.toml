@@ -1,0 +1,15 @@
+["bat:install"]
+description = "Install only bat dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/bat/Brewfile\""
+
+["bat:plan"]
+description = "Preview only bat deployment"
+run = "mise dot apply --dry-run \"~/.config/bat\""
+
+["bat:apply"]
+description = "Deploy only bat configuration; no installation or setup"
+run = "mise dot apply \"~/.config/bat\""
+
+["bat:cache"]
+description = "Explicitly rebuild Bat caches"
+run = "bat cache --build"

@@ -1,0 +1,11 @@
+["starship:install"]
+description = "Install only starship dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/starship/Brewfile\""
+
+["starship:plan"]
+description = "Preview only starship deployment"
+run = "mise dot apply --dry-run \"~/.config/starship.toml\""
+
+["starship:apply"]
+description = "Deploy only starship configuration; no installation or setup"
+run = "mise dot apply \"~/.config/starship.toml\""

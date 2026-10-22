@@ -1,0 +1,11 @@
+["hunk:install"]
+description = "Install only hunk dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/hunk/Brewfile\""
+
+["hunk:plan"]
+description = "Preview only hunk deployment"
+run = "mise dot apply --dry-run \"~/.config/hunk/config.toml\""
+
+["hunk:apply"]
+description = "Deploy only hunk configuration; no installation or setup"
+run = "mise dot apply \"~/.config/hunk/config.toml\""

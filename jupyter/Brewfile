@@ -1,0 +1,4 @@
+# Dependencies of the existing jupy:* tasks; no Jupyter user configuration is managed.
+brew "uv"
+brew "python@3.14"
+brew "ripgrep"

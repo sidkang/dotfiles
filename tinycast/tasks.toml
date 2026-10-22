@@ -1,0 +1,3 @@
+["tinycast:install"]
+description = "Install only tinycast; no deployment or setup"
+run = 'brew bundle install --no-upgrade --file="{{ config_root }}/tinycast/Brewfile"'

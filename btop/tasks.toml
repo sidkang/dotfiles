@@ -1,0 +1,11 @@
+["btop:install"]
+description = "Install only btop dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/btop/Brewfile\""
+
+["btop:plan"]
+description = "Preview only btop deployment"
+run = "mise dot apply --dry-run \"~/.config/btop\""
+
+["btop:apply"]
+description = "Deploy only btop configuration; no installation or setup"
+run = "mise dot apply \"~/.config/btop\""

@@ -1,0 +1,11 @@
+["nvim:install"]
+description = "Install only nvim dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/nvim/Brewfile\""
+
+["nvim:plan"]
+description = "Preview only nvim deployment"
+run = "mise dot apply --dry-run \"~/.config/nvim\""
+
+["nvim:apply"]
+description = "Deploy only nvim configuration; no installation or setup"
+run = "mise dot apply \"~/.config/nvim\""

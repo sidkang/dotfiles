@@ -1,0 +1,4 @@
+brew "mise"
+brew "node"
+brew "uv"
+brew "yq"

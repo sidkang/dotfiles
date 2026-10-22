@@ -1,0 +1,11 @@
+["jj:install"]
+description = "Install only jj dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/jj/Brewfile\""
+
+["jj:plan"]
+description = "Preview only jj deployment"
+run = "mise dot apply --dry-run \"~/.config/jj/config.toml\""
+
+["jj:apply"]
+description = "Deploy only jj configuration; no installation or setup"
+run = "mise dot apply \"~/.config/jj/config.toml\""

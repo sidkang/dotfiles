@@ -1,0 +1,3 @@
+["jupyter:install"]
+description = "Install only runtime dependencies of jupy tasks; no Python package setup"
+run = 'brew bundle install --no-upgrade --file="{{ config_root }}/jupyter/Brewfile"'

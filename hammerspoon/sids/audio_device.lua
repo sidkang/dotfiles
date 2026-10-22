@@ -106,12 +106,13 @@ end
 
 local function finishPendingQuiet(pending)
 	if state.pendingQuiet ~= pending then return end
-	-- Delivery to Notification Center alone does not mean the alert was shown.
-	-- Never change the volume silently when macOS suppresses the notification.
-	local presented = pending.notification:delivered() and pending.notification:presented()
+	-- alwaysPresent requests presentation, but presented() still reports the
+	-- Notification Center's original decision, not whether the banner appeared.
+	-- Require successful delivery rather than that advisory presentation flag.
+	local delivered = pending.notification:delivered()
 	cancelPendingQuiet()
-	if not presented then
-		print("Audio Device: skipped quieting because macOS did not confirm notification presentation")
+	if not delivered then
+		print("Audio Device: skipped quieting because macOS did not confirm notification delivery")
 		return
 	end
 
@@ -172,8 +173,9 @@ quietOutputOnWifi = function()
 		actionButtonTitle = "10 min",
 		additionalActions = { "30 min", "1 hour" },
 		alwaysShowAdditionalActions = true,
-		-- Honor the system presentation decision so presented() is meaningful.
-		alwaysPresent = false,
+		-- Request native presentation even when Hammerspoon is frontmost.
+		-- macOS notification permissions and Focus can still suppress it.
+		alwaysPresent = true,
 		autoWithdraw = false,
 		withdrawAfter = 0,
 	})
