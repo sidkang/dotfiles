@@ -7,7 +7,9 @@ min_version = "2026.10.13"
 "brew:btop" = { os = "macos" }
 "brew:fish" = { os = "macos" }
 "brew:git" = { os = "macos" }
+"brew:gitleaks" = { os = "macos" }
 "brew:hunk" = { os = "macos" }
+"brew:ipython" = { os = "macos" }
 "brew:jj" = { os = "macos" }
 "brew:nebula" = { os = "macos" }
 "brew:neovim" = { os = "macos" }
@@ -31,6 +33,8 @@ min_version = "2026.10.13"
 "~/.config/git" = { source = "git", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/hammerspoon" = { source = "hammerspoon", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/hunk/config.toml" = { source = "hunk/config.toml", mode = "symlink" }
+# IPYTHONDIR is set in fish; history and other profile state stay local.
+"~/.config/ipython/profile_default/ipython_config.py" = { source = "ipython/ipython_config.py", mode = "symlink" }
 # Only the global config; jj/repos stays local.
 "~/.config/jj/config.toml" = { source = "jj/config.toml", mode = "symlink" }
 "~/.config/karabiner.edn" = { source = "goku/karabiner.edn", mode = "symlink" }

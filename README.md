@@ -8,6 +8,7 @@ jj 管版本，`mise dot` 管部署，`mise bootstrap` 管软件安装和初始�
 - **btop**：运行时会回写 `btop.conf`，改动直接进入仓库。
 - **Kitty**：`kitty/com.sid.kitten.plist` 软链接到 `~/Library/LaunchAgents/`，bootstrap 加载后台保活服务。修改 plist 后，先 `mise dot apply`，再用 `launchctl bootout "gui/$(id -u)/com.sid.kitten"` 和 `launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.sid.kitten.plist"` 重新加载；这会重启 Kitty。
 - **Hammerspoon**：bootstrap 设置 `MJConfigFile` 指向 `~/.config/hammerspoon/init.lua`；更改入口后需重启应用。
+- **IPython**：Fish 设置 `IPYTHONDIR=~/.config/ipython`；只部署默认 profile 的配置，历史数据库和其他运行状态留在本机。启动时尝试加载 `icecream.ic`，未安装则跳过。
 - **pi**：依赖 fish 设置的 `PI_CODING_AGENT_DIR`。只链接配置，认证、会话和缓存留在本机；会话由 Syncthing 同步。`subagent-manager/` 采用复制，插件修改后用 `mise dot add ~/.config/pi/agent/subagent-manager` 收回仓库。
 - **本机文件**：mise 覆盖配置写到 `~/.config/mise/config.local.toml`，Fish 密钥只放 `fish/conf.d/secrets.fish`；其他私有文件见 `.gitignore`。
 - **SSH**：仅用 age 加密同步 `~/.ssh/config`，不管理私钥或公钥。修改后运行 `mise ssh:save`，发布前运行 `mise ssh:check`；恢复见 [ssh/README.md](ssh/README.md)。
