@@ -27,8 +27,6 @@ set -gx XDG_CACHE_HOME $HOME/.cache
 set -gx XDG_DATA_HOME $HOME/.local/share
 set -gx XDG_STATE_HOME $HOME/.local/state
 
-set -gx RBW_INDEX_FILE "$XDG_DATA_HOME/rbw/name-id-index.enc"
-
 set -gx DSH_HOME $HOME/.config/dsh
 
 set -gx LARKSUITE_CLI_CONFIG_DIR $HOME/.config/lark-cli
@@ -148,8 +146,6 @@ end
 if command -q gh; and not set -qx GH_TOKEN
     set -gx GH_TOKEN (gh auth token)
 end
-
-# set -gx RAYCAST_NEWAPI_KEY (gopass show api/raycast_newapi)
 
 ########################## INTERACTIVE ABBRS ####################################
 if command -q brew
