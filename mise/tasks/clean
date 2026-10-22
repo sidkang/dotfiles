@@ -1,15 +1,22 @@
 #!/usr/bin/env fish
 #MISE description="清理当前目录中的 macOS、Windows、Python 缓存和本地虚拟环境"
 
-set -l target_dir $MISE_ORIGINAL_CWD
+set -l target_dir "$MISE_ORIGINAL_CWD"
+if test -z "$target_dir"
+    echo "MISE_ORIGINAL_CWD 为空，拒绝清理。" >&2
+    exit 1
+end
+
+cd -- "$target_dir"; or exit 1
+if test (pwd -P) = /
+    echo "拒绝清理根目录 /。" >&2
+    exit 1
+end
 
 set_color --bold cyan
 echo "📂 目标目录: $target_dir"
 echo "🧹 开始扫描并清理垃圾文件..."
 set_color normal
-
-# 切换物理路径，确保 find 命令的作用域正确
-cd $target_dir
 
 # --- 内部辅助函数 ---
 function verbose_clean -a label pattern type
