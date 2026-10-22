@@ -1,40 +1,23 @@
 # nvim
 
-极简 Neovim 全局配置，stow 到 `~/.config/nvim`。
-
-## 组成
-
-- lazy.nvim
-- catppuccin
-- blink.cmp
-- native LSP + nvim-lspconfig
-- conform.nvim
-- mini.pick / mini.extra / mini.files / mini.diff / mini.clue / mini.notify
-- vim-slime + kitty
-- sidekick.nvim
-
-Lean 已迁移但默认禁用；需要时在 `lua/plugins/lean.lua` 改 `enabled = true`。
+Neovim 配置，部署见[根 README](../README.md)。插件配置在 `lua/plugins/`；需要 Lean 时，在 `lua/plugins/lean.lua` 设置 `enabled = true`。
 
 ## 工具
 
-Mason 管理 LSP / formatter；少量系统工具用 Homebrew：`joker`、`caddy`、`taplo`、`fish_indent`。
+Mason 管理 LSP 与 formatter。`joker`、`caddy`、`taplo` 需另装；`fish_indent` 随 Fish 提供。
 
 ## 按键
 
 - `<leader>s*`：search / picker
 - `<leader>se`：mini.files
-- `<leader>c*`：code actions / format
+- `<leader>cf`：format
 - `<leader>u*`：UI toggles
 - `<leader>w*`：windows / buffers
 - `<leader>o*`：sidekick
 
-REPL 只在 Python / sh 启用：
+REPL（Python / sh）：
 
 - `<localleader>i`：选择 kitty target
 - `<localleader>l/s/v`：发送 line / motion / selection
 - `<localleader>c/n`：发送 cell / cell and next
-- `<localleader>r/x`：向 target 发送 Enter / Ctrl-C key event
-
-## 状态
-
-`lua-legacy/` 和 `after-legacy/` 已清理。
+- `<localleader>r/x`：向 target 发送 Enter / Ctrl-C

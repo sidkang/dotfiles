@@ -1,31 +1,27 @@
 # dotfiles
 
-jj（与 Git 共存）管版本，`mise dot` 管部署，`mise bootstrap` 管软件安装和初始化。
-每个顶层目录是一个程序的配置，映射全部写在 `mise.toml`。
+jj 管版本，`mise dot` 管部署，`mise bootstrap` 管软件安装和初始化。软件、部署映射及 bootstrap 任务统一写在根目录 `mise.toml`。
 
-多数程序是简单映射，不在此列出。需要注意的：
+需要注意的配置：
 
-| 程序 | 目标 | 说明 |
-| --- | --- | --- |
-| Bat | `~/.config/bat/` | 改主题后运行 `bat cache --build` |
-| btop | `~/.config/btop/` | btop 会改写 `btop.conf`，改动直接进仓库 |
-| Espanso | `~/Library/Application Support/espanso/{config,match,script}` | 整目录链接 |
-| Fish | `~/.config/fish/` | 独立命令在 `functions/<name>.fish`（不用 `funcsave`），按功能分组的在 `conf.d/<功能>.fish`；密钥在 Git 忽略的 `conf.d/secrets.fish` |
-| pi | `~/.config/pi/agent/` | 需要 fish 设置的 `PI_CODING_AGENT_DIR`。只链接配置（`subagent-manager/` 例外：插件拒绝软链接，改为复制；插件自己改动后用 `mise dot add ~/.config/pi/agent/subagent-manager` 收回仓库）；`auth.json`、`sessions/`、`npm/`、`git/` 和缓存留在本机。扩展和 skills 来自 git 包 `github.com/sidkang/pi-stuff`，由 `bootstrap` 任务的 `pi update --extensions` 安装。`sessions/` 由 Syncthing 原地同步，不进 Git |
-| mise | `~/.config/mise/{config.toml,tasks}` | 全局配置与任务；本机覆盖写在不进仓库的 `config.local.toml` |
-| Zellij | `~/.config/zellij/` | zjstatus 插件从固定版本的 GitHub release URL 加载，不提交 wasm |
-| Git | `~/.config/git/` | 不使用 `~/.gitconfig` |
+- **Bat**：修改主题后运行 `bat cache --build`。
+- **btop**：运行时会回写 `btop.conf`，改动直接进入仓库。
+- **Hammerspoon**：bootstrap 设置 `MJConfigFile` 指向 `~/.config/hammerspoon/init.lua`；更改入口后需重启应用。
+- **pi**：依赖 fish 设置的 `PI_CODING_AGENT_DIR`。只链接配置，认证、会话和缓存留在本机；会话由 Syncthing 同步。`subagent-manager/` 采用复制，插件修改后用 `mise dot add ~/.config/pi/agent/subagent-manager` 收回仓库。
+- **本机文件**：mise 覆盖配置写到 `~/.config/mise/config.local.toml`，Fish 密钥只放 `fish/conf.d/secrets.fish`；其他私有文件见 `.gitignore`。
+- **tmux**：`tmux/` 只归档，不安装或部署。
 
-新增程序：建 `<程序>/` 目录，在 `[dotfiles]` 加一行，在 `[bootstrap.packages]` 声明软件。
+配置纳管与排除偏好见 [CONFIG-POLICY.md](CONFIG-POLICY.md)；检查遗漏前先看该文件，避免重复建议已决定不纳管的程序。
 
-私有文件被 Git 忽略，不会发布：`fish/conf.d/secrets.fish`、`pi/agent/models.json`、`espanso/match/mine.yml`、`espanso/match/packages/`。
+新增程序：建 `<程序>/`，在 `mise.toml` 的 `[dotfiles]` 添加映射，在 `[bootstrap.packages]` 声明软件。
 
 ## 新机器
 
-需要 Git、Homebrew 和 mise 2026.10.13 或更新版本，仅支持 macOS。
+支持 macOS，需 Git、Homebrew 和 mise（最低版本见 `mise.toml` 的 `min_version`）。
 
 ```sh
-git clone https://github.com/sidkang/dotfiles.git ~/config/dotfiles
+brew install jj
+jj git clone https://github.com/sidkang/dotfiles.git ~/config/dotfiles
 cd ~/config/dotfiles
 mise trust                 # 先审查 mise.toml
 mise bootstrap --only packages,dotfiles,task --dry-run
@@ -33,13 +29,11 @@ mise bootstrap --only packages,dotfiles,task
 mise dot status
 ```
 
-bootstrap 安装缺少的软件（不升级已有的），建立链接，再运行 `bootstrap` 任务：
-从 AeroSpace 的 tap 安装它（mise 无法声明这个 tap），并构建 Bat 缓存。
-目标位置已有文件时会停下；先备份，不要默认加 `--force`。
+遇到目标文件冲突时先备份处理，不要直接加 `--force`。
 
 ## 日常修改
 
-直接编辑本目录的文件，已链接的配置立即生效。新增、删除文件或修改映射后：
+编辑已链接的源文件会直接影响本机配置。新增、删除文件或修改映射后：
 
 ```sh
 mise dot diff
@@ -47,8 +41,7 @@ mise dot apply --dry-run
 mise dot apply
 ```
 
-在其他目录可用 `mise -C ~/config/dotfiles dot apply`。
-解除部署用 `mise dot unapply`；它不会恢复部署前的文件。
+解除部署用 `mise dot unapply`，不会恢复部署前的文件。
 
 ## 发布
 
@@ -62,12 +55,11 @@ jj bookmark move master --to @-
 jj git push
 ```
 
-jj 会自动纳入所有未被忽略的新文件。私有文件要先写进 `.gitignore`，再运行任何 jj 命令。
-仓库是公开的：秘密放密码管理器或 Git 忽略的本地文件。已泄露的凭据要轮换，删文件不够。
+私有文件先加入 `.gitignore`，再运行 jj。凭据泄露后需轮换，仅删文件不够。
 
 ## 获取更新
 
-`jj git fetch` 不改动工作区。rebase 之后已链接的配置会立即改变，所以先审查：
+rebase 会影响已链接的配置，先审查差异：
 
 ```sh
 jj git fetch
