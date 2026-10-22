@@ -1,0 +1,7 @@
+# Shared age recipients (public only), one per line.
+# Add every target machine / recovery recipient before first encryption.
+# Current Mac: existing SOPS Secure Enclave identity
+age1se1qtj4aay3acfucgx50lcjsr8e2dfpgy6le66f8mxdjkghfjcjt2x5gwh8sfq
+
+# Cube: existing SOPS Secure Enclave identity
+age1se1qgjuuskalgwezw6pw36qq3ggtr4tcf72vmfpdn2nv8trxclclqpg7lkuq3h

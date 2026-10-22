@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+#MISE description="Check SSH config matches its encrypted archive"
+import os
+from pathlib import Path
+import runpy
+import sys
+
+script = Path(os.environ.get("MISE_TASK_FILE", __file__)).resolve()
+repo = script.parents[3]
+sys.argv = [str(script), "check", "--file", str(Path.home() / ".ssh/config"),
+            "--encrypted", str(repo / "ssh/config.age"), *sys.argv[1:]]
+runpy.run_path(str(repo / "scripts/age-file.py"), run_name="__main__")
