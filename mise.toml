@@ -2,14 +2,18 @@ min_version = "2026.10.13"
 
 [bootstrap.packages]
 "brew:bat" = { os = "macos" }
+"brew:bottom" = { os = "macos" }
 "brew:btop" = { os = "macos" }
 "brew:fish" = { os = "macos" }
 "brew:git" = { os = "macos" }
 "brew:hunk" = { os = "macos" }
+"brew:jj" = { os = "macos" }
+"brew:nebula" = { os = "macos" }
 "brew:neovim" = { os = "macos" }
 "brew:pi-coding-agent" = { os = "macos" }
 "brew:starship" = { os = "macos" }
 "brew:yqrashawn/goku/goku" = { os = "macos" }
+"brew:yazi" = { os = "macos" }
 "brew:zellij" = { os = "macos" }
 "brew-cask:espanso" = { os = "macos" }
 "brew-cask:hammerspoon" = { os = "macos" }
@@ -25,11 +29,14 @@ min_version = "2026.10.13"
 "~/.config/git" = { source = "git", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/hammerspoon" = { source = "hammerspoon", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/hunk/config.toml" = { source = "hunk/config.toml", mode = "symlink" }
+# Only the global config; jj/repos stays local.
+"~/.config/jj/config.toml" = { source = "jj/config.toml", mode = "symlink" }
 "~/.config/karabiner.edn" = { source = "goku/karabiner.edn", mode = "symlink" }
 "~/.config/kitty" = { source = "kitty", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store", "__pycache__", "research"] }
 # mise reads and runs these globally; config.local.toml stays local.
 "~/.config/mise/config.toml" = { source = "mise/config.toml", mode = "symlink" }
 "~/.config/mise/tasks" = { source = "mise/tasks", mode = "symlink" }
+"~/.config/nebula" = { source = "nebula", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 # lazy-lock.json and the uv .venv stay local.
 "~/.config/nvim" = { source = "nvim", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store", "readme.md"] }
 "~/.config/starship.toml" = { source = "starship/starship.toml", mode = "symlink" }
@@ -41,19 +48,21 @@ min_version = "2026.10.13"
 # pi-subagent-manager refuses symlinked state, so this one is copied. Capture its own edits with `mise dot add`.
 "~/.config/pi/agent/subagent-manager" = { source = "pi/agent/subagent-manager", mode = "copy", exclude = [".import-offered", ".DS_Store"] }
 "~/.config/pi/agent/themes" = { source = "pi/agent/themes", mode = "symlink" }
-# Espanso reloads and installs packages inside these directories, so link them whole.
-"~/.config/tmux/tmux.conf" = { source = "tmux/tmux.conf", mode = "symlink" }
+"~/.config/yazi" = { source = "yazi", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
 # zjstatus loads from its pinned GitHub release URL; zellij caches it.
 "~/.config/zellij" = { source = "zellij", mode = "symlink-each", exclude = ["README.md", "AGENTS.md", ".DS_Store"] }
+# Espanso reloads and installs packages inside these directories, so link them whole.
 "~/Library/Application Support/espanso/config" = { source = "espanso/config", mode = "symlink" }
 "~/Library/Application Support/espanso/match" = { source = "espanso/match", mode = "symlink" }
 "~/Library/Application Support/espanso/script" = { source = "espanso/script", mode = "symlink" }
 
 [tasks.bootstrap]
-description = "Install packages mise cannot declare, then build caches"
+description = "Finish app setup and build caches"
 run = [
   # AeroSpace is only in its own tap, which mise cannot evaluate without Ruby 3.
   "brew list --cask aerospace >/dev/null 2>&1 || brew install --cask nikitabobko/tap/aerospace",
+  # Hammerspoon otherwise reads ~/.hammerspoon/init.lua.
+  'defaults write org.hammerspoon.Hammerspoon MJConfigFile -string "$HOME/.config/hammerspoon/init.lua"',
   "bat cache --build",
   # pi: install the packages declared in settings.json, including github.com/sidkang/pi-stuff.
   "PI_CODING_AGENT_DIR=~/.config/pi/agent pi update --extensions",
