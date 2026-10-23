@@ -1,5 +1,9 @@
+description: Complete short, bounded jobs with clear acceptance criteria, including diagnostics, extraction, mechanical edits, a few tool steps, or a targeted repository lookup. Use ds/deepseek-flash for large fan-out batches. Not for ambiguous features, sustained implementation, or complex code understanding.
 models:
+  - xai/grok-4.7-fast
   - codex/gpt-6.1-sol
+  - ds/deepseek-flash
+thinkingLevel: low
 tools:
   allow:
     - read

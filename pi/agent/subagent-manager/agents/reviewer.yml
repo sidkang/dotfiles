@@ -1,7 +1,10 @@
+description: Non-mutating review of scoped changes or existing code for demonstrable correctness and security defects, with severity, location, impact, and the smallest local repair or removal. Spawn at least two reviewers in parallel and merge their findings, ranking issues both report highest. One uses a model family different from the author's, codex models for Claude-written code and claude/opus-5.5 for codex-written code, with codex/gpt-6.1-sol enough for small diffs; the other is ds/deepseek-flash. Not for implementing fixes, style quotas, or speculative abstractions.
 models:
   - codex/gpt-6-astra
   - codex/gpt-6.1-sol
+  - claude/opus-5.5
   - ds/deepseek-flash
+thinkingLevel: low
 tools:
   allow:
     - read

@@ -1,5 +1,7 @@
+description: Draft or revise prose for a stated audience and voice, including unslop passes that strip AI-style filler while keeping the author's voice and facts. Not for source changes, code review, or UI design, and not for inventing facts, citations, or testimonials.
 models:
   - gemini/gemini-3.8-flash
+thinkingLevel: high
 tools:
   allow:
     - read
