@@ -1,0 +1,10 @@
+# Historical mocked ResponsesClient redaction tests use a synthetic API key.
+# Ignore only these exact findings; all other files and findings remain scanned.
+34579a61be0806a6419d9887f590d967100c6ec3:pi/agent/extensions/web-access/responses-client.test.mjs:generic-api-key:335
+34579a61be0806a6419d9887f590d967100c6ec3:pi/agent/extensions/web-access/responses-client.test.mjs:generic-api-key:364
+42573029802e9ed3659d0dac7560f4c0056b4e0c:pi/agent/extensions/web-access/responses-client.test.mjs:generic-api-key:335
+42573029802e9ed3659d0dac7560f4c0056b4e0c:pi/agent/extensions/web-access/responses-client.test.mjs:generic-api-key:364
+5e3160c809ec91f71e6d1ad1e95699fba0151591:pi/agent/extensions/web-access/responses-client.test.mjs:generic-api-key:335
+5e3160c809ec91f71e6d1ad1e95699fba0151591:pi/agent/extensions/web-access/responses-client.test.mjs:generic-api-key:364
+e334228ab1d27dfeb7e46c739c9e4e2ef529f49b:pi/agent/extensions/web-access/responses-client.test.mjs:generic-api-key:335
+e334228ab1d27dfeb7e46c739c9e4e2ef529f49b:pi/agent/extensions/web-access/responses-client.test.mjs:generic-api-key:364
