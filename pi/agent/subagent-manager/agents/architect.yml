@@ -1,8 +1,7 @@
 models:
-  - codex/gpt-6-astra
   - claude/opus-5.5
   - claude/fable-5.1
-thinkingLevel: low
+thinkingLevel: medium
 tools:
   allow:
     - read
