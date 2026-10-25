@@ -69,7 +69,7 @@ local function filename()
 	if name == "" then name = vim.bo.buftype == "" and "[No Name]" or "" end
 	if vim.bo.modified then name = name .. "[+]" end
 	if vim.bo.readonly or not vim.bo.modifiable then name = name .. "[-]" end
-	return name
+	return (name:gsub("%%", "%%%%"))
 end
 
 local function lsp()

@@ -56,7 +56,7 @@ mise kitty:reload          # 要求确认，会重启后台实例
 - Node、Go、uv 默认由 Homebrew 提供；mise 只保留需要时由项目显式选择的旧版 Node。其他现有 mise 工具选择见 `mise/config.toml`，不随任务自动安装。
 - **IPython**：Fish 设置 `IPYTHONDIR=~/.config/ipython`；只部署默认 profile 的配置，历史数据库和其他运行状态留在本机。启动时尝试加载 `icecream.ic`，未安装则跳过。
 - pi 的 `subagent-manager/` 使用复制；本机修改后用 `mise dot add ~/.config/pi/agent/subagent-manager` 收回仓库。部署前检查，不自动覆盖。
-- SSH 只保存 age 密文，恢复、保存、检查都是[显式操作](ssh/README.md)，不随部署执行。
+- SSH 只保存 age 密文；远端更新用 `mise ssh:apply` 一次解密完成应用和校验，不留备份。保存、检查及首次恢复见 [SSH 操作](ssh/README.md)，不随部署执行。
 - `mise dot unapply` 不会恢复部署前的文件。
 
 依赖审计及待决定项见 [DEPENDENCIES.md](DEPENDENCIES.md)。纳管例外和私有数据边界见 [CONFIG-POLICY.md](CONFIG-POLICY.md)。

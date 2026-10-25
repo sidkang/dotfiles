@@ -24,7 +24,7 @@ python3 scripts/age-file.py save \
   --encrypted example/config.age
 ```
 
-把 `save` 换为 `check` 或 `restore` 即可比较或恢复。`--file` 是明文源文件或恢复目标，`--encrypted` 是密文路径；密文父目录需预先存在。
+把 `save` 换为 `check` 或 `restore` 即可比较或首次恢复。覆盖更新用 `apply`：一次解密完成脱敏预览、交互确认、原子写入和内存校验，不留备份；`--yes` 跳过确认，`--dry-run` 只预览。`--file` 是明文源文件或恢复目标，`--encrypted` 是密文路径；密文父目录需预先存在。
 
 默认读取共享 `age/recipients.txt`；identity 使用 `SOPS_AGE_KEY_FILE`，未设置时为 `~/.config/sops/age/keys.txt`。也可以显式指定 `--recipients PATH` 和 `--identity PATH`。identity 必须在仓库外，权限为 `0600` 或更严格。插件解密可能需要 Touch ID 或终端交互。
 

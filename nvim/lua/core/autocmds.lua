@@ -38,7 +38,11 @@ autocmd({ "FocusGained", "TermClose", "TermLeave" }, {
 
 autocmd("VimResized", {
 	desc = "Keep splits equal after resizing the terminal",
-	command = "tabdo wincmd =",
+	callback = function()
+		local tab = vim.api.nvim_get_current_tabpage()
+		vim.cmd("tabdo wincmd =")
+		vim.api.nvim_set_current_tabpage(tab)
+	end,
 })
 
 autocmd("BufWritePre", {
@@ -58,9 +62,14 @@ if vim.uv.os_uname().sysname == "Darwin" and not (vim.env.SSH_TTY or vim.env.SSH
 	local switch_en = function()
 		if en then return end
 		en = true
-		-- Hammerspoon IPC is ~3x cheaper than `open`; fall back to it when unreachable
+		local fallback = function() vim.system({ "open", "-g", "hammerspoon://switchIME?to=en" }) end
+		-- Hammerspoon IPC is cheaper than `open`; fall back when missing or unreachable.
+		if vim.fn.executable(hs) == 0 then
+			fallback()
+			return
+		end
 		vim.system({ hs, "-q", "-c", 'hsurl("switchIME?to=en")' }, {}, function(result)
-			if result.code ~= 0 then vim.system({ "open", "-g", "hammerspoon://switchIME?to=en" }) end
+			if result.code ~= 0 then fallback() end
 		end)
 	end
 

@@ -5,8 +5,12 @@ local function bootstrap()
 	local install = spoon.SpoonInstall
 	if false then install:andUse("EmmyLua") end
 
-	-- require("hs.ipc").cliInstall("/opt/homebrew")
-	hs.ipc.cliInstall(os.getenv("HOME") .. "/.local", true)
+	local prefix = os.getenv("HOME") .. "/.local"
+	for _, suffix in ipairs({ "", "/bin", "/share", "/share/man", "/share/man/man1" }) do
+		local path = prefix .. suffix
+		if not hs.fs.attributes(path, "mode") then assert(hs.fs.mkdir(path)) end
+	end
+	assert(hs.ipc.cliInstall(prefix) == true, "Failed to install Hammerspoon CLI")
 	hs.window.animationDuration = 0
 	require("sids.router").setup() -- before any hs.urlevent.bind
 end
