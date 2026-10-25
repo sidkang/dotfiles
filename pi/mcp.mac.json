@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "cua-driver": {
+      "command": "/opt/homebrew/bin/cua-driver",
+      "args": [
+        "mcp"
+      ],
+      "exposure": "codemode",
+      "description": "Cua Driver：macOS 桌面应用读取与自动化操作"
+    },
+    "safari": {
+      "command": "/usr/bin/safaridriver",
+      "args": [
+        "--mcp"
+      ],
+      "description": "Safari browser automation and debugging: pages, DOM interactions, screenshots, console and network requests."
+    }
+  }
+}

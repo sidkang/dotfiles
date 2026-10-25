@@ -4,11 +4,11 @@ run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/pi/Brewfile\"
 
 ["pi:plan"]
 description = "Preview only pi deployment"
-run = "mise dot apply --dry-run \"~/.config/pi/agent\" \"~/.config/pi/agent/prompts\" \"~/.config/pi/agent/subagent-manager\" \"~/.config/pi/agent/themes\""
+run = "mise dot apply --dry-run \"~/.config/pi/agent\" \"~/.config/pi/agent/mcp.json\" \"~/.config/pi/agent/prompts\" \"~/.config/pi/agent/subagent-manager\" \"~/.config/pi/agent/themes\""
 
 ["pi:apply"]
 description = "Deploy only pi configuration; no installation or setup"
-run = "mise dot apply \"~/.config/pi/agent\" \"~/.config/pi/agent/prompts\" \"~/.config/pi/agent/subagent-manager\" \"~/.config/pi/agent/themes\""
+run = "mise dot apply \"~/.config/pi/agent\" \"~/.config/pi/agent/mcp.json\" \"~/.config/pi/agent/prompts\" \"~/.config/pi/agent/subagent-manager\" \"~/.config/pi/agent/themes\""
 
 ["pi:extensions"]
 description = "Explicitly update Pi extensions; may run npm lifecycle scripts"

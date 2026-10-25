@@ -31,6 +31,8 @@ includes = ["*/tasks.toml"]
 # (auth.json, sessions/, npm/, git/, caches) stays out of the repo.
 # AGENTS.md here is pi's global instruction file, so it is deployed.
 "~/.config/pi/agent" = { source = "pi/agent", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", ".DS_Store", "/prompts", "/subagent-manager", "/themes"] }
+"pi/mcp.json" = { source = "pi/mcp.json", mode = "symlink", variants = [{ os = ["linux", "windows"], target = "~/.config/pi/agent/mcp.json" }] }
+"pi/mcp.mac.json" = { source = "pi/mcp.mac.json", mode = "symlink", variants = [{ os = "macos", target = "~/.config/pi/agent/mcp.json" }] }
 "~/.config/pi/agent/prompts" = { source = "pi/agent/prompts", mode = "symlink" }
 # pi-subagent-manager refuses symlinked state, so this one is copied. Capture its own edits with `mise dot add`.
 "~/.config/pi/agent/subagent-manager" = { source = "pi/agent/subagent-manager", mode = "copy", exclude = [".import-offered", ".DS_Store"] }
