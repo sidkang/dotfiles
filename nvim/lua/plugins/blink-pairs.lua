@@ -6,7 +6,7 @@ return {
 	end,
 
 	-- download prebuilt binaries from github releases
-	dependencies = "saghen/blink.download",
+	dependencies = "saghen/blink.lib",
 
 	--- @module 'blink.pairs'
 	--- @type blink.pairs.Config
