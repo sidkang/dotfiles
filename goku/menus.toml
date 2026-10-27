@@ -1,0 +1,124 @@
+# Key menus: source of truth for the Karabiner one-shot modes and the WhichKey guide.
+# `mise run goku:gen` rewrites the generated regions of karabiner.edn and
+# hammerspoon/sids/whichkey/groups.lua. Edit here, not there.
+#
+# cmd = "<goku template>:<argument>"; {key} / {KEY} expand to the lower / upper case key.
+# generate = false: guide only, the rules stay hand-written in karabiner.edn.
+
+[[menu]]
+id = "aerospace-mode"
+title = "AeroSpace"
+generate = false
+footer = "松开 ' 退出"
+items = [
+  { label = "R", desc = "{发送|blue}窗口到工作区" },
+  { label = "T", desc = "{布局|blue}与工具" },
+  { label = "F", desc = "{打开|blue}应用" },
+  { label = "G", desc = "{切换|blue}工作区" },
+  { label = "S", desc = "{交换|peach}窗口位置" },
+  { label = "Z", desc = "进入 {Z 模式|teal}" },
+  { label = "V", desc = "{关闭|mauve}窗口" },
+  { label = "HJKL", desc = "移动{焦点|green}" },
+  { label = "⇧ HJKL", desc = "移动{窗口|green}" },
+  { label = "⌃ HJKL", desc = "合并{窗口|green}" },
+  { label = "1-6", desc = "切换{工作区|teal}" },
+]
+
+[[menu]]
+id = "as-send-ws"
+region = "aerospace"
+title = "发送到工作区"
+exit = "caps_lock"
+items = [
+  { keys = ["1", "2", "3", "4", "5", "6"], label = "1-6", cmd = "as:move-node-to-workspace --focus-follows-window {KEY}", desc = "发送到工作区 {1-6|teal}" },
+  { keys = ["q", "w", "e"], label = "Q/W/E", cmd = "as:move-node-to-workspace --focus-follows-window {KEY}", desc = "发送到工作区 {Q/W/E|blue}" },
+  { keys = ["a", "s", "d", "t"], label = "A/S/D/T", cmd = "as:move-node-to-workspace --focus-follows-window {KEY}", desc = "发送到工作区 {A/S/D/T|mauve}" },
+]
+
+[[menu]]
+id = "as-toggle"
+region = "aerospace"
+title = "布局与工具"
+exit = "caps_lock"
+items = [
+  { key = "j", cmd = "as:layout tiles accordion", desc = "{平铺|teal} ⇄ {手风琴|blue}" },
+  { key = "k", cmd = "as:layout horizontal vertical", desc = "{水平|teal} ⇄ {垂直|blue}" },
+  { key = "f", cmd = "as:layout floating tiling", desc = "{浮动|mauve} ⇄ {平铺|teal}" },
+  { key = "e", cmd = "sh:killall AeroSpace borders;open -a AeroSpace", desc = "重启 {AeroSpace|red} 与边框" },
+  { key = "b", cmd = "as:balance-sizes", desc = "{平衡|green}窗口大小" },
+  { key = "r", cmd = "as:reload-config", desc = "重载 {AeroSpace|yellow} 配置" },
+  { key = "g", cmd = "as-py:window move-ghost", desc = "清理{无标题窗口|sky}" },
+  { key = "c", cmd = "hs:floatwindow?action=move&target=center", desc = "{浮动窗口|peach}居中" },
+]
+
+[[menu]]
+id = "as-open"
+region = "aerospace"
+title = "打开应用"
+exit = "caps_lock"
+items = [
+  { key = "f", cmd = "sh:osascript -e 'tell application \"Finder\" to make new Finder window'", desc = "打开 {Finder|blue}" },
+  { key = "w", cmd = "as-py:app toggle wechat", desc = "打开 {WeChat|green}" },
+  { key = "t", cmd = "as-py:app toggle telegram", desc = "打开 {Telegram|teal}" },
+  { key = "g", cmd = "as-py:app toggle chrome", desc = "打开 {Google Chrome|peach}" },
+]
+
+[[menu]]
+id = "as-go"
+region = "aerospace"
+title = "切换工作区"
+exit = "caps_lock"
+items = [
+  { keys = ["1", "2", "3", "4", "5", "6"], label = "1-6", cmd = "as:workspace {KEY}", desc = "切到工作区 {1-6|teal}" },
+  { keys = ["q", "w", "e"], label = "Q/W/E", cmd = "as:workspace {KEY}", desc = "切到工作区 {Q/W/E|blue}" },
+  { keys = ["a", "s", "d", "t"], label = "A/S/D/T", cmd = "as:workspace {KEY}", desc = "切到工作区 {A/S/D/T|mauve}" },
+]
+
+[[menu]]
+id = "as-swap"
+region = "aerospace"
+title = "交换窗口"
+exit = "caps_lock"
+items = [
+  { key = "h", cmd = "as:swap left", desc = "交换到{左侧|teal}" },
+  { key = "j", cmd = "as:swap down", desc = "交换到{下方|green}" },
+  { key = "k", cmd = "as:swap up", desc = "交换到{上方|mauve}" },
+  { key = "l", cmd = "as:swap right", desc = "交换到{右侧|blue}" },
+]
+
+[[menu]]
+id = "z-mode"
+title = "Z 模式"
+generate = false
+footer = "Caps 退出"
+items = [
+  { label = "1", desc = "显示器输入切到 {USB-C|teal}" },
+  { label = "2", desc = "显示器输入切到 {DP|blue}" },
+  { label = "3", desc = "显示器输入切到 {HDMI|mauve}" },
+  { label = "Q", desc = "进入 {PBP 菜单|green}" },
+  { label = "O", desc = "划词翻译 ({Bob|blue})" },
+  { label = "P", desc = "截图翻译 ({Bob|teal})" },
+  { label = "9", desc = "打开 {Hammerspoon|peach} 控制台" },
+  { label = "0", desc = "重载 {Hammerspoon|red} 配置" },
+  { label = "=", desc = "发送{错误通知|yellow}" },
+  { label = "/", desc = "{Xnip|sky} 截图" },
+]
+
+[[menu]]
+id = "m1ddc-pbp"
+region = "z"
+title = "显示器 PBP"
+exit = "caps_lock"
+hide_group = false
+items = [
+  { key = "1", cmd = "m1ddc:set input 16", desc = "主输入切到 {USB-C|teal}" },
+  { key = "2", cmd = "m1ddc:set input 15", desc = "主输入切到 {DP|blue}" },
+  { key = "3", cmd = "m1ddc:set input 17", desc = "主输入切到 {HDMI|mauve}" },
+  { key = "q", cmd = "m1ddc:set pbp-input 16", desc = "PBP 输入设为 {USB-C|green}" },
+  { key = "w", cmd = "m1ddc:set pbp-input 15", desc = "PBP 输入设为 {DP|yellow}" },
+  { key = "e", cmd = "m1ddc:set pbp-input 17", desc = "PBP 输入设为 {HDMI|sky}" },
+  { key = "a", cmd = "m1ddc:set pbp 0", desc = "{关闭|red} PBP" },
+  { key = "s", cmd = "m1ddc:set pbp 33", desc = "PBP {小窗|peach}" },
+  { key = "d", cmd = "m1ddc:set pbp 34", desc = "PBP {大窗|teal}" },
+  { key = "f", cmd = "m1ddc:set pbp 36", desc = "PBP {对半|blue}" },
+]

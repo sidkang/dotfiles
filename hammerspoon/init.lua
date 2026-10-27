@@ -8,6 +8,7 @@ local function bootstrap()
 	-- require("hs.ipc").cliInstall("/opt/homebrew")
 	hs.ipc.cliInstall(os.getenv("HOME") .. "/.local", true)
 	hs.window.animationDuration = 0
+	require("sids.router").setup() -- before any hs.urlevent.bind
 end
 
 local alertColors = {

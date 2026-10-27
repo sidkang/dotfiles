@@ -1,18 +1,14 @@
 {:profiles
  {:goku
   {:default true :sim 50 :delay 180 :alone 150 :held 140}}
- :templates {:alfred "osascript -e 'tell application \"Alfred 4\" to run trigger \"%s\" in workflow \"%s\" with argument \"%s\"'"
-             :open "open \"%s\""
-             :kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
+ :templates {:kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
              :kitty-py "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';python3 $HOME/.config/kitty/kitty-action.py %s"
              :as "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';aerospace %s"
-             :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";/opt/homebrew/bin/python3.14 $HOME/.config/aerospace/as.py %s"
+             :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
              :sh "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';%s"
-             :hs "open -g \"hammerspoon://%s\""
-             :hs-notify "open -g \"hammerspoon://notify?msg=%s\""
-             :m1ddc "/opt/homebrew/bin/m1ddc %s"
-             :beep "osascript -e 'beep 1'"
-             :kitty-hotkey-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten send-text --match session:hotkey %s"}
+             :hs "$HOME/.local/bin/hs -q -c 'hsurl(\"%s\")'"
+             :hs-notify "$HOME/.local/bin/hs -q -c 'hsurl(\"notify?msg=%s\")'"
+             :m1ddc "/opt/homebrew/bin/m1ddc %s"}
  :simlayers {:z-mode {:key :z}
              :f-mode {:key :f}
              :w-mode {:key :w}
@@ -20,12 +16,9 @@
  :layers {}
  :applications {:chrome ["^com\\.google\\.Chrome$"]
                 :logseq ["^com\\.electron\\.logseq$"]
-                :safari ["^com\\.apple\\.Safari$"]
-                :telegram ["^ru\\.keepcoder\\.Telegram$"]
                 :terminals ["^com\\.googlecode\\.iterm2$" "^net\\.kovidgoyal\\.kitty$"]
                 :kitty ["^net\\.kovidgoyal\\.kitty$"]
                 :vscode ["^com\\.microsoft\\.VSCode$"]
-                :wechat ["^com\\.tencent\\.xinWeChat$"]
                 :chatgpt-app ["^com\\.openai\\.chat$"]
                 :office ["^com\\.microsoft\\.Word$" "^com\\.microsoft\\.Excel$"]}
  :input-sources {:cn {:language "^zh\\-Hans$" :input_source_id "Shuangpin$"}
@@ -104,7 +97,9 @@
                  [:3 [:as "workspace 3"]]
                  [:4 [:as "workspace 4"]]
                  [:5 [:as "workspace 5"]]
+                 [:6 [:as "workspace 6"]]
 
+                 ;; BEGIN menus:aerospace (generated from menus.toml)
                  :as-send-ws
                  [:caps_lock [["as-send-ws" 0] [:hs "whichkey?action=hide&group=as-send-ws"]]]
                  [:1 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 1"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
@@ -112,12 +107,14 @@
                  [:3 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 3"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
                  [:4 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 4"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
                  [:5 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 5"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:6 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 6"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
                  [:q [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window Q"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
                  [:w [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window W"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
                  [:e [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window E"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
                  [:a [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window A"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
                  [:s [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window S"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
                  [:d [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window D"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:t [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window T"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
 
                  :as-toggle
                  [:caps_lock [["as-toggle" 0] [:hs "whichkey?action=hide&group=as-toggle"]]]
@@ -144,11 +141,10 @@
                  [:3 [["as-go" 0] [:as "workspace 3"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
                  [:4 [["as-go" 0] [:as "workspace 4"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
                  [:5 [["as-go" 0] [:as "workspace 5"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
-
+                 [:6 [["as-go" 0] [:as "workspace 6"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
                  [:q [["as-go" 0] [:as "workspace Q"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
                  [:w [["as-go" 0] [:as "workspace W"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
                  [:e [["as-go" 0] [:as "workspace E"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
-
                  [:a [["as-go" 0] [:as "workspace A"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
                  [:s [["as-go" 0] [:as "workspace S"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
                  [:d [["as-go" 0] [:as "workspace D"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
@@ -159,7 +155,9 @@
                  [:h [["as-swap" 0] [:as "swap left"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
                  [:j [["as-swap" 0] [:as "swap down"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
                  [:k [["as-swap" 0] [:as "swap up"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
-                 [:l [["as-swap" 0] [:as "swap right"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]]}
+                 [:l [["as-swap" 0] [:as "swap right"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 ;; END menus:aerospace
+                 ]}
         {:des "aerospace []"
          :rules [[:open_bracket ["bracket-l-mode" 1] nil {:afterup ["bracket-l-mode" 0] :alone :open_bracket}]
                  [:close_bracket ["bracket-r-mode" 1] nil {:afterup ["bracket-r-mode" 0] :alone :close_bracket}]
@@ -306,6 +304,7 @@
                  [:3 [:m1ddc "set input 17"]]
 
                  [:q [["m1ddc-pbp" 1] [:hs "whichkey?action=show&group=m1ddc-pbp"]]]
+                 ;; BEGIN menus:z (generated from menus.toml)
                  :m1ddc-pbp
                  [:caps_lock [["m1ddc-pbp" 0] [:hs "whichkey?action=hide"]]]
                  [:1 [["m1ddc-pbp" 0] [:m1ddc "set input 16"]] nil {:afterup [:hs "whichkey?action=hide"]}]
@@ -318,6 +317,7 @@
                  [:s [["m1ddc-pbp" 0] [:m1ddc "set pbp 33"]] nil {:afterup [:hs "whichkey?action=hide"]}]
                  [:d [["m1ddc-pbp" 0] [:m1ddc "set pbp 34"]] nil {:afterup [:hs "whichkey?action=hide"]}]
                  [:f [["m1ddc-pbp" 0] [:m1ddc "set pbp 36"]] nil {:afterup [:hs "whichkey?action=hide"]}]
+                 ;; END menus:z
 
                  :z-mode
                  [:o [:hs "callBob?action=selectionTranslate"]]
@@ -331,15 +331,4 @@
         {:des "caps-mode"
          :rules [[:caps_lock :left_control :terminals {:alone :escape}]
                  [:caps_lock :left_control :vscode {:alone :escape}]
-                 [:caps_lock ["caps-mode" 1] nil {:afterup ["caps-mode" 0] :alone :escape}]]}
-
-        {:des "Press right_shift twice to enter double shift mode, press any undefined key to leave it"
-         :rules [[:right_shift ["right_shift_double_mode" 1] ["right_shift_single_mode" 1]]
-                 [:right_shift [["right_shift_single_mode" 1] :right_shift] ["right_shift_double_mode" 0] {:delayed {:invoked ["right_shift_single_mode" 0] :canceled ["right_shift_single_mode" 0]}}]
-                 :right_shift_double_mode
-                 [:right_shift ["right_shift_double_mode" 0]]
-
-                 [:a ["say 'know we are in double shift mode'" ["right_shift_double_mode" 0]]]
-                 [:b [:c ["right_shift_double_mode" 0]]]
-
-                 [{:any :key_code :modi :any} ["right_shift_double_mode" 0]]]}]}
+                 [:caps_lock ["caps-mode" 1] nil {:afterup ["caps-mode" 0] :alone :escape}]]}]}

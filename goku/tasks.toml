@@ -9,3 +9,11 @@ run = "mise dot apply --dry-run \"~/.config/karabiner.edn\""
 ["goku:apply"]
 description = "Deploy only goku configuration; no installation or setup"
 run = "mise dot apply \"~/.config/karabiner.edn\""
+
+["goku:gen"]
+description = "Regenerate karabiner.edn menus and WhichKey groups from goku/menus.toml; no deployment"
+run = "python3 \"{{ config_root }}/goku/gen.py\""
+
+["goku:check"]
+description = "Fail if the generated menus are out of date"
+run = "python3 \"{{ config_root }}/goku/gen.py\" --check"

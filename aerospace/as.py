@@ -1,13 +1,14 @@
-#!/opt/homebrew/bin/python3
+#!/usr/bin/env python3
+# Startup time matters (one process per key press): keep imports minimal.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 import time
-from dataclasses import dataclass
-from typing import Sequence
-from urllib.parse import urlencode
+from collections import namedtuple
+from collections.abc import Sequence
 
 
 INFO = "info"
@@ -19,28 +20,17 @@ KITTY_BUNDLE_ID = "net.kovidgoyal.kitty"
 KITTY_HOTKEY_TITLE = "kitty-hotkey"
 KITTY_HOTKEY_SESSION = "hotkey"
 FOCUS_RETRY_DELAY_SEC = 0.05
+HS_CLI = os.path.expanduser("~/.local/bin/hs")
+URL_SAFE = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~")
 
 
-@dataclass(frozen=True)
-class AppRule:
-    bundle_id: str
-    launch_args: tuple[str, ...]
-    home_workspace: str | None = None
-    mode: str = "focus_only"
-    window_title: str | None = None
-
-
-@dataclass(frozen=True)
-class KittyHotkeyRule:
-    hide_workspace: str
-    launch_args: tuple[str, ...]
-
-
-@dataclass(frozen=True)
-class VisibleWorkspace:
-    name: str
-    monitor_id: str
-    is_focused: bool
+AppRule = namedtuple(
+    "AppRule",
+    "bundle_id launch_args home_workspace mode window_title",
+    defaults=(None, "focus_only", None),
+)
+KittyHotkeyRule = namedtuple("KittyHotkeyRule", "hide_workspace launch_args")
+VisibleWorkspace = namedtuple("VisibleWorkspace", "name monitor_id is_focused")
 
 
 APP_RULES = {
@@ -100,9 +90,20 @@ def check_cmd(args: Sequence[str]) -> str:
     return run_cmd(args, check=True).stdout.strip()
 
 
+def quote(text: str) -> str:
+    return "".join(c if c in URL_SAFE else "".join(f"%{b:02X}" for b in c.encode()) for c in text)
+
+
+def hammerspoon(route: str, **params: str) -> None:
+    """Call a Hammerspoon URL route over IPC; fall back to `open` if Hammerspoon is not reachable."""
+    query = "&".join(f"{key}={quote(value)}" for key, value in params.items())
+    url = f"{route}?{query}"
+    if run_cmd((HS_CLI, "-q", "-c", f'hsurl("{url}")')).returncode != 0:
+        run_cmd(("open", "-g", f"hammerspoon://{url}"))
+
+
 def notify(message: str, level: str = INFO) -> None:
-    params = urlencode({"msg": message, "level": level})
-    run_cmd(("open", "-g", f"hammerspoon://notify?{params}"))
+    hammerspoon("notify", msg=message, level=level)
 
 
 def notify_command_error(exc: subprocess.CalledProcessError) -> None:
@@ -110,11 +111,6 @@ def notify_command_error(exc: subprocess.CalledProcessError) -> None:
     command = " ".join(str(arg) for arg in exc.cmd)
     message = output or f"exit {exc.returncode}"
     notify(f"Command failed: {command}: {message}", ERROR)
-
-
-def hammerspoon(route: str, **params: str) -> None:
-    query = urlencode(params)
-    run_cmd(("open", "-g", f"hammerspoon://{route}?{query}"))
 
 
 def focused_window_id() -> str | None:

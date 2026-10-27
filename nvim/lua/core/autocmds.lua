@@ -49,15 +49,19 @@ autocmd("BufWritePre", {
 	end,
 })
 
--- macOS: switch to the English input source through Hammerspoon.
+-- macOS: switch to the English input source through Hammerspoon (hs.ipc is installed by hammerspoon/init.lua).
 -- Only spawn when the source may have changed: always after Insert mode, in the
 -- command line only after typing non-ASCII text or when focus came back.
 if vim.uv.os_uname().sysname == "Darwin" and not (vim.env.SSH_TTY or vim.env.SSH_CONNECTION) then
 	local en = false
+	local hs = vim.fn.expand("~/.local/bin/hs")
 	local switch_en = function()
 		if en then return end
 		en = true
-		vim.system({ "open", "-g", "hammerspoon://switchIME?to=en" })
+		-- Hammerspoon IPC is ~3x cheaper than `open`; fall back to it when unreachable
+		vim.system({ hs, "-q", "-c", 'hsurl("switchIME?to=en")' }, {}, function(result)
+			if result.code ~= 0 then vim.system({ "open", "-g", "hammerspoon://switchIME?to=en" }) end
+		end)
 	end
 
 	autocmd("InsertEnter", { callback = function() en = false end })

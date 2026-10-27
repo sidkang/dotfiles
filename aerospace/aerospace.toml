@@ -9,14 +9,13 @@ after-login-command = []
 # 'after-startup-command' is run after 'after-login-command'
 # Available commands : https://nikitabobko.github.io/AeroSpace/commands
 after-startup-command = [
-  # 'exec-and-forget borders active_color=0xffa7c957 inactive_color=0xffD4BEE4 width=6.0'
-  # 'exec-and-forget borders active_color=0xffB1D690 inactive_color=0xffFFB26F width=6.0'
   'exec-and-forget borders active_color=0xffFFB26F width=4.0 blacklist="iPhone Mirroring"',
-  # 'exec-and-forget borders inactive_color=0xffB1D690 active_color=0xffFFB26F width=4.0 blacklist="iPhone Mirroring"',
 ]
 
 # Start AeroSpace at login
 start-at-login = true
+
+auto-reload-config = true
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
 enable-normalization-flatten-containers = true
@@ -44,9 +43,7 @@ key-mapping.preset = 'qwerty'
 # See https://nikitabobko.github.io/AeroSpace/guide#on-focus-changed-callbacks
 # See https://nikitabobko.github.io/AeroSpace/commands#move-mouse
 # Fallback value (if you omit the key): on-focused-monitor-changed = []
-# on-focus-changed = []
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
-# on-focused-monitor-changed = []
 
 # You can effectively turn off macOS "Hide application" (cmd-h) feature by toggling this flag
 # Useful if you don't use this macOS feature, but accidentally hit cmd-h or cmd-alt-h key
@@ -55,7 +52,11 @@ automatically-unhide-macos-hidden-apps = false
 
 persistent-workspaces = ["1", "2", "3", "4", "5", "6", "Q", "W", "E", "A", "S", "D", "T"]
 
-exec-on-workspace-change = ["/opt/homebrew/bin/fish", "-c", 'open -g "hammerspoon://notify?msg=$AEROSPACE_FOCUSED_WORKSPACE&level=info"']
+# /bin/sh + Hammerspoon IPC: roughly 3x cheaper than fish -c + open
+exec-on-workspace-change = ["/bin/sh", "-c", '''
+url="notify?msg=$AEROSPACE_FOCUSED_WORKSPACE&level=info"
+"$HOME/.local/bin/hs" -q -c "hsurl(\"$url\")" || open -g "hammerspoon://$url"
+''']
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
 # Possible values:
@@ -84,7 +85,6 @@ PATH = '/opt/homebrew/bin:/opt/homebrew/sbin:${PATH}'
 3 = ["LG", "main"]
 4 = ["secondary", "main"]
 5 = ["secondary", "main"]
-# Q = "secondary"
 
 [[on-window-detected]]
 if.app-id = "com.tencent.xinWeChat"
@@ -116,7 +116,6 @@ run = "move-node-to-workspace W"
 
 [[on-window-detected]]
 if.app-id = "com.tencent.xinWeChat"
-# if.window-title-regex-substring = '^((?!Chat).)*$'
 run = "layout floating"
 
 [[on-window-detected]] # orbstack
@@ -139,7 +138,16 @@ run = "layout floating"
 if.app-id = "com.apple.DigitalColorMeter"
 run = 'layout floating'
 
-[[on-window-detected]]
-#  fallback
+[[on-window-detected]] # fallback
 if.during-aerospace-startup = true
 run = "move-node-to-workspace 3"
+
+# Safety net when Karabiner is not running: alt-shift-; enters service mode.
+[mode.main.binding]
+alt-shift-semicolon = 'mode service'
+
+[mode.service.binding]
+esc = ['reload-config', 'mode main']
+r = ['flatten-workspace-tree', 'mode main']
+f = ['layout floating tiling', 'mode main']
+d = ['enable toggle', 'mode main']
