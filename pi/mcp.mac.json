@@ -1,5 +1,15 @@
 {
   "mcpServers": {
+    "openpencil": {
+      "command": "/opt/homebrew/bin/mise",
+      "args": [
+        "exec",
+        "--",
+        "openpencil-mcp"
+      ],
+      "exposure": "codemode",
+      "description": "OpenPencil desktop document inspection and editing"
+    },
     "cua-driver": {
       "command": "/opt/homebrew/bin/cua-driver",
       "args": [

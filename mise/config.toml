@@ -181,6 +181,7 @@ bun = "latest"
 # Node, Go and uv default to Homebrew; do not select them globally here.
 # Older Node versions may be explicitly selected in individual projects.
 "npm:@larksuite/cli" = "latest"
+"npm:@open-pencil/mcp" = { version = "0.16.0", allow_low_downloads = "true" }
 "npm:cf" = "latest"
 "npm:microsandbox" = "latest"
 "npm:wrangler" = "latest"
