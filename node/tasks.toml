@@ -1,3 +1,0 @@
-["node:install"]
-description = "Install only node dependencies; no deployment or setup"
-run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/node/Brewfile\""

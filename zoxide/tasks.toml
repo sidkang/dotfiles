@@ -1,3 +1,0 @@
-["zoxide:install"]
-description = "Install only zoxide dependencies; no deployment or setup"
-run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/zoxide/Brewfile\""

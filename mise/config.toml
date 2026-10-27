@@ -95,7 +95,7 @@ description = "在 127.0.0.1:7077 启动 JupyterLab"
 shell = "bash -c"
 run = """
 set -euo pipefail
-command -v rg >/dev/null || { echo "Missing ripgrep; review jupyter/Brewfile" >&2; exit 1; }
+command -v rg >/dev/null || { echo "Missing ripgrep; review mise/Brewfile" >&2; exit 1; }
 
 ROOT_DIR="$PWD"
 LOG_DIR="/tmp/mise"
@@ -129,7 +129,7 @@ description = "在 127.0.0.1:7077 启动 Jupyter Notebook"
 shell = "bash -c"
 run = """
 set -euo pipefail
-command -v rg >/dev/null || { echo "Missing ripgrep; review jupyter/Brewfile" >&2; exit 1; }
+command -v rg >/dev/null || { echo "Missing ripgrep; review mise/Brewfile" >&2; exit 1; }
 
 ROOT_DIR="$PWD"
 LOG_DIR="/tmp/mise"
@@ -163,7 +163,7 @@ description = "停止 Jupyter 服务"
 shell = "bash -c"
 run = """
 set -euo pipefail
-command -v rg >/dev/null || { echo "Missing ripgrep; review jupyter/Brewfile" >&2; exit 1; }
+command -v rg >/dev/null || { echo "Missing ripgrep; review mise/Brewfile" >&2; exit 1; }
 
 PIDS=$(ps -ax -o pid= -o command= | rg "jupyter(-| )(lab|notebook)" | rg -F -- "--ServerApp.port=7077" | awk '{print $1}' || true)
 

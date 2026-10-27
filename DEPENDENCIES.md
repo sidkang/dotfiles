@@ -6,12 +6,12 @@
 
 - 安装声明在各应用的 `Brewfile`；根 `mise.toml` 不安装软件。
 - `<app>:install` 只安装该应用依赖；`:plan` 只预览部署；`:apply` 只部署指定目标。三者没有自动依赖。
-- 必需共享依赖在各使用方重复声明。独立工具（如 gh、rbw、Go）也有自己的安装入口。
+- 必需共享依赖在各使用方重复声明。无配置的独立工具集中在 `tools/`、`apps/`，可按名称选装。
 - 每个应用只有一份 `Brewfile`，包含该配置使用的依赖；不设置 optional 文件或 extras 安装任务。执行安装前审查整份清单。
 - 缓存重建、应用初始化、插件更新和服务启动/重启分别显式执行。
 - 禁止 mise 任务、exec 和命令缺失时自动安装。系统包只走真正的 Homebrew CLI，失败或信任检查不通过时停止。
 - 检查不自动安装工具；`scripts/check-secrets.py` 只使用 Homebrew 前缀里的 gitleaks，不经 mise shim。
-- 既有 Jupyter 用户配置仍不纳管。`jupyter/Brewfile` 只声明公开 `jupy:*` 任务的运行依赖。启动不再使用会下载临时环境的 `uv tool run`；显式 `jupy:setup` 使用已有 Homebrew Python，禁止 uv 自动下载 Python。`jupy:enable` 只注册已有 kernel，项目依赖安装拆为 `jupy:kernel-install`。
+- 既有 Jupyter 用户配置仍不纳管。`mise/Brewfile` 中的 Python 和 ripgrep 是公开 `jupy:*` 任务的运行依赖。启动不再使用会下载临时环境的 `uv tool run`；显式 `jupy:setup` 使用已有 Homebrew Python，禁止 uv 自动下载 Python。`jupy:enable` 只注册已有 kernel，项目依赖安装拆为 `jupy:kernel-install`。
 
 ## 从实际调用补充的应用依赖
 
@@ -29,7 +29,7 @@
 | rbw | rbw、pinentry-mac | 用户确认的密码管理基础工具；不读取本机密码库配置 |
 | 发布检查 | jj、gitleaks | `scripts/check-secrets.py` |
 
-sops、mise、gh、pinentry-mac、zoxide、Node、Go、uv 等已确认的基础工具均保留独立安装入口。
+无配置的基础工具（Go、rustup、Node、uv、rbw、pinentry-mac、rsync）归入 `tools/Brewfile`，GUI 应用（Chrome、IINA、tinycast）归入 `apps/Brewfile`；sops 在 `age/Brewfile`，gh、zoxide 由 `fish/Brewfile` 安装。
 
 本机 `/opt/homebrew/bin/kitten` 已验证可执行。`jq` 在本机由 `/usr/bin/jq` 提供，不能误报为命令缺失；Kitty 的 Brewfile 仍显式声明 jq，以保证安装可复现。新增的安装声明本轮**未执行**。
 

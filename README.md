@@ -28,7 +28,7 @@ mise kitty:start
 mise kitty:reload          # 要求确认，会重启后台实例
 ```
 
-其他应用使用相同的 `<app>:install`、`<app>:plan`、`<app>:apply` 命名。只有软件、没有部署映射的目录仅提供安装任务。`mise tasks` 查看全部任务。
+其他应用使用相同的 `<app>:install`、`<app>:plan`、`<app>:apply` 命名。没有配置的软件不单独建目录：命令行工具在 `tools/Brewfile`，GUI 应用在 `apps/Brewfile`，用 `mise tools:install` / `mise apps:install` 安装全部，或追加名称只装指定项（如 `mise tools:install go rustup`）。`mise tasks` 查看全部任务。
 
 **不要为了单个配置运行全量 bootstrap 或通配符安装任务。** 没有全局包安装 hook，也没有通用 bootstrap 初始化任务。`mise dot apply` 不带目标仍会部署全部映射，日常优先用应用的 `:plan` / `:apply`。
 

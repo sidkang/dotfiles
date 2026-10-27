@@ -1,3 +1,0 @@
-["rsync:install"]
-description = "Install only rsync; no deployment or setup"
-run = 'brew bundle install --no-upgrade --file="{{ config_root }}/rsync/Brewfile"'

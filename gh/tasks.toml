@@ -1,3 +1,0 @@
-["gh:install"]
-description = "Install only gh dependencies; no deployment or setup"
-run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/gh/Brewfile\""

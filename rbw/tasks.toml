@@ -1,3 +1,0 @@
-["rbw:install"]
-description = "Install only rbw dependencies; no deployment or setup"
-run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/rbw/Brewfile\""

@@ -1,1 +1,3 @@
+cask "google-chrome"
+cask "iina"
 cask "abue-ammar/tinycast/tinycast"

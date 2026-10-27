@@ -1,3 +1,0 @@
-["rustup:install"]
-description = "Install only rustup; no deployment or setup"
-run = 'brew bundle install --no-upgrade --file="{{ config_root }}/rustup/Brewfile"'

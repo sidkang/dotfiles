@@ -1,0 +1,4 @@
+["tools:install"]
+description = "Install tools without configuration; pass names to install only those"
+usage = 'arg "[names]..." help="Brewfile entries to install; omit for all"'
+run = 'bash "{{ config_root }}/scripts/brew-install.sh" "{{ config_root }}/tools/Brewfile" ${usage_names:-}'

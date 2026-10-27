@@ -1,4 +1,4 @@
-# gitleaks
+# scripts
 
 安装依赖声明在 `scripts/Brewfile`；先审查该文件，再显式运行 `mise scripts:install`。使用内置检测规则，无配置文件需要部署。
 

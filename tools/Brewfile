@@ -1,0 +1,12 @@
+# Language toolchains
+brew "go"
+brew "rustup"
+brew "node"
+brew "uv"
+
+# Passwords
+brew "rbw"
+brew "pinentry-mac"
+
+# Misc
+brew "rsync"

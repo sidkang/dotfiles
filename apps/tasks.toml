@@ -1,0 +1,7 @@
+["apps:install"]
+description = "Install GUI apps without configuration; pass names to install only those. Pins Chrome against Homebrew upgrades"
+usage = 'arg "[names]..." help="Brewfile entries to install; omit for all"'
+run = [
+  'bash "{{ config_root }}/scripts/brew-install.sh" "{{ config_root }}/apps/Brewfile" ${usage_names:-}',
+  "if brew list --cask google-chrome >/dev/null 2>&1; then brew pin --cask google-chrome; fi",
+]

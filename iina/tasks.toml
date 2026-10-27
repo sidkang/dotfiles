@@ -1,3 +1,0 @@
-["iina:install"]
-description = "Install only iina; no deployment or setup"
-run = 'brew bundle install --no-upgrade --file="{{ config_root }}/iina/Brewfile"'

@@ -11,7 +11,7 @@
 | Colab CLI | `~/.config/colab-cli/` |
 | DSH | `~/.config/dsh/`，包括设置和 profiles |
 | herdr | `~/.config/herdr/`、`~/.local/state/herdr/`；不安装或部署 |
-| tmux | `~/.config/tmux/`、仓库 `tmux/`；仅归档，不安装或部署 |
+| tmux | `~/.config/tmux/`、仓库 `archive/tmux/`；仅归档，不安装或部署 |
 | JJ 本机仓库配置和状态 | `~/.config/jj/repos/` |
 | mise 本机覆盖 | `~/.config/mise/config.local.toml` |
 | Neovim 插件锁文件 | `~/.config/nvim/lazy-lock.json` |
