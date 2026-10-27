@@ -49,9 +49,8 @@ sops、mise、gh、pinentry-mac、zoxide、Node、Go、uv 等已确认的基础�
 
 ## 配置冲突与缺文件：需要用户决定
 
-1. **Neovim Sidekick 与 tmux 策略冲突**：`nvim/lua/plugins/sidekick.lua:6` 明确启用 tmux backend，但策略禁止安装或部署 tmux。没有安装 tmux或改策略。建议关闭 mux，或由用户选择已使用的替代后端并验证兼容性。
-2. **Yazi 语法主题缺文件**：`yazi/theme.toml:22` 引用 `~/.config/yazi/Catppuccin-latte.tmTheme`，仓库与当前部署目录未找到该文件。需要决定引入正确主题还是删除该引用；未擅自下载。
-3. **全局 mise 的可选开发工具**：`mise/config.toml` 仍声明 Bun 及四个 npm 工具的版本选择。它们不再随任务自动安装；是否保留各工具由用户决定，未擅自卸载。
+1. **Yazi 语法主题缺文件**：`yazi/theme.toml:22` 引用 `~/.config/yazi/Catppuccin-latte.tmTheme`，仓库与当前部署目录未找到该文件。需要决定引入正确主题还是删除该引用；未擅自下载。
+2. **全局 mise 的可选开发工具**：`mise/config.toml` 仍声明 Bun 及四个 npm 工具的版本选择。它们不再随任务自动安装；是否保留各工具由用户决定，未擅自卸载。
 
 ## 不是 Homebrew 安装遗漏
 

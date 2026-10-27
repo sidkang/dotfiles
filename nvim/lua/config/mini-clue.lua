@@ -28,6 +28,7 @@ function M.setup()
 		},
 		clues = {
 			{ mode = "n", keys = "<leader>c", desc = "+Code" },
+			{ mode = "n", keys = "<leader>g", desc = "+Git" },
 			{ mode = "n", keys = "<leader>s", desc = "+Search" },
 			{ mode = "n", keys = "<leader>u", desc = "+Toggle" },
 			{ mode = "n", keys = "<leader>w", desc = "+Window" },

@@ -1,69 +1,65 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = ","
 
-vim.opt.number = true -- Make line numbers default
-vim.opt.numberwidth = 2
-vim.opt.relativenumber = true
--- vim.opt.statuscolumn = "%=%{v:virtnum < 1 ? (v:relnum ? v:relnum : v:lnum < 10 ? v:lnum . '  ' : v:lnum) : ''}%=%s"
-vim.o.ruler = false
+local o = vim.o
 
-vim.opt.nrformats:remove("octal") -- Disable octal number parsing.
+o.number = true
+o.numberwidth = 2
+o.relativenumber = true
+o.ruler = false
+o.showmode = false -- mode is shown in the statusline
+o.signcolumn = "yes"
+o.cursorline = true
+o.cursorlineopt = "line"
+o.scrolloff = 10
+o.winborder = "rounded"
+o.cmdheight = 1
+o.termguicolors = true
+o.wrap = false
+o.linebreak = true -- only matters when wrap is on
 
-vim.opt.shiftround = true -- Round indent
-vim.opt.shiftwidth = 2 -- Size of an indent
-vim.opt.expandtab = true
-vim.opt.tabstop = 2 -- Number of spaces tabs count for
-vim.opt.softtabstop = 2
-vim.opt.breakindent = true -- Enable break indent
+o.shiftround = true
+o.shiftwidth = 2
+o.tabstop = 2
+o.softtabstop = 2
+o.expandtab = true
+o.breakindent = true
 
--- vim.opt.fillchars = [[eob: ,fold: ,foldopen:󰛲,foldsep:│,foldclose:󰜄,vert:│,horiz:─,horizup:┴,horizdown:┬,vertleft:┤,vertright:├,verthoriz:┼]]
--- vim.opt.fillchars = "eob: ,fold: ,foldopen:󰛲,foldsep:│,foldclose:󰜄"
--- vim.opt.fillchars = "eob: ,fold: ,foldopen:󰛲,foldsep:│,foldclose:󰜄,foldinner: "
--- vim.opt.foldcolumn = "1"
+o.mouse = "a"
+o.undofile = true
+o.confirm = true -- ask instead of failing on unsaved buffers
+o.updatetime = 250
+o.timeoutlen = 500
 
--- Enable mouse support.
-vim.o.mouse = "a"
+o.ignorecase = true
+o.smartcase = true
+o.inccommand = "split"
+o.grepprg = "rg --vimgrep --smart-case"
+o.grepformat = "%f:%l:%c:%m"
 
--- Hide mode, since it is usually shown in the statusline.
-vim.o.showmode = false
+o.splitright = true
+o.splitbelow = true
+o.splitkeep = "screen" -- keep text stable when splits open or close
+o.smoothscroll = true
+o.jumpoptions = "clean,view"
+o.virtualedit = "block"
 
--- Enable remote clipboard to host
-if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then vim.g.clipboard = "osc52" end
+o.list = false
+o.spelllang = "en,cjk" -- do not flag CJK characters
 
--- Sync with the system clipboard after startup.
-vim.schedule(function() vim.o.clipboard = "unnamedplus" end)
-
-vim.opt.undofile = true -- Save undo history
-
-vim.opt.ignorecase = true
-vim.opt.smartcase = true -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
-
-vim.opt.signcolumn = "yes" -- Keep signcolumn on by default
-
-vim.opt.updatetime = 250 -- Decrease update time
-vim.opt.timeoutlen = 500 -- Decrease mapped sequence wait time, displays which-key popup sooner
-
--- Configure how new splits should be opened
-vim.opt.splitright = true
-vim.opt.splitbelow = true
-
-vim.opt.list = false
 vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
-vim.opt.cursorline = true
-vim.opt.cursorlineopt = "line"
+vim.opt.nrformats:remove("octal")
+vim.opt.wildoptions:append("fuzzy")
+vim.opt.diffopt:append("algorithm:histogram")
+vim.opt.formatoptions:append({ "m", "M" }) -- wrap at CJK characters, no space when joining CJK lines
 
-vim.opt.inccommand = "split" -- Preview substitutions live, as you type!
-vim.opt.scrolloff = 10 -- Minimal number of screen lines to keep above and below the cursor
-
-vim.opt.winborder = "rounded"
-
-vim.opt.cmdheight = 1
-vim.opt.termguicolors = true
-vim.opt.wrap = false -- no pause the listing continues until finished.
+if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then vim.g.clipboard = "osc52" end
+-- Sync with the system clipboard after startup.
+vim.schedule(function() o.clipboard = "unnamedplus" end)
 
 vim.g.python3_host_prog = vim.fn.expand("$CENTRAL_VENV_DIR/nvim/bin/python")
 vim.g.loaded_node_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 
-vim.o.exrc = true -- 开启权限
+o.exrc = true -- load trusted project-local .nvim.lua

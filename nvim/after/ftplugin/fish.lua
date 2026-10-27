@@ -1,3 +1,3 @@
-vim.opt.shiftwidth = 2 -- Size of an indent
-vim.opt.tabstop = 2 -- Number of spaces tabs count for
-vim.o.softtabstop = 2
+vim.opt_local.shiftwidth = 2
+vim.opt_local.tabstop = 2
+vim.opt_local.softtabstop = 2

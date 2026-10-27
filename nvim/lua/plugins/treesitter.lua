@@ -7,37 +7,14 @@ return { -- Highlight, edit, and navigate code
 			"nvim-treesitter/nvim-treesitter-textobjects",
 			branch = "main",
 			config = function()
-				local select = require("nvim-treesitter-textobjects.select")
 				local move = require("nvim-treesitter-textobjects.move")
 				local repeatable_move = require("nvim-treesitter-textobjects.repeatable_move")
 
 				require("nvim-treesitter-textobjects").setup({
-					select = {
-						lookahead = true,
-						include_surrounding_whitespace = true,
-					},
-					move = {
-						set_jumps = true,
-					},
+					move = { set_jumps = true },
 				})
 
-				for key, query in pairs({
-					["aa"] = "@parameter.outer",
-					["ia"] = "@parameter.inner",
-					["af"] = "@function.outer",
-					["if"] = "@function.inner",
-					["ac"] = "@class.outer",
-					["ic"] = "@class.inner",
-					["aj"] = "@conditional.outer",
-					["ij"] = "@conditional.inner",
-					["al"] = "@loop.outer",
-					["il"] = "@loop.inner",
-				}) do
-					vim.keymap.set({ "x", "o" }, key, function()
-						select.select_textobject(query, "textobjects")
-					end)
-				end
-
+				-- Text objects (a/i + a f c j l) come from mini.ai
 				for key, query in pairs({
 					["]a"] = "@parameter.outer",
 					["]f"] = "@function.outer",
@@ -63,13 +40,6 @@ return { -- Highlight, edit, and navigate code
 				end
 
 				vim.keymap.set({ "n", "x", "o" }, ";", repeatable_move.repeat_last_move, { desc = "Repeat last move" })
-				vim.keymap.set(
-					{ "n", "x", "o" },
-					",",
-					repeatable_move.repeat_last_move_opposite,
-					{ desc = "Repeat last move opposite" }
-				)
-
 				vim.keymap.set(
 					{ "n", "x", "o" },
 					"f",

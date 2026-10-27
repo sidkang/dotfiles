@@ -4,7 +4,6 @@ return {
 	{
 		"catppuccin/nvim",
 		priority = 1000, -- Make sure to load this before all the other start plugins.
-		-- enabled = false,
 		name = "catppuccin",
 		opts = {
 			flavour = "latte",
@@ -72,29 +71,6 @@ return {
 					DiagnosticVirtualTextHint = { fg = colors.lavender },
 					DiagnosticFloatingHint = { fg = colors.lavender },
 					DiagnosticUnderlineHint = { sp = colors.lavender, style = { "undercurl" } },
-					-- DropBarIconUISeparator = { fg = colors.teal, bg = colors.mantle },
-					-- DropBarIconUISeparatorMenu = { fg = colors.teal, bg = colors.mantle },
-					-- DropBarCurrentContext = { fg = colors.blue, bg = colors.mantle },
-					-- DropBarFzfMatch = { fg = colors.yellow, bg = colors.mantle },
-					-- DropBarHover = { fg = colors.blue, bg = colors.mantle },
-					--
-					-- TabLineSel = { bg = colors.pink },
-					--
-					-- -- mini.jump
-					-- MiniJump = { fg = colors.base, bg = colors.green },
-					-- -- mini.hipatterns
-					-- MiniHipatternsTodo = { fg = colors.base, bg = colors.green },
-					-- MiniHipatternsNote = { fg = colors.base, bg = colors.peach },
-					-- MiniHipatternsWarn = { fg = colors.base, bg = colors.yellow },
-					-- MiniHipatternsFix = { fg = colors.base, bg = colors.maroon },
-					-- MiniHipatternsCell = { fg = colors.pink },
-					-- -- mini.indentscope
-					-- -- MiniIndentscopeSymbol = { fg = colors.surface2 },
-					-- MiniIndentscopeSymbol = { fg = colors.pink },
-					-- -- mini.diffsings
-					-- MiniDiffSignAdd = { fg = colors.green },
-					-- MiniDiffSignChange = { fg = colors.peach },
-					-- MiniDiffSignDelete = { fg = colors.red },
 				}
 			end,
 		},
@@ -102,14 +78,6 @@ return {
 			require("catppuccin").setup(opts)
 			vim.o.background = "light"
 			vim.cmd.colorscheme("catppuccin")
-
-			-- local palette = require("catppuccin.palettes").get_palette(opts.flavour)
-			--
-			-- for _, name in ipairs(vim.fn.getcompletion("DropBarKind", "highlight")) do
-			-- 	if name:match("^DropBarKind") and not name:match("NC$") then
-			-- 		vim.api.nvim_set_hl(0, name, { fg = palette.teal, bg = palette.mantle })
-			-- 	end
-			-- end
 		end,
 	},
 }

@@ -32,16 +32,18 @@ return {
 			caddyfile = { "caddy" },
 			clojure = { "cljfmt", "joker", stop_after_first = true },
 			fish = { "fish_indent" },
-			javascript = { "prettierd", "prettier", stop_after_first = true },
-			json = { "prettier", stop_after_first = true },
+			javascript = { "prettier" },
+			json = { "prettier" },
 			lua = { "stylua" },
-			markdown = { "prettier", "prettierd", stop_after_first = true },
+			markdown = { "prettier" },
 			python = { "ruff_organize_imports", "ruff_fix", "ruff_format" },
 			toml = { "taplo" },
 			yaml = { "yamlfmt" },
 		},
 		formatters = {
 			["bean-format"] = {
+				-- Mason only links `bh`; bean-format lives in the beanhub-cli venv
+				command = vim.fn.stdpath("data") .. "/mason/packages/beanhub-cli/venv/bin/bean-format",
 				prepend_args = { "-c", "70" },
 			},
 			caddy = {

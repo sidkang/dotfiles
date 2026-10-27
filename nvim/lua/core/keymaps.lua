@@ -1,23 +1,10 @@
--- local map = function(mode, keys, func, opts)
--- 	local options = { silent = true }
--- 	if type(opts) == "string" then
--- 		options.desc = opts
--- 	else
--- 		opts = opts or {}
--- 		options.desc = opts.desc or ""
--- 		options = { unpack(options), unpack(opts) }
--- 	end
--- 	vim.keymap.set(mode, keys, func, options)
--- end
-
 local map = function(mode, keys, func, opts)
 	local options = { silent = true }
 
 	if type(opts) == "string" then
 		options.desc = opts
 	else
-		opts = opts or {}
-		options = vim.tbl_extend("force", options, opts)
+		options = vim.tbl_extend("force", options, opts or {})
 	end
 
 	vim.keymap.set(mode, keys, func, options)
@@ -36,57 +23,41 @@ map("v", ">", ">gv", "Indent right and reselect")
 map("x", "p", '"_dP', "Paste without yanking replaced text")
 
 -- resize window
-map("n", "<C-Up>", ":resize -2<CR>", "Resize window up")
-map("n", "<C-Down>", ":resize +2<CR>", "Resize window down")
-map("n", "<C-Left>", ":vertical resize -2<CR>", "Resize window left")
-map("n", "<C-Right>", ":vertical resize +2<CR>", "Resize window right")
+map("n", "<C-Up>", "<cmd>resize -2<CR>", "Resize window up")
+map("n", "<C-Down>", "<cmd>resize +2<CR>", "Resize window down")
+map("n", "<C-Left>", "<cmd>vertical resize -2<CR>", "Resize window left")
+map("n", "<C-Right>", "<cmd>vertical resize +2<CR>", "Resize window right")
 
 -- Navigate buffers
-map("n", "<S-l>", ":bnext<CR>", "Next buffer")
-map("n", "<S-h>", ":bprevious<CR>", "Previous buffer")
+map("n", "<S-l>", "<cmd>bnext<CR>", "Next buffer")
+map("n", "<S-h>", "<cmd>bprevious<CR>", "Previous buffer")
 
 -- Terminal Mappings
 map("t", "<C-x>", "<C-\\><C-N>", "Exit terminal mode")
 map("t", "<esc><esc>", "<c-\\><c-n>", "Enter Normal mode")
 map("t", "<C-/>", "<cmd>close<CR>", "Close terminal window")
 
--- window
-map("n", "<leader>wx", "<C-w>c", { desc = "Delete Window", remap = true })
-
-map("n", "<leader>wd", ":bp<bar>bd#<CR>", { desc = "Delete Buffer", remap = true })
-map("n", "<leader>wv", "<C-w>v", { desc = "Split window right", remap = true })
-map("n", "<leader>ws", "<C-w>s", { desc = "Split window below", remap = true })
-map("n", "<leader>wh", "<C-w>h", { desc = "Go to left window", remap = true })
-map("n", "<leader>wj", "<C-w>j", { desc = "Go to lower window", remap = true })
-map("n", "<leader>wk", "<C-w>k", { desc = "Go to upper window", remap = true })
-map("n", "<leader>wl", "<C-w>l", { desc = "Go to right window", remap = true })
-map("n", "<leader>w=", "<C-w>=", { desc = "Equalize window sizes", remap = true })
+-- window / buffer
+map("n", "<leader>wx", "<cmd>wincmd c<CR>", "Delete Window")
+map("n", "<leader>wd", function() require("mini.bufremove").delete(0) end, "Delete Buffer")
+map("n", "<leader>wD", function() require("mini.bufremove").delete(0, true) end, "Delete Buffer (force)")
+map("n", "<leader>wv", "<cmd>wincmd v<CR>", "Split window right")
+map("n", "<leader>ws", "<cmd>wincmd s<CR>", "Split window below")
+map("n", "<leader>wh", "<cmd>wincmd h<CR>", "Go to left window")
+map("n", "<leader>wj", "<cmd>wincmd j<CR>", "Go to lower window")
+map("n", "<leader>wk", "<cmd>wincmd k<CR>", "Go to upper window")
+map("n", "<leader>wl", "<cmd>wincmd l<CR>", "Go to right window")
+map("n", "<leader>w=", "<cmd>wincmd =<CR>", "Equalize window sizes")
 
 -- toggles
-map("n", "<leader>ud", function()
-	local enabled = vim.diagnostic.is_enabled()
-	vim.diagnostic.enable(not enabled)
-end, "[U]I Toggle [D]iagnostics")
+map("n", "<leader>ud", function() vim.diagnostic.enable(not vim.diagnostic.is_enabled()) end, "[U]I Toggle [D]iagnostics")
 map("n", "<leader>uv", function()
-	local current = vim.diagnostic.config().virtual_text
-	local enabled = current == nil or current == true or type(current) == "table"
-	vim.diagnostic.config({ virtual_text = not enabled })
+	vim.diagnostic.config({ virtual_text = not vim.diagnostic.config().virtual_text })
 end, "[U]I Toggle Diagnostic [V]irtual Text")
 map("n", "<leader>uV", function()
 	local current = vim.diagnostic.config().virtual_text
-	local error_only = type(current) == "table" and current.severity and current.severity.min == vim.diagnostic.severity.ERROR and current.severity.max == vim.diagnostic.severity.ERROR
-	if error_only then
-		vim.diagnostic.config({ virtual_text = false })
-	else
-		vim.diagnostic.config({
-			virtual_text = {
-				severity = {
-					min = vim.diagnostic.severity.ERROR,
-					max = vim.diagnostic.severity.ERROR,
-				},
-			},
-		})
-	end
+	local errors_only = type(current) == "table" and current.severity == vim.diagnostic.severity.ERROR
+	vim.diagnostic.config({ virtual_text = not errors_only and { severity = vim.diagnostic.severity.ERROR } or false })
 end, "[U]I Toggle Error [V]irtual Text")
 
 map("n", "<leader>uw", function() vim.wo.wrap = not vim.wo.wrap end, "[U]I Toggle [W]rap")
@@ -97,29 +68,6 @@ map("n", "<leader>ul", function()
 	vim.wo.relativenumber = not enabled
 end, "[U]I Toggle [L]ine Numbers")
 
-local jump_diagnostic = function(count, severity)
-	vim.diagnostic.jump({
-		count = count,
-		severity = severity,
-		on_jump = function() vim.diagnostic.open_float(nil, { scope = "cursor", focus = false }) end,
-	})
-end
-
-map("n", "[d", function() jump_diagnostic(-1) end, "Prev diagnostic")
-map("n", "]d", function() jump_diagnostic(1) end, "Next diagnostic")
-map("n", "[e", function() jump_diagnostic(-1, vim.diagnostic.severity.ERROR) end, "Go to previous [E]rror")
-map("n", "]e", function() jump_diagnostic(1, vim.diagnostic.severity.ERROR) end, "Go to next [E]rror")
-
--- REPL
--- move cursor
--- local keymap = function(lhs, side, textobj_id, ai_type, search_method, desc)
--- 	for _, mode in ipairs { "n", "x", "o" } do
--- 		vim.keymap.set(mode, lhs, function()
--- 			-- MiniAi.move_cursor(side, ai_type, textobj_id, { search_method = search_method })
--- 			require("mini.ai").move_cursor(side, ai_type, textobj_id, { search_method = search_method })
--- 		end, { desc = desc })
--- 	end
--- end
---
--- keymap("[r", "left", "r", "i", "prev", "Code_cell start")
--- keymap("]r", "left", "r", "i", "next", "Code_cell start")
+-- [d / ]d are Neovim defaults; on_jump (core.diagnostics) opens the float
+map("n", "[e", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR }) end, "Go to previous [E]rror")
+map("n", "]e", function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR }) end, "Go to next [E]rror")
