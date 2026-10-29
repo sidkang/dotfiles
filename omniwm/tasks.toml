@@ -1,3 +1,11 @@
 ["omniwm:install"]
 description = "Install only omniwm dependencies; no deployment or setup"
 run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/omniwm/Brewfile\""
+
+["omniwm:plan"]
+description = "Preview only omniwm deployment"
+run = "mise dot apply --dry-run \"~/.config/omniwm\""
+
+["omniwm:apply"]
+description = "Deploy only omniwm settings; no installation or setup"
+run = "mise dot apply \"~/.config/omniwm\""
