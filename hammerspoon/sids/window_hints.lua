@@ -1,5 +1,6 @@
 local M = {}
 
+local OMNIWMCTL = "/opt/homebrew/bin/omniwmctl"
 local maxHints = 9
 local borderWidth = 6
 local routeCanvases = {}
@@ -73,22 +74,27 @@ local function markProfile(name, detail)
 	profileState.last = now
 end
 
-local function runAerospace(args)
-	local output, ok, _, rc = hs.execute("aerospace " .. table.concat(args, " "), true)
-	if ok then return output, nil end
+local function omniQuery(args)
+	local output, ok, _, rc = hs.execute(OMNIWMCTL .. " query " .. table.concat(args, " ") .. " --format json", false)
+	if not ok then return nil, "omniwmctl failed (" .. tostring(rc) .. "): " .. tostring(output) end
 
-	return nil, "aerospace failed (" .. tostring(rc) .. "): " .. tostring(output)
+	local decoded = hs.json.decode(output)
+	if decoded == nil or decoded.result == nil then return nil, "omniwmctl returned no result: " .. tostring(output) end
+
+	return decoded.result.payload, nil
 end
 
 local function focusedWorkspaceWindowIds()
-	local output, err = runAerospace({ "list-windows", "--workspace", "focused", "--format", "'%{window-id}'" })
-	if output == nil then return nil, err end
-	markProfile("aerospace ids")
+	local active, err = omniQuery({ "active-workspace" })
+	if active == nil then return nil, err end
+
+	local payload, windowsErr = omniQuery({ "windows", "--workspace", active.workspace.rawName, "--visible", "--fields", "window-id" })
+	if payload == nil then return nil, windowsErr end
+	markProfile("omniwm ids")
 
 	local ids = {}
-	for line in output:gmatch("[^\r\n]+") do
-		local id = tonumber(line)
-		if id ~= nil then table.insert(ids, id) end
+	for _, window in ipairs(payload.windows) do
+		if window.windowId ~= nil then table.insert(ids, window.windowId) end
 		if #ids >= maxHints then break end
 	end
 	markProfile("parse ids")
@@ -269,7 +275,7 @@ function M.show(options)
 		return
 	end
 	if #targets == 0 then
-		notify("No windows in focused AeroSpace workspace")
+		notify("No windows in the active workspace")
 		return
 	end
 
@@ -282,7 +288,7 @@ function M.show(options)
 
 	if #routeTargets == 0 then
 		clear()
-		notify("No drawable windows in focused AeroSpace workspace")
+		notify("No drawable windows in the active workspace")
 		return
 	end
 

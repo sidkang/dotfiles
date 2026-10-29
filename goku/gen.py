@@ -34,8 +34,9 @@ def menu_rules(menu: dict) -> list[str]:
         lines.append(f"[:{exit_key} [[{mid} 0] {hide_command(menu)}]]")
     for item in menu["items"]:
         template, _, argument = item["cmd"].partition(":")
-        for key in item.get("keys") or [item["key"]]:
-            arg = argument.replace("{key}", key).replace("{KEY}", key.upper())
+        keys = item.get("keys") or [item["key"]]
+        for key, ident in zip(keys, item.get("ids", keys)):
+            arg = argument.replace("{key}", key).replace("{KEY}", key.upper()).replace("{ID}", ident)
             lines.append(f"[:{key} [[{mid} 0] [:{template} {quote(arg)}]] nil {{:afterup {hide_command(menu)}}}]")
     return lines
 

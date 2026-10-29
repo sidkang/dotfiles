@@ -4,7 +4,6 @@ min_version = "2026.10.13"
 includes = ["*/tasks.toml"]
 
 [dotfiles]
-"~/.config/aerospace" = { source = "aerospace", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/bat" = { source = "bat", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/bottom" = { source = "bottom", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/btop" = { source = "btop", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }

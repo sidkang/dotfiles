@@ -2,12 +2,13 @@
 # `mise run goku:gen` rewrites the generated regions of karabiner.edn and
 # hammerspoon/sids/whichkey/groups.lua. Edit here, not there.
 #
-# cmd = "<goku template>:<argument>"; {key} / {KEY} expand to the lower / upper case key.
+# cmd = "<goku template>:<argument>"; {key} / {KEY} expand to the lower / upper case key,
+# {ID} to the matching entry of `ids` (default: the key).
 # generate = false: guide only, the rules stay hand-written in karabiner.edn.
 
 [[menu]]
-id = "aerospace-mode"
-title = "AeroSpace"
+id = "wm-mode"
+title = "OmniWM"
 generate = false
 footer = "松开 ' 退出"
 items = [
@@ -25,65 +26,64 @@ items = [
 ]
 
 [[menu]]
-id = "as-send-ws"
-region = "aerospace"
+id = "wm-send-ws"
+region = "wm"
 title = "发送到工作区"
 exit = "caps_lock"
 items = [
-  { keys = ["1", "2", "3", "4", "5", "6"], label = "1-6", cmd = "as:move-node-to-workspace --focus-follows-window {KEY}", desc = "发送到工作区 {1-6|teal}" },
-  { keys = ["q", "w", "e"], label = "Q/W/E", cmd = "as:move-node-to-workspace --focus-follows-window {KEY}", desc = "发送到工作区 {Q/W/E|blue}" },
-  { keys = ["a", "s", "d", "t"], label = "A/S/D/T", cmd = "as:move-node-to-workspace --focus-follows-window {KEY}", desc = "发送到工作区 {A/S/D/T|mauve}" },
+  { keys = ["1", "2", "3", "4", "5", "6"], label = "1-6", cmd = "om:command move-to-workspace {ID}", desc = "发送到工作区 {1-6|teal}" },
+  { keys = ["q", "w", "e"], ids = ["7", "8", "9"], label = "Q/W/E", cmd = "om:command move-to-workspace {ID}", desc = "发送到工作区 {Q/W/E|blue}" },
+  { keys = ["a", "s", "d", "t"], ids = ["10", "11", "12", "13"], label = "A/S/D/T", cmd = "om:command move-to-workspace {ID}", desc = "发送到工作区 {A/S/D/T|mauve}" },
 ]
 
 [[menu]]
-id = "as-toggle"
-region = "aerospace"
+id = "wm-toggle"
+region = "wm"
 title = "布局与工具"
 exit = "caps_lock"
 items = [
-  { key = "j", cmd = "as:layout tiles accordion", desc = "{平铺|teal} ⇄ {手风琴|blue}" },
-  { key = "k", cmd = "as:layout horizontal vertical", desc = "{水平|teal} ⇄ {垂直|blue}" },
-  { key = "f", cmd = "as:layout floating tiling", desc = "{浮动|mauve} ⇄ {平铺|teal}" },
-  { key = "e", cmd = "sh:killall AeroSpace borders;open -a AeroSpace", desc = "重启 {AeroSpace|red} 与边框" },
-  { key = "b", cmd = "as:balance-sizes", desc = "{平衡|green}窗口大小" },
-  { key = "r", cmd = "as:reload-config", desc = "重载 {AeroSpace|yellow} 配置" },
-  { key = "g", cmd = "as-py:window move-ghost", desc = "清理{无标题窗口|sky}" },
+  { key = "j", cmd = "om:command toggle-column-tabbed", desc = "{平铺|teal} ⇄ {标签页|blue} (Niri)" },
+  { key = "k", cmd = "om:command toggle-split", desc = "{水平|teal} ⇄ {垂直|blue} (Dwindle)" },
+  { key = "f", cmd = "om:command toggle-focused-window-floating", desc = "{浮动|mauve} ⇄ {平铺|teal}" },
+  { key = "e", cmd = "sh:killall OmniWM;open -a OmniWM", desc = "重启 {OmniWM|red}" },
+  { key = "b", cmd = "om:command balance-sizes", desc = "{平衡|green}窗口大小" },
+  { key = "l", cmd = "om:command toggle-workspace-layout", desc = "{Niri|yellow} ⇄ {Dwindle|peach} 布局" },
   { key = "c", cmd = "hs:floatwindow?action=move&target=center", desc = "{浮动窗口|peach}居中" },
 ]
 
 [[menu]]
-id = "as-open"
-region = "aerospace"
+id = "wm-open"
+region = "wm"
 title = "打开应用"
 exit = "caps_lock"
 items = [
   { key = "f", cmd = "sh:osascript -e 'tell application \"Finder\" to make new Finder window'", desc = "打开 {Finder|blue}" },
-  { key = "w", cmd = "as-py:app toggle wechat", desc = "打开 {WeChat|green}" },
-  { key = "t", cmd = "as-py:app toggle telegram", desc = "打开 {Telegram|teal}" },
-  { key = "g", cmd = "as-py:app toggle chrome", desc = "打开 {Google Chrome|peach}" },
+  { key = "w", cmd = "hs:wm?action=app-toggle&app=wechat", desc = "打开 {WeChat|green}" },
+  { key = "t", cmd = "hs:wm?action=app-toggle&app=telegram", desc = "打开 {Telegram|teal}" },
+  { key = "g", cmd = "hs:wm?action=app-toggle&app=chrome", desc = "打开 {Google Chrome|peach}" },
 ]
 
 [[menu]]
-id = "as-go"
-region = "aerospace"
+id = "wm-go"
+region = "wm"
 title = "切换工作区"
 exit = "caps_lock"
 items = [
-  { keys = ["1", "2", "3", "4", "5", "6"], label = "1-6", cmd = "as:workspace {KEY}", desc = "切到工作区 {1-6|teal}" },
-  { keys = ["q", "w", "e"], label = "Q/W/E", cmd = "as:workspace {KEY}", desc = "切到工作区 {Q/W/E|blue}" },
-  { keys = ["a", "s", "d", "t"], label = "A/S/D/T", cmd = "as:workspace {KEY}", desc = "切到工作区 {A/S/D/T|mauve}" },
+  { keys = ["1", "2", "3", "4", "5", "6"], label = "1-6", cmd = "om:command switch-workspace {ID}", desc = "切到工作区 {1-6|teal}" },
+  { keys = ["q", "w", "e"], ids = ["7", "8", "9"], label = "Q/W/E", cmd = "om:command switch-workspace {ID}", desc = "切到工作区 {Q/W/E|blue}" },
+  { keys = ["a", "s", "d", "t"], ids = ["10", "11", "12", "13"], label = "A/S/D/T", cmd = "om:command switch-workspace {ID}", desc = "切到工作区 {A/S/D/T|mauve}" },
 ]
 
 [[menu]]
-id = "as-swap"
-region = "aerospace"
+id = "wm-swap"
+region = "wm"
 title = "交换窗口"
 exit = "caps_lock"
 items = [
-  { key = "h", cmd = "as:swap left", desc = "交换到{左侧|teal}" },
-  { key = "j", cmd = "as:swap down", desc = "交换到{下方|green}" },
-  { key = "k", cmd = "as:swap up", desc = "交换到{上方|mauve}" },
-  { key = "l", cmd = "as:swap right", desc = "交换到{右侧|blue}" },
+  { key = "h", cmd = "om:command move-column left", desc = "交换到{左侧|teal}" },
+  { key = "j", cmd = "sh:omniwmctl command move-column down || omniwmctl command move-window-down", desc = "交换到{下方|green}" },
+  { key = "k", cmd = "sh:omniwmctl command move-column up || omniwmctl command move-window-up", desc = "交换到{上方|mauve}" },
+  { key = "l", cmd = "om:command move-column right", desc = "交换到{右侧|blue}" },
 ]
 
 [[menu]]
