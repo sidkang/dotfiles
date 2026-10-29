@@ -1,4 +1,5 @@
 models:
+  - xai/grok-4.5
   - codex/gpt-6.1-sol
   - ds/deepseek-flash
   - claude/sonnet-5.5
