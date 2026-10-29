@@ -42,8 +42,8 @@ region = "wm"
 title = "布局与工具"
 exit = "caps_lock"
 items = [
-  { key = "j", cmd = "om:command toggle-column-tabbed", desc = "{平铺|teal} ⇄ {标签页|blue} (Niri)" },
-  { key = "k", cmd = "om:command toggle-split", desc = "{水平|teal} ⇄ {垂直|blue} (Dwindle)" },
+  { key = "j", cmd = "hs:wm?action=layout&cmd=tabbed", desc = "{平铺|teal} ⇄ {标签页|blue} (Niri)" },
+  { key = "k", cmd = "hs:wm?action=layout&cmd=split", desc = "{水平|teal} ⇄ {垂直|blue} (Dwindle)" },
   { key = "f", cmd = "om:command toggle-focused-window-floating", desc = "{浮动|mauve} ⇄ {平铺|teal}" },
   { key = "e", cmd = "sh:killall OmniWM;open -a OmniWM", desc = "重启 {OmniWM|red}" },
   { key = "b", cmd = "om:command balance-sizes", desc = "{平衡|green}窗口大小" },
@@ -80,10 +80,10 @@ region = "wm"
 title = "交换窗口"
 exit = "caps_lock"
 items = [
-  { key = "h", cmd = "om:command move-column left", desc = "交换到{左侧|teal}" },
-  { key = "j", cmd = "sh:omniwmctl command move-column down || omniwmctl command move-window-down", desc = "交换到{下方|green}" },
-  { key = "k", cmd = "sh:omniwmctl command move-column up || omniwmctl command move-window-up", desc = "交换到{上方|mauve}" },
-  { key = "l", cmd = "om:command move-column right", desc = "交换到{右侧|blue}" },
+  { key = "h", cmd = "hs:wm?action=layout&cmd=move-column&dir=left", desc = "交换到{左侧|teal}" },
+  { key = "j", cmd = "hs:wm?action=layout&cmd=move-column&dir=down", desc = "交换到{下方|green}" },
+  { key = "k", cmd = "hs:wm?action=layout&cmd=move-column&dir=up", desc = "交换到{上方|mauve}" },
+  { key = "l", cmd = "hs:wm?action=layout&cmd=move-column&dir=right", desc = "交换到{右侧|blue}" },
 ]
 
 [[menu]]

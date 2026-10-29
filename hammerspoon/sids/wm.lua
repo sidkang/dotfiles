@@ -15,6 +15,8 @@ local FLOATING_MIN_SIZE = 300
 local FOCUS_RETRY_DELAY = 0.05
 local FOCUS_SETTLE_TIMEOUT = 0.4
 local WINDOW_FIELDS = "id,window-id,title,workspace,mode,is-focused,is-visible,is-scratchpad"
+local DIRECTIONS = { left = true, right = true, up = true, down = true }
+local maximized = {} -- windowId -> frame to restore
 
 -- Workspaces are addressed by display name (Q, W, 1, ...).
 local appRules = {
@@ -260,6 +262,58 @@ local function resizeFocused(axis, delta)
 	if not exec({ OMNIWMCTL, "command", table.unpack(niri) }, false) then exec({ OMNIWMCTL, "command", table.unpack(dwindle) }, false) end
 end
 
+--- Fullscreen for a floating window: fill its screen, then restore the previous frame.
+local function toggleFloatingMaximize(window)
+	local win = hs.window.get(window.windowId)
+	if win == nil then return end
+
+	local saved = maximized[window.windowId]
+	if saved ~= nil then
+		maximized[window.windowId] = nil
+		win:setFrame(saved)
+		return
+	end
+
+	local frame = win:frame()
+	maximized[window.windowId] = { x = frame.x, y = frame.y, w = frame.w, h = frame.h }
+	win:setFrame(win:screen():frame())
+end
+
+--- Layout commands act on the tiled window selected in the layout, so a focused floating window would be skipped.
+local function layoutCommand(cmd, dir)
+	local focused = queryWindows("--focused")[1]
+	local floating = focused ~= nil and focused.mode == "floating"
+	if cmd == "fullscreen" then
+		if floating then
+			toggleFloatingMaximize(focused)
+		else
+			exec({ OMNIWMCTL, "command", "toggle-fullscreen" }, false)
+		end
+		return
+	end
+	if floating then
+		notify("Floating window: command only applies to tiled windows")
+		return
+	end
+
+	local alternatives
+	if cmd == "move" then
+		alternatives = { { "move", dir } }
+	elseif cmd == "move-column" then
+		-- Up and down fall back to reordering inside the column.
+		alternatives = { { "move-column", dir } }
+		if dir == "up" then table.insert(alternatives, { "move-window-up" }) end
+		if dir == "down" then table.insert(alternatives, { "move-window-down" }) end
+	elseif cmd == "tabbed" then
+		alternatives = { { "toggle-column-tabbed" } }
+	else
+		alternatives = { { "toggle-split" } }
+	end
+	for _, args in ipairs(alternatives) do
+		if exec({ OMNIWMCTL, "command", table.unpack(args) }, false) then return end
+	end
+end
+
 local function cycleAppWindow(direction)
 	local bundleId = (query("active-workspace").focusedApp or {}).bundleId
 	if bundleId == nil then
@@ -285,6 +339,13 @@ local actions = {
 	["cycle-app"] = function(params)
 		if params.dir ~= "next" and params.dir ~= "prev" then return notify("wm: dir must be next or prev") end
 		cycleAppWindow(params.dir)
+	end,
+	layout = function(params)
+		local cmd, dir = params.cmd, params.dir
+		local needsDirection = cmd == "move" or cmd == "move-column"
+		if not (needsDirection or cmd == "fullscreen" or cmd == "tabbed" or cmd == "split") then return notify("wm: unknown layout cmd " .. tostring(cmd)) end
+		if needsDirection and not DIRECTIONS[dir] then return notify("wm: layout " .. cmd .. " needs dir=left|right|up|down") end
+		layoutCommand(cmd, dir)
 	end,
 	resize = function(params)
 		local delta = math.tointeger(tonumber(params.delta))

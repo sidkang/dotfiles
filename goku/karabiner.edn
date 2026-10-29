@@ -61,7 +61,7 @@
                  [:f1 [:om "command focus previous"]]
 
                  [:f2 [:om "command toggle-native-fullscreen"] ["f2-mode" 1]]
-                 [:f2 ["f2-mode" 1] nil {:delayed {:invoked [[:om "command toggle-fullscreen"] ["f2-mode" 0]] :canceled ["f2-mode" 0]}}]
+                 [:f2 ["f2-mode" 1] nil {:delayed {:invoked [[:hs "wm?action=layout&cmd=fullscreen"] ["f2-mode" 0]] :canceled ["f2-mode" 0]}}]
 
                  [:f3 [:sh "omniwmctl command move-to-monitor right || omniwmctl command move-to-monitor left"]]
                  [:f4 [:om "command focus-monitor next"]]
@@ -81,15 +81,15 @@
                  [:k [:om "command focus up"]]
                  [:l [:om "command focus right"]]
 
-                 [:!Th [:om "command move left"]]
-                 [:!Tj [:om "command move down"]]
-                 [:!Tk [:om "command move up"]]
-                 [:!Tl [:om "command move right"]]
+                 [:!Th [:hs "wm?action=layout&cmd=move&dir=left"]]
+                 [:!Tj [:hs "wm?action=layout&cmd=move&dir=down"]]
+                 [:!Tk [:hs "wm?action=layout&cmd=move&dir=up"]]
+                 [:!Tl [:hs "wm?action=layout&cmd=move&dir=right"]]
 
-                 [:!Sh [:om "command move-column left"]]
-                 [:!Sj [:sh "omniwmctl command move-column down || omniwmctl command move-window-down"]]
-                 [:!Sk [:sh "omniwmctl command move-column up || omniwmctl command move-window-up"]]
-                 [:!Sl [:om "command move-column right"]]
+                 [:!Sh [:hs "wm?action=layout&cmd=move-column&dir=left"]]
+                 [:!Sj [:hs "wm?action=layout&cmd=move-column&dir=down"]]
+                 [:!Sk [:hs "wm?action=layout&cmd=move-column&dir=up"]]
+                 [:!Sl [:hs "wm?action=layout&cmd=move-column&dir=right"]]
 
                  [:1 [:om "command switch-workspace 1"]]
                  [:2 [:om "command switch-workspace 2"]]
@@ -117,8 +117,8 @@
 
                  :wm-toggle
                  [:caps_lock [["wm-toggle" 0] [:hs "whichkey?action=hide&group=wm-toggle"]]]
-                 [:j [["wm-toggle" 0] [:om "command toggle-column-tabbed"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
-                 [:k [["wm-toggle" 0] [:om "command toggle-split"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
+                 [:j [["wm-toggle" 0] [:hs "wm?action=layout&cmd=tabbed"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
+                 [:k [["wm-toggle" 0] [:hs "wm?action=layout&cmd=split"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
                  [:f [["wm-toggle" 0] [:om "command toggle-focused-window-floating"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
                  [:e [["wm-toggle" 0] [:sh "killall OmniWM;open -a OmniWM"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
                  [:b [["wm-toggle" 0] [:om "command balance-sizes"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
@@ -150,10 +150,10 @@
 
                  :wm-swap
                  [:caps_lock [["wm-swap" 0] [:hs "whichkey?action=hide&group=wm-swap"]]]
-                 [:h [["wm-swap" 0] [:om "command move-column left"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
-                 [:j [["wm-swap" 0] [:sh "omniwmctl command move-column down || omniwmctl command move-window-down"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
-                 [:k [["wm-swap" 0] [:sh "omniwmctl command move-column up || omniwmctl command move-window-up"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
-                 [:l [["wm-swap" 0] [:om "command move-column right"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
+                 [:h [["wm-swap" 0] [:hs "wm?action=layout&cmd=move-column&dir=left"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
+                 [:j [["wm-swap" 0] [:hs "wm?action=layout&cmd=move-column&dir=down"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
+                 [:k [["wm-swap" 0] [:hs "wm?action=layout&cmd=move-column&dir=up"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
+                 [:l [["wm-swap" 0] [:hs "wm?action=layout&cmd=move-column&dir=right"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
                  ;; END menus:wm
                  ]}
         {:des "wm []"
@@ -164,8 +164,8 @@
                  [:a [:hs "wm?action=cycle-app&dir=prev"]]
                  [:w [:om "command move-to-workspace up"]]
                  [:s [:om "command switch-workspace prev"]]
-                 [:h [:hs "wm?action=resize&axis=h&delta=-50"]]
-                 [:v [:hs "wm?action=resize&axis=v&delta=-50"]]
+                 [:h [:hs "wm?action=resize&axis=h&delta=-200"]]
+                 [:v [:hs "wm?action=resize&axis=v&delta=-100"]]
                  [:d :delete_or_backspace]
                  [:m [:sh "omniwmctl command move-to-monitor left || omniwmctl command move-to-monitor right"]]
 
@@ -173,8 +173,8 @@
                  [:a [:hs "wm?action=cycle-app&dir=next"]]
                  [:w [:om "command move-to-workspace down"]]
                  [:s [:om "command switch-workspace next"]]
-                 [:h [:hs "wm?action=resize&axis=h&delta=50"]]
-                 [:v [:hs "wm?action=resize&axis=v&delta=50"]]
+                 [:h [:hs "wm?action=resize&axis=h&delta=200"]]
+                 [:v [:hs "wm?action=resize&axis=v&delta=100"]]
                  [:d :delete_forward]
                  [:m [:sh "omniwmctl command move-to-monitor right || omniwmctl command move-to-monitor left"]]]}
         {:des "common ,./"
