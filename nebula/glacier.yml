@@ -1,0 +1,46 @@
+pki:
+  ca: /opt/homebrew/etc/nebula/ca.crt
+  cert: /opt/homebrew/etc/nebula/host.crt
+  key: /opt/homebrew/etc/nebula/host.key
+
+static_host_map:
+  "10.8.11.22": ["47.245.37.35:4242"]
+  "10.8.1.2": ["10.0.1.2:4242", "139.227.252.136:4242"]
+
+lighthouse:
+  am_lighthouse: false
+  interval: 60
+  hosts: ["10.8.11.22"]
+
+relay:
+  use_relays: false
+
+listen:
+  host: 0.0.0.0
+  port: 0
+
+punchy:
+  punch: true
+  respond: true
+
+preferred_ranges: ["10.0.1.0/24"]
+
+tun:
+  disabled: false
+  mtu: 1300
+
+logging:
+  level: info
+  format: text
+
+firewall:
+  outbound_action: drop
+  inbound_action: drop
+  outbound:
+    - port: any
+      proto: any
+      host: any
+  inbound:
+    - port: any
+      proto: any
+      group: infra

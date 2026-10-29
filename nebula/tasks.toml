@@ -4,8 +4,8 @@ run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/nebula/Brewfi
 
 ["nebula:plan"]
 description = "Preview only nebula deployment"
-run = "mise dot apply --dry-run \"~/.config/nebula\""
+run = "mise dot apply --dry-run \"~/.config/nebula\" /opt/homebrew/etc/nebula/config.yml"
 
 ["nebula:apply"]
 description = "Deploy only nebula configuration; no installation or setup"
-run = "mise dot apply \"~/.config/nebula\""
+run = "mise dot apply \"~/.config/nebula\" /opt/homebrew/etc/nebula/config.yml"

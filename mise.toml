@@ -21,7 +21,8 @@ includes = ["*/tasks.toml"]
 # mise reads and runs these globally; config.local.toml stays local.
 "~/.config/mise/config.toml" = { source = "mise/config.toml", mode = "symlink" }
 "~/.config/mise/tasks" = { source = "mise/tasks", mode = "symlink" }
-"~/.config/nebula" = { source = "nebula", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
+"~/.config/nebula" = { source = "nebula", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store", "glacier.yml"] }
+"/opt/homebrew/etc/nebula/config.yml" = { source = "nebula/glacier.yml", mode = "symlink" }
 # lazy-lock.json and the uv .venv stay local.
 "~/.config/nvim" = { source = "nvim", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store", "readme.md"] }
 # The app rewrites settings.toml itself; its .pre-v5 / .corrupt backups stay local.
