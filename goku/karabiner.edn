@@ -120,7 +120,7 @@
                  [:j [["wm-toggle" 0] [:hs "wm?action=layout&cmd=tabbed"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
                  [:k [["wm-toggle" 0] [:hs "wm?action=layout&cmd=split"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
                  [:f [["wm-toggle" 0] [:om "command toggle-focused-window-floating"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
-                 [:e [["wm-toggle" 0] [:sh "killall OmniWM;open -a OmniWM"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
+                 [:e [["wm-toggle" 0] [:hs "wm?action=restart"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
                  [:b [["wm-toggle" 0] [:om "command balance-sizes"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
                  [:l [["wm-toggle" 0] [:om "command toggle-workspace-layout"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
                  [:c [["wm-toggle" 0] [:hs "floatwindow?action=move&target=center"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]

@@ -12,11 +12,16 @@ local KITTY_HOTKEY_SCRATCHPAD = "1"
 local KITTY_HOTKEY_FIT_RATIO = 0.6
 local KITTY_LAUNCH_TIMEOUT = 3.0
 local FLOATING_MIN_SIZE = 300
+local RESTART_EXIT_TIMEOUT = 3.0
+local RESTART_TIMEOUT = 20.0
+local RESTART_POLL = 0.5
+local RESTART_STABLE_POLLS = 2
 local FOCUS_RETRY_DELAY = 0.05
 local FOCUS_SETTLE_TIMEOUT = 0.4
 local WINDOW_FIELDS = "id,window-id,title,workspace,mode,is-focused,is-visible,is-scratchpad"
 local DIRECTIONS = { left = true, right = true, up = true, down = true }
 local maximized = {} -- windowId -> frame to restore
+local restartTimer = nil
 
 -- Workspaces are addressed by display name (Q, W, 1, ...).
 local appRules = {
@@ -314,6 +319,86 @@ local function layoutCommand(cmd, dir)
 	end
 end
 
+--- Rules only place the first window of an app, and a restart restores old placements.
+--- Re-applying them moves every window of the apps that have a workspace rule; returns moved and failed counts.
+local function tidyWindows()
+	local bundleIds, seen = {}, {}
+	for _, rule in ipairs(query("rules").rules) do
+		if rule.assignToWorkspace ~= nil and rule.bundleId ~= nil and not seen[rule.bundleId] then
+			seen[rule.bundleId] = true
+			table.insert(bundleIds, rule.bundleId)
+		end
+	end
+
+	local before, targets = {}, {}
+	for _, bundleId in ipairs(bundleIds) do
+		for _, window in ipairs(queryWindows("--bundle-id", bundleId)) do
+			if not window.isScratchpad then
+				before[window.id] = window.workspace.displayName
+				table.insert(targets, window)
+			end
+		end
+	end
+
+	local failed = 0
+	for _, window in ipairs(targets) do
+		if not exec({ OMNIWMCTL, "rule", "apply", "--window", window.id }, false) then failed = failed + 1 end
+	end
+
+	local moved = 0
+	for _, bundleId in ipairs(bundleIds) do
+		for _, window in ipairs(queryWindows("--bundle-id", bundleId)) do
+			if before[window.id] ~= nil and before[window.id] ~= window.workspace.displayName then moved = moved + 1 end
+		end
+	end
+
+	return moved, failed
+end
+
+local function tidyAndReport()
+	local moved, failed = tidyWindows()
+	local message = string.format("Tidied %d window(s)", moved)
+	if failed > 0 then message = message .. string.format(", %d failed", failed) end
+	notify(message)
+end
+
+--- Restart OmniWM, then tidy once it has adopted the windows (without blocking Hammerspoon while it starts).
+local function restartOmniWM()
+	if restartTimer ~= nil and restartTimer:running() then return end
+
+	exec({ "/usr/bin/killall", "OmniWM" }, true)
+	waitUntil(function() return not exec({ "/usr/bin/pgrep", "-x", "OmniWM" }, false) end, RESTART_EXIT_TIMEOUT)
+	exec({ "/usr/bin/open", "-a", "OmniWM" }, true)
+
+	local deadline = hs.timer.secondsSinceEpoch() + RESTART_TIMEOUT
+	local lastCount, stable = nil, 0
+	restartTimer = hs.timer.doEvery(RESTART_POLL, function()
+		local ok, err = pcall(function()
+			local timedOut = hs.timer.secondsSinceEpoch() > deadline
+			local answered, windows = pcall(queryWindows)
+			if not answered then
+				if timedOut then
+					restartTimer:stop()
+					notify("OmniWM did not come back")
+				end
+				return
+			end
+
+			local count = #windows
+			stable = (count > 0 and count == lastCount) and stable + 1 or 0
+			lastCount = count
+			if stable >= RESTART_STABLE_POLLS or timedOut then
+				restartTimer:stop()
+				tidyAndReport()
+			end
+		end)
+		if not ok then
+			restartTimer:stop()
+			notify(tostring(err))
+		end
+	end)
+end
+
 local function cycleAppWindow(direction)
 	local bundleId = (query("active-workspace").focusedApp or {}).bundleId
 	if bundleId == nil then
@@ -340,6 +425,7 @@ local actions = {
 		if params.dir ~= "next" and params.dir ~= "prev" then return notify("wm: dir must be next or prev") end
 		cycleAppWindow(params.dir)
 	end,
+	restart = function() restartOmniWM() end,
 	layout = function(params)
 		local cmd, dir = params.cmd, params.dir
 		local needsDirection = cmd == "move" or cmd == "move-column"

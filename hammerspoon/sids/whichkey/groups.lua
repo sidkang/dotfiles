@@ -33,7 +33,7 @@ return {
 			{ key = "J", desc = "{平铺|teal} ⇄ {标签页|blue} (Niri)" },
 			{ key = "K", desc = "{水平|teal} ⇄ {垂直|blue} (Dwindle)" },
 			{ key = "F", desc = "{浮动|mauve} ⇄ {平铺|teal}" },
-			{ key = "E", desc = "重启 {OmniWM|red}" },
+			{ key = "E", desc = "重启 {OmniWM|red}并整理窗口" },
 			{ key = "B", desc = "{平衡|green}窗口大小" },
 			{ key = "L", desc = "{Niri|yellow} ⇄ {Dwindle|peach} 布局" },
 			{ key = "C", desc = "{浮动窗口|peach}居中" },
