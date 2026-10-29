@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fuzzy switcher for Kitty windows/tabs using resolved context state.
+"""Fuzzy switcher for Kitty windows/tabs using native window titles.
 
 Launch from kitty.conf:
 
@@ -13,24 +13,69 @@ import shlex
 import shutil
 import subprocess
 import sys
-import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, Sequence
+from typing import Any, Iterable, Sequence
 
 CONFIG_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(CONFIG_DIR))
-from context_state import WindowRecord, sorted_window_records  # noqa: E402
 
 LOG_FILE = Path("/tmp/kitty-context-switcher.log")
 PATH_PREFIXES = ("/opt/homebrew/bin", "/usr/local/bin", "/Applications/kitty.app/Contents/MacOS")
-VIEWS = ("window", "agent", "tab")
+VIEWS = ("window", "tab")
 
 FZF_COLORS = (
     "--color=bg:#eff1f5,bg+:#f2d5e7,fg:#4c4f69,fg+:#4c4f69,gutter:#eff1f5",
     "--color=hl:#ea76cb:bold,hl+:#8839ef:bold,prompt:#8839ef,pointer:#ea76cb,marker:#40a02b",
     "--color=spinner:#ea76cb,info:#8c8fa1,header:#6c6f85,border:#ccd0da,separator:#ccd0da",
 )
+
+
+@dataclass(frozen=True)
+class WindowRecord:
+    os_window_id: str
+    tab_id: str
+    tab_index: str
+    window_id: str
+    marker: str
+    is_current: bool
+    is_active_in_tab: bool
+    tab_title: str
+    window_title: str
+    cwd: str
+    switcher_marker: str = ""
+
+    @property
+    def display_title(self) -> str:
+        return self.window_title or self.tab_title
+
+
+def sorted_window_records(kitty_ls: Any) -> list[WindowRecord]:
+    records = []
+    for os_window in kitty_ls or ():
+        for tab_index, tab in enumerate(os_window.get("tabs", ()), start=1):
+            for window in tab.get("windows", ()):
+                is_current = bool(window.get("is_self"))
+                records.append(WindowRecord(
+                    os_window_id=str(os_window.get("id", "")),
+                    tab_id=str(tab.get("id", "")),
+                    tab_index=str(tab_index),
+                    window_id=str(window.get("id", "")),
+                    marker="@" if is_current else "*" if window.get("is_focused") else " ",
+                    is_current=is_current,
+                    is_active_in_tab=bool(window.get("is_active")) and bool(tab.get("is_focused")),
+                    tab_title=str(tab.get("title", "")),
+                    window_title=str(window.get("title", "")),
+                    cwd=str(window.get("cwd", "")),
+                    switcher_marker=str((window.get("user_vars") or {}).get("CONTEXT_SWITCHER", "")),
+                ))
+    records.sort(key=lambda record: (
+        record.marker != "@",
+        record.marker != "*",
+        to_int(record.os_window_id),
+        to_int(record.tab_index),
+        to_int(record.window_id),
+    ))
+    return records
 
 
 @dataclass(frozen=True)
@@ -46,7 +91,7 @@ class Choice:
 
 @dataclass(frozen=True)
 class Args:
-    view: str = "agent"
+    view: str = "window"
     list_only: bool = False
     fzf_input_only: bool = False
     preview_id: str = ""
@@ -75,9 +120,9 @@ def parse_args(argv: Sequence[str]) -> Args:
     if len(argv) >= 2 and argv[1] == "--preview":
         return Args(preview_id=argv[2] if len(argv) >= 3 else "")
 
-    view = value_after(argv, "--view", "agent")
+    view = value_after(argv, "--view", "window")
     if view not in VIEWS:
-        view = "agent"
+        view = "window"
     return Args(
         view=view,
         list_only=(len(argv) >= 2 and argv[1] == "--list"),
@@ -158,8 +203,6 @@ def to_int(value: str) -> int:
 
 def choices_for_view(records: list[WindowRecord], view: str) -> list[Choice]:
     width = display_width()
-    if view == "agent":
-        return agent_choices(records, width)
     if view == "tab":
         return tab_choices(records, width)
     return window_choices(records, width)
@@ -197,49 +240,7 @@ def window_choices(records: Iterable[WindowRecord], width: int) -> list[Choice]:
         prefix = f"{switcher_glyph(record)} {scope(record):<13} "
         title_width = max(18, min(42, width // 3))
         detail_width = max(10, width - len(prefix) - title_width - 2)
-        text = f"{prefix}{padded(record.resolved.title, title_width)}  {fit(record.display_title, detail_width)}"
-        choices.append(Choice("window", record.window_id, record.window_id, text))
-    return choices
-
-
-def relative_age(updated_at: int) -> str:
-    if updated_at <= 0:
-        return ""
-    seconds = max(0, int(time.time()) - updated_at)
-    if seconds < 10:
-        return "now"
-    if seconds < 60:
-        return f"{seconds}s ago"
-    minutes = seconds // 60
-    if minutes < 60:
-        return f"{minutes}m ago"
-    hours = minutes // 60
-    if hours < 24:
-        return f"{hours}h ago"
-    days = hours // 24
-    return f"{days}d ago"
-
-
-def agent_choices(records: Iterable[WindowRecord], width: int) -> list[Choice]:
-    choices = []
-    for record in records:
-        agent = record.resolved.agent
-        if agent is None:
-            continue
-        prefix = f"{switcher_glyph(record)} {scope(record):<13} "
-        location = record.resolved.location or record.resolved.host or record.resolved.title
-        activity = agent.task or record.display_title
-        fixed_width = len(prefix) + 8 + 8 + 8 + 18 + 16 + 12
-        activity_width = max(12, width - fixed_width)
-        text = (
-            f"{prefix}"
-            f"{padded(agent.name, 8)}  "
-            f"{padded(agent.state, 8)}  "
-            f"{padded(relative_age(agent.updated_at), 8)}  "
-            f"{padded(location, 18)}  "
-            f"{padded(agent.session_name, 16)}  "
-            f"{fit(activity, activity_width)}"
-        )
+        text = f"{prefix}{padded(record.display_title, title_width)}  {fit(record.cwd, detail_width)}"
         choices.append(Choice("window", record.window_id, record.window_id, text))
     return choices
 
@@ -264,7 +265,7 @@ def tab_choices(records: Iterable[WindowRecord], width: int) -> list[Choice]:
         prefix = f"{switcher_glyph(record)} os{record.os_window_id} t{record.tab_index:<4} "
         title_width = max(18, min(42, width // 3))
         detail_width = max(10, width - len(prefix) - title_width - len(suffix) - 4)
-        text = f"{prefix}{padded(record.resolved.title, title_width)}  {suffix:<10} {fit(record.tab_title or record.window_title, detail_width)}"
+        text = f"{prefix}{padded(record.tab_title or record.window_title, title_width)}  {suffix:<10} {fit(record.cwd, detail_width)}"
         choices.append(Choice("tab", record.tab_id, record.window_id, text))
     return choices
 
@@ -303,7 +304,7 @@ def preview(window_id: str) -> int:
 
 def select_choice(choices: list[Choice], active_view: str, preferred_view: str, *, exclude_current_tab: bool) -> tuple[str, str]:
     if not choices:
-        print(f"context-switcher: no {view} entries found", file=sys.stderr)
+        print(f"context-switcher: no {active_view} entries found", file=sys.stderr)
         raise SystemExit(1)
     if shutil.which(FZF) is None and not Path(FZF).exists():
         print("context-switcher: fzf not found", file=sys.stderr)

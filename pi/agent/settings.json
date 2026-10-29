@@ -27,6 +27,7 @@
     "git:github.com/sidkang/pi-subagent-manager",
     {
       "source": "git:github.com/sidkang/pi-stuff",
+      "extensions": ["!extensions/session-env.ts"],
       "skills": ["!extensions/pi-image-gen/skills/sprite-gen"]
     }
   ],

@@ -1,12 +1,11 @@
 import inspect
 import os
 import shlex
-import sys
-from typing import Any, NamedTuple
+from typing import NamedTuple
 
 from kitty.boss import Boss, get_boss
-from kitty.fast_data_types import Screen, add_timer
-from kitty.tabs import Tab, TabManager
+from kitty.fast_data_types import Screen
+from kitty.tabs import TabManager
 from kitty.tab_bar import (
     DrawData,
     ExtraData,
@@ -14,9 +13,6 @@ from kitty.tab_bar import (
     as_rgb,
     wcswidth,
 )
-
-sys.path.insert(0, os.path.dirname(__file__))
-from context_state import resolve_window_state  # noqa: E402
 
 LATTE_TEXT = as_rgb(0x4C4F69)
 LATTE_BASE = as_rgb(0xEFF1F5)
@@ -41,15 +37,6 @@ RIGHT_MARGIN = 0
 ACTIVE_TITLE_MAX = 48
 HOTKEY_SESSION = "hotkey"
 FISH_TITLE_SEPARATOR = " · "
-PI_WORKING_FRAMES = frozenset("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
-BRAILLE_START = 0x2800
-BRAILLE_ALIAS_START = 0xF800
-# Pi emits frames every 80ms; redraw at 8 FPS to limit full tab-bar rendering cost.
-BACKGROUND_SPINNER_REDRAW_DELAY = 0.125
-
-_pending_spinner_tab_ids: set[int] = set()
-_pending_spinner_redraw_timer: int | None = None
-_tabs_with_working_pi: set[int] = set()
 
 
 class RemoteTitle(NamedTuple):
@@ -60,7 +47,7 @@ class RemoteTitle(NamedTuple):
 
 def draw_title(data):
     title = data.get("title", "").strip()
-    parts = [_context_title() or (_compact_title(title) if title else "")]
+    parts = [_compact_title(title) if title else ""]
 
     layout = data.get("layout_name", "")
     num_windows = data.get("num_windows", 0)
@@ -122,57 +109,6 @@ def _disable_tab_bar_mouse_side_effects() -> None:
 
         new_tab_without_blank_double_click._dotfile_no_blank_double_click_new_tab = True
         TabManager.new_tab = new_tab_without_blank_double_click
-
-
-def _is_pi_title(title: str) -> bool:
-    return title.startswith("π - ") or title[1:].startswith(" π - ")
-
-
-def _flush_pending_spinner_tab_bar_redraw(_timer_id: int | None) -> None:
-    global _pending_spinner_redraw_timer
-    _pending_spinner_redraw_timer = None
-
-    pending_tab_ids = _pending_spinner_tab_ids.copy()
-    _pending_spinner_tab_ids.clear()
-    dirtied_os_window_ids: set[int] = set()
-    for tab_id in pending_tab_ids:
-        tab = get_boss().tab_for_id(tab_id)
-        if tab is not None and tab.os_window_id not in dirtied_os_window_ids:
-            tab.mark_tab_bar_dirty()
-            dirtied_os_window_ids.add(tab.os_window_id)
-
-
-def _request_spinner_tab_bar_redraw(tab_id: int) -> None:
-    global _pending_spinner_redraw_timer
-    _pending_spinner_tab_ids.add(tab_id)
-    if _pending_spinner_redraw_timer is None:
-        _pending_spinner_redraw_timer = add_timer(
-            _flush_pending_spinner_tab_bar_redraw,
-            BACKGROUND_SPINNER_REDRAW_DELAY,
-            False,
-        )
-
-
-def _invalidate_tab_bar_for_background_title_changes() -> None:
-    """Coalesce background Pi title changes into at most one redraw every 125ms."""
-    current_title_changed = Tab.title_changed
-    if getattr(current_title_changed, "_dotfile_background_title_invalidation_version", 0) == 2:
-        return
-
-    original_title_changed = getattr(current_title_changed, "_dotfile_original_title_changed", None)
-    if original_title_changed is None and getattr(current_title_changed, "_dotfile_background_title_invalidates_tab_bar", False):
-        original_title_changed = inspect.getclosurevars(current_title_changed).nonlocals.get("original_title_changed")
-    if not callable(original_title_changed):
-        original_title_changed = current_title_changed
-
-    def title_changed_and_invalidate_tab_bar(self, window):
-        original_title_changed(self, window)
-        if window is not self.active_window and (_is_pi_title(window.title) or self.id in _tabs_with_working_pi):
-            _request_spinner_tab_bar_redraw(self.id)
-
-    title_changed_and_invalidate_tab_bar._dotfile_background_title_invalidation_version = 2
-    title_changed_and_invalidate_tab_bar._dotfile_original_title_changed = original_title_changed
-    Tab.title_changed = title_changed_and_invalidate_tab_bar
 
 
 def _active_title() -> str:
@@ -265,42 +201,12 @@ def _left_status(title: str) -> tuple[str, int]:
     return LOCAL_ICON, LATTE_GREEN
 
 
-def _window_user_vars(window: Any) -> dict[str, str]:
-    user_vars = window.get("user_vars") if isinstance(window, dict) else getattr(window, "user_vars", None)
-    try:
-        return dict(user_vars or {})
-    except (TypeError, ValueError):
-        return {}
-
-
-def _active_window() -> Any:
-    return getattr(get_boss(), "active_window", None)
-
-
-def _window_foreground_processes(window: Any) -> Any:
-    if isinstance(window, dict):
-        return window.get("foreground_processes") or ()
-    child = getattr(window, "child", None)
-    return getattr(child, "foreground_processes", None) or ()
-
-
 def _tab_bg(is_active: bool) -> int:
     return TAB_ACTIVE_BG if is_active else TAB_INACTIVE_BG
 
 
 def _tab_fg(is_active: bool) -> int:
     return TAB_ACTIVE_FG if is_active else TAB_INACTIVE_FG
-
-
-# Kitty context user-var schema is defined and interpreted in context_state.py.
-
-
-def _context_title() -> str:
-    window = _active_window()
-    user_vars = _window_user_vars(window)
-    if not user_vars.get("PROGRAM", "").strip() and not user_vars.get("AGENT", "").strip():
-        return ""
-    return resolve_window_state(user_vars, _window_foreground_processes(window), _active_title().strip()).title
 
 
 def _local_path_from_title(title: str) -> str:
@@ -400,27 +306,6 @@ def _draw_left_icon(screen: Screen, tab: TabBarData, index: int) -> int:
     return screen.cursor.x
 
 
-def _pi_working_frames(tab_id: int) -> str:
-    """Return one leading spinner frame for every working Pi window in a tab."""
-    tab = get_boss().tab_for_id(tab_id)
-    if tab is None:
-        return ""
-
-    frames: list[str] = []
-    for window in tab:
-        title = getattr(window, "title", "") or ""
-        if not title or not title[1:].startswith(" π - "):
-            continue
-        if title[0] in PI_WORKING_FRAMES:
-            frames.append(chr(BRAILLE_ALIAS_START + ord(title[0]) - BRAILLE_START))
-
-    if frames:
-        _tabs_with_working_pi.add(tab_id)
-    else:
-        _tabs_with_working_pi.discard(tab_id)
-    return " ".join(frames)
-
-
 def _draw_tab_number(screen: Screen, tab: TabBarData, index: int) -> int:
     bold = screen.cursor.bold
     italic = screen.cursor.italic
@@ -429,12 +314,6 @@ def _draw_tab_number(screen: Screen, tab: TabBarData, index: int) -> int:
     screen.cursor.bold = tab.is_active
     screen.cursor.italic = False
     screen.draw(f" {index}")
-
-    frames = _pi_working_frames(tab.tab_id)
-    if frames:
-        screen.cursor.fg = LATTE_TEXT if tab.is_active else LATTE_MAUVE
-        screen.cursor.bold = True
-        screen.draw(f" {frames}")
 
     screen.cursor.bold = bold
     screen.cursor.italic = italic
@@ -481,9 +360,7 @@ def _draw_right_status(screen: Screen, is_last: bool) -> int:
     if not is_last:
         return 0
 
-    title = _context_title()
-    if not title:
-        title = _compact_title(_active_title().strip())
+    title = _compact_title(_active_title().strip())
     if not title:
         return screen.cursor.x
 
@@ -512,7 +389,6 @@ def draw_tab(
     extra_data: ExtraData,
 ) -> int:
     _disable_tab_bar_mouse_side_effects()
-    _invalidate_tab_bar_for_background_title_changes()
     tab_end = _draw_tab_index(draw_data, screen, tab, before, max_title_length, index, is_last, extra_data)
     _draw_right_status(screen, is_last)
     return tab_end
