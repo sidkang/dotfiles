@@ -18,10 +18,11 @@ local RESTART_POLL = 0.5
 local RESTART_STABLE_POLLS = 2
 local FOCUS_RETRY_DELAY = 0.05
 local FOCUS_SETTLE_TIMEOUT = 0.4
-local WINDOW_FIELDS = "id,window-id,title,workspace,mode,is-focused,is-visible,is-scratchpad"
+local WINDOW_FIELDS = "id,pid,window-id,title,workspace,mode,is-focused,is-visible,is-scratchpad"
 local DIRECTIONS = { left = true, right = true, up = true, down = true }
 local maximized = {} -- windowId -> frame to restore
 local restartTimer = nil
+local kittyFocusTimer = nil
 
 -- Workspaces are addressed by display name (Q, W, 1, ...).
 local appRules = {
@@ -188,9 +189,22 @@ local function interactionScreen()
 	return hs.mouse.getCurrentScreen()
 end
 
+--- Avoid hs.window.get(id): it enumerates windows across every application.
+local function nativeWindow(window)
+	local focused = hs.window.focusedWindow()
+	if focused ~= nil and focused:id() == window.windowId then return focused end
+
+	local app = hs.application.applicationForPID(window.pid)
+	if app == nil then return nil end
+	for _, win in ipairs(app:allWindows()) do
+		if win:id() == window.windowId then return win end
+	end
+	return nil
+end
+
 --- A scratchpad keeps the size it had on another monitor; shrink and center it when it does not fit this one.
 local function fitToScreen(window)
-	local win = hs.window.get(window.windowId)
+	local win = nativeWindow(window)
 	if win == nil then return end
 
 	local area = interactionScreen():frame()
@@ -202,17 +216,38 @@ local function fitToScreen(window)
 	win:setFrame({ x = round(area.x + (area.w - width) / 2), y = round(area.y + (area.h - height) / 2), w = width, h = height })
 end
 
+--- Focus the actual macOS window, not just OmniWM's recorded selection.
+local function focusKittyHotkey(window)
+	local win = nativeWindow(window)
+	if win == nil then return end
+	win:focus()
+	kittyFocusTimer = hs.timer.doAfter(0.12, function()
+		kittyFocusTimer = nil
+		local focused = hs.window.focusedWindow()
+		if focused ~= nil and focused:id() == window.windowId then return end
+		local ok, current = pcall(findKittyHotkey)
+		if not ok or current == nil or current.id ~= window.id or not current.isVisible then return end
+		local target = nativeWindow(current)
+		if target ~= nil then target:focus() end
+	end)
+end
+
 --- Scratchpad toggle shows the window on the current monitor without focusing it.
 local function revealKittyHotkey(window)
 	omni("command", "scratchpad", "toggle", KITTY_HOTKEY_SCRATCHPAD)
 	fitToScreen(window)
-	focusWindowRobustly(window.id)
+	focusKittyHotkey(window)
 end
 
 --- Floating drop-down terminal in a scratchpad slot: shown over the current workspace, parked off-screen otherwise.
 local function toggleKittyHotkey()
+	if kittyFocusTimer ~= nil then
+		kittyFocusTimer:stop()
+		kittyFocusTimer = nil
+	end
 	local window = findKittyHotkey() or launchKittyHotkey()
 	if window == nil then return end
+	local focused = hs.window.focusedWindow()
 
 	if not window.isScratchpad then
 		-- Slots only last for the OmniWM process; assigning floats and parks the focused window.
@@ -221,10 +256,10 @@ local function toggleKittyHotkey()
 		revealKittyHotkey(window)
 	elseif not window.isVisible then
 		revealKittyHotkey(window)
-	elseif window.isFocused then
+	elseif focused ~= nil and focused:id() == window.windowId then
 		omni("command", "scratchpad", "toggle", KITTY_HOTKEY_SCRATCHPAD)
 	elseif window.workspace.displayName == focusedWorkspace() then
-		focusWindowRobustly(window.id)
+		focusKittyHotkey(window)
 	else
 		-- Shown on another monitor: toggling summons it to this one.
 		revealKittyHotkey(window)
@@ -233,7 +268,7 @@ end
 
 --- OmniWM has no size commands for floating windows: grow or shrink around the center, within the screen.
 local function resizeFloating(window, axis, delta)
-	local win = hs.window.get(window.windowId)
+	local win = nativeWindow(window)
 	if win == nil then return end
 
 	local area = win:screen():frame()
@@ -269,7 +304,7 @@ end
 
 --- Fullscreen for a floating window: fill its screen, then restore the previous frame.
 local function toggleFloatingMaximize(window)
-	local win = hs.window.get(window.windowId)
+	local win = nativeWindow(window)
 	if win == nil then return end
 
 	local saved = maximized[window.windowId]
