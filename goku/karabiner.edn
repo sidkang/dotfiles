@@ -87,10 +87,10 @@
                  [:!Tk [:as "join-with up"]]
                  [:!Tl [:as "join-with right"]]
 
-                 [:!Sh [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop left"]]
-                 [:!Sj [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop down"]]
-                 [:!Sk [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
-                 [:!Sl [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop right"]]
+                 [:!Sh [:as-py "window smart-move h -20 left"]]
+                 [:!Sj [:as-py "window smart-move v +20 down"]]
+                 [:!Sk [:as-py "window smart-move v -20 up"]]
+                 [:!Sl [:as-py "window smart-move h +20 right"]]
 
                  [:1 [:as "workspace 1"]]
                  [:2 [:as "workspace 2"]]
@@ -166,8 +166,8 @@
                  [:a [:as-py "window cycle-app prev"]]
                  [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin prev"]]
                  [:s [:as "workspace prev --no-stdin"]]
-                 [:h [:as "resize width -50"]]
-                 [:v [:as "resize height -50"]]
+                 [:h [:as-py "window smart-resize width -50"]]
+                 [:v [:as-py "window smart-resize height -50"]]
                  [:d :delete_or_backspace]
                  [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around prev"]]
 
@@ -175,8 +175,8 @@
                  [:a [:as-py "window cycle-app next"]]
                  [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin next"]]
                  [:s [:as "workspace next --no-stdin"]]
-                 [:h [:as "resize width +50"]]
-                 [:v [:as "resize height +50"]]
+                 [:h [:as-py "window smart-resize width +50"]]
+                 [:v [:as-py "window smart-resize height +50"]]
                  [:d :delete_forward]
                  [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around next"]]]}
         {:des "common ,./"
