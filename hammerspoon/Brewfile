@@ -1,6 +1,4 @@
 brew "imagemagick"
 cask "hammerspoon"
-# sids.window_hints and sids.wm invoke omniwmctl.
-cask "omniwm"
-# sids.wm launches the hotkey terminal through kitten.
-cask "kitty"
+# sids.aerospace_window_hints invokes the aerospace CLI.
+cask "nikitabobko/tap/aerospace"

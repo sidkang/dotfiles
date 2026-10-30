@@ -1,0 +1,11 @@
+["aerospace:install"]
+description = "Install only aerospace dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/aerospace/Brewfile\""
+
+["aerospace:plan"]
+description = "Preview only aerospace deployment"
+run = "mise dot apply --dry-run \"~/.config/aerospace\""
+
+["aerospace:apply"]
+description = "Deploy only aerospace configuration; no installation or setup"
+run = "mise dot apply \"~/.config/aerospace\""

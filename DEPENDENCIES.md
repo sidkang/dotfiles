@@ -19,8 +19,9 @@
 |---|---|---|
 | Fish | gh、starship、zoxide | `fish/config.fish` 的交互初始化；后两项有守卫，但已确认为常用功能 |
 | Kitty | fzf、jq、Python、两款字体 | `kitty/context_switcher.py`、`fish/conf.d/kitty.fish`、`kitty/kitty.conf` |
-| Goku | Karabiner-Elements、Python 3.14、OmniWM、Hammerspoon、Kitty | `goku/karabiner.edn` 的窗口管理层直接调用这些应用；不会代为部署或初始化它们 |
-| Hammerspoon | ImageMagick、OmniWM、Kitty | 壁纸处理及 `sids.window_hints`、`sids.wm` 调用 |
+| AeroSpace | borders、Python 3.14、Fish、Hammerspoon | `aerospace/aerospace.toml` 的启动与 workspace hook、`aerospace/as.py` |
+| Goku | Karabiner-Elements、borders、Python 3.14、AeroSpace、Hammerspoon、Kitty | `goku/karabiner.edn` 的窗口管理层直接调用这些应用；不会代为部署或初始化它们 |
+| Hammerspoon | ImageMagick、AeroSpace | 壁纸处理及 `sids.aerospace_window_hints` 调用 |
 | Neovim | Git、Fish、tree-sitter-cli、ripgrep、fd | 插件安装、Fish formatter、treesitter 构建和查找功能 |
 | Git | hunk | `git/config` 默认 pager |
 | Pi | Node、zmx | Pi 运行时以及 `fish/functions/pi.fish` 的交互包装 |

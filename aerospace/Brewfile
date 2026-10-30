@@ -1,0 +1,5 @@
+brew "felixkratz/formulae/borders"
+brew "python"
+# exec-on-workspace-change and as.py notify through Hammerspoon IPC.
+cask "hammerspoon"
+cask "nikitabobko/tap/aerospace"

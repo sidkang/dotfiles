@@ -1,7 +1,8 @@
 brew "yqrashawn/goku/goku"
 brew "python"
+brew "felixkratz/formulae/borders"
 cask "karabiner-elements"
 # The configured window-management layers directly call these applications.
-cask "omniwm"
+cask "nikitabobko/tap/aerospace"
 cask "hammerspoon"
 cask "kitty"

@@ -79,8 +79,7 @@ local function setupModules()
 	require("sids.clipboard").setup()
 	require("sids.color_meter").setup()
 	require("sids.float_window").setup("floatwindow")
-	require("sids.window_hints").setup("aswindowhints") -- route name kept: bound outside this repo
-	require("sids.wm").setup("wm")
+	require("sids.aerospace_window_hints").setup("aswindowhints")
 	require("sids.audio_device").setup()
 end
 

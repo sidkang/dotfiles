@@ -3,7 +3,8 @@
   {:default true :sim 50 :delay 180 :alone 150 :held 140}}
  :templates {:kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
              :kitty-py "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';python3 $HOME/.config/kitty/kitty-action.py %s"
-             :om "/opt/homebrew/bin/omniwmctl %s"
+             :as "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';aerospace %s"
+             :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
              :sh "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';%s"
              :hs "$HOME/.local/bin/hs -q -c 'hsurl(\"%s\")'"
              :hs-notify "$HOME/.local/bin/hs -q -c 'hsurl(\"notify?msg=%s\")'"
@@ -46,137 +47,138 @@
                  [:!Ssemicolon :semicolon]
                  [:!Squote :quote]
                  [:quote
-                  [["wm-mode" 1] [:hs "whichkey?action=show&group=wm-mode"]]
+                  [["aerospace-mode" 1] [:hs "whichkey?action=show&group=aerospace-mode"]]
                   nil
-                  {:afterup [["wm-mode" 0] [:hs "whichkey?action=hide&group=wm-mode"]] :alone :!Squote}]]}
+                  {:afterup [["aerospace-mode" 0] [:hs "whichkey?action=hide&group=aerospace-mode"]] :alone :!Squote}]]}
 
-        {:des "wm quote"
-         :rules [[:escape [:hs "wm?action=app-toggle&app=obsidian"] ["escape-mode" 1]]
+        {:des "aerospace quote"
+         :rules [[:escape [:as-py "app toggle obsidian"] ["escape-mode" 1]]
                  [:escape
                   ["escape-mode" 1]
                   nil
-                  {:delayed {:invoked [[:hs "wm?action=kitty-hotkey"] ["escape-mode" 0]]
+                  {:delayed {:invoked [[:as-py "kitty toggle-hotkey"] ["escape-mode" 0]]
                              :canceled ["escape-mode" 0]}}]
 
-                 [:f1 [:om "command focus previous"]]
+                 [:f1 [:as "focus-back-and-forth"]]
 
-                 [:f2 [:om "command toggle-native-fullscreen"] ["f2-mode" 1]]
-                 [:f2 ["f2-mode" 1] nil {:delayed {:invoked [[:hs "wm?action=layout&cmd=fullscreen"] ["f2-mode" 0]] :canceled ["f2-mode" 0]}}]
+                 [:f2 [:as "macos-native-fullscreen"] ["f2-mode" 1]]
+                 [:f2 ["f2-mode" 1] nil {:delayed {:invoked [[:as "fullscreen"] ["f2-mode" 0]] :canceled ["f2-mode" 0]}}]
 
-                 [:f3 [:sh "omniwmctl command move-to-monitor right || omniwmctl command move-to-monitor left"]]
-                 [:f4 [:om "command focus-monitor next"]]
+                 [:f3 [:as "move-node-to-monitor --wrap-around --focus-follows-window next"]]
+                 [:f4 [:as "focus-monitor --wrap-around next"]]
 
-                 :wm-mode
-                 [:r [["wm-send-ws" 1] [:hs "whichkey?action=show&group=wm-send-ws"]]]
-                 [:t [["wm-toggle" 1] [:hs "whichkey?action=show&group=wm-toggle"]]]
-                 [:f [["wm-open" 1] [:hs "whichkey?action=show&group=wm-open"]]]
-                 [:g [["wm-go" 1] [:hs "whichkey?action=show&group=wm-go"]]]
-                 [:s [["wm-swap" 1] [:hs "whichkey?action=show&group=wm-swap"]]]
+                 :aerospace-mode
+                 [:r [["as-send-ws" 1] [:hs "whichkey?action=show&group=as-send-ws"]]]
+                 [:t [["as-toggle" 1] [:hs "whichkey?action=show&group=as-toggle"]]]
+                 [:f [["as-open" 1] [:hs "whichkey?action=show&group=as-open"]]]
+                 [:g [["as-go" 1] [:hs "whichkey?action=show&group=as-go"]]]
+                 [:s [["as-swap" 1] [:hs "whichkey?action=show&group=as-swap"]]]
                  [:z [["z-mode" 1] [:hs "whichkey?action=show&group=z-mode"]]]
 
-                 [:v [:om "command close-focused-window"]]
+                 [:v [:as "close"]]
 
-                 [:h [:om "command focus left"]]
-                 [:j [:om "command focus down"]]
-                 [:k [:om "command focus up"]]
-                 [:l [:om "command focus right"]]
+                 [:h [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop left"]]
+                 [:j [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop down"]]
+                 [:k [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
+                 [:l [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop right"]]
 
-                 [:!Th [:hs "wm?action=layout&cmd=move&dir=left"]]
-                 [:!Tj [:hs "wm?action=layout&cmd=move&dir=down"]]
-                 [:!Tk [:hs "wm?action=layout&cmd=move&dir=up"]]
-                 [:!Tl [:hs "wm?action=layout&cmd=move&dir=right"]]
+                 [:!Th [:as "join-with left"]]
+                 [:!Tj [:as "join-with down"]]
+                 [:!Tk [:as "join-with up"]]
+                 [:!Tl [:as "join-with right"]]
 
-                 [:!Sh [:hs "wm?action=layout&cmd=move-column&dir=left"]]
-                 [:!Sj [:hs "wm?action=layout&cmd=move-column&dir=down"]]
-                 [:!Sk [:hs "wm?action=layout&cmd=move-column&dir=up"]]
-                 [:!Sl [:hs "wm?action=layout&cmd=move-column&dir=right"]]
+                 [:!Sh [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop left"]]
+                 [:!Sj [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop down"]]
+                 [:!Sk [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
+                 [:!Sl [:as "move --boundaries all-monitors-outer-frame --boundaries-action stop right"]]
 
-                 [:1 [:om "command switch-workspace 1"]]
-                 [:2 [:om "command switch-workspace 2"]]
-                 [:3 [:om "command switch-workspace 3"]]
-                 [:4 [:om "command switch-workspace 4"]]
-                 [:5 [:om "command switch-workspace 5"]]
-                 [:6 [:om "command switch-workspace 6"]]
+                 [:1 [:as "workspace 1"]]
+                 [:2 [:as "workspace 2"]]
+                 [:3 [:as "workspace 3"]]
+                 [:4 [:as "workspace 4"]]
+                 [:5 [:as "workspace 5"]]
+                 [:6 [:as "workspace 6"]]
 
-                 ;; BEGIN menus:wm (generated from menus.toml)
-                 :wm-send-ws
-                 [:caps_lock [["wm-send-ws" 0] [:hs "whichkey?action=hide&group=wm-send-ws"]]]
-                 [:1 [["wm-send-ws" 0] [:om "command move-to-workspace 1"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:2 [["wm-send-ws" 0] [:om "command move-to-workspace 2"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:3 [["wm-send-ws" 0] [:om "command move-to-workspace 3"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:4 [["wm-send-ws" 0] [:om "command move-to-workspace 4"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:5 [["wm-send-ws" 0] [:om "command move-to-workspace 5"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:6 [["wm-send-ws" 0] [:om "command move-to-workspace 6"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:q [["wm-send-ws" 0] [:om "command move-to-workspace 7"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:w [["wm-send-ws" 0] [:om "command move-to-workspace 8"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:e [["wm-send-ws" 0] [:om "command move-to-workspace 9"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:a [["wm-send-ws" 0] [:om "command move-to-workspace 10"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:s [["wm-send-ws" 0] [:om "command move-to-workspace 11"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:d [["wm-send-ws" 0] [:om "command move-to-workspace 12"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
-                 [:t [["wm-send-ws" 0] [:om "command move-to-workspace 13"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-send-ws"]}]
+                 ;; BEGIN menus:aerospace (generated from menus.toml)
+                 :as-send-ws
+                 [:caps_lock [["as-send-ws" 0] [:hs "whichkey?action=hide&group=as-send-ws"]]]
+                 [:1 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 1"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:2 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 2"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:3 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 3"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:4 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 4"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:5 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 5"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:6 [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window 6"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:q [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window Q"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:w [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window W"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:e [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window E"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:a [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window A"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:s [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window S"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:d [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window D"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
+                 [:t [["as-send-ws" 0] [:as "move-node-to-workspace --focus-follows-window T"]] nil {:afterup [:hs "whichkey?action=hide&group=as-send-ws"]}]
 
-                 :wm-toggle
-                 [:caps_lock [["wm-toggle" 0] [:hs "whichkey?action=hide&group=wm-toggle"]]]
-                 [:j [["wm-toggle" 0] [:hs "wm?action=layout&cmd=tabbed"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
-                 [:k [["wm-toggle" 0] [:hs "wm?action=layout&cmd=split"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
-                 [:f [["wm-toggle" 0] [:om "command toggle-focused-window-floating"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
-                 [:e [["wm-toggle" 0] [:hs "wm?action=restart"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
-                 [:b [["wm-toggle" 0] [:om "command balance-sizes"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
-                 [:l [["wm-toggle" 0] [:om "command toggle-workspace-layout"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
-                 [:c [["wm-toggle" 0] [:hs "floatwindow?action=move&target=center"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-toggle"]}]
+                 :as-toggle
+                 [:caps_lock [["as-toggle" 0] [:hs "whichkey?action=hide&group=as-toggle"]]]
+                 [:j [["as-toggle" 0] [:as "layout tiles accordion"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:k [["as-toggle" 0] [:as "layout horizontal vertical"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:f [["as-toggle" 0] [:as "layout floating tiling"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:e [["as-toggle" 0] [:sh "killall AeroSpace borders;open -a AeroSpace"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:b [["as-toggle" 0] [:as "balance-sizes"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:r [["as-toggle" 0] [:as "reload-config"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:g [["as-toggle" 0] [:as-py "window move-ghost"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:c [["as-toggle" 0] [:hs "floatwindow?action=move&target=center"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
 
-                 :wm-open
-                 [:caps_lock [["wm-open" 0] [:hs "whichkey?action=hide&group=wm-open"]]]
-                 [:f [["wm-open" 0] [:sh "osascript -e 'tell application \"Finder\" to make new Finder window'"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-open"]}]
-                 [:w [["wm-open" 0] [:hs "wm?action=app-toggle&app=wechat"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-open"]}]
-                 [:t [["wm-open" 0] [:hs "wm?action=app-toggle&app=telegram"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-open"]}]
-                 [:g [["wm-open" 0] [:hs "wm?action=app-toggle&app=chrome"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-open"]}]
+                 :as-open
+                 [:caps_lock [["as-open" 0] [:hs "whichkey?action=hide&group=as-open"]]]
+                 [:f [["as-open" 0] [:sh "osascript -e 'tell application \"Finder\" to make new Finder window'"]] nil {:afterup [:hs "whichkey?action=hide&group=as-open"]}]
+                 [:w [["as-open" 0] [:as-py "app toggle wechat"]] nil {:afterup [:hs "whichkey?action=hide&group=as-open"]}]
+                 [:t [["as-open" 0] [:as-py "app toggle telegram"]] nil {:afterup [:hs "whichkey?action=hide&group=as-open"]}]
+                 [:g [["as-open" 0] [:as-py "app toggle chrome"]] nil {:afterup [:hs "whichkey?action=hide&group=as-open"]}]
 
-                 :wm-go
-                 [:caps_lock [["wm-go" 0] [:hs "whichkey?action=hide&group=wm-go"]]]
-                 [:1 [["wm-go" 0] [:om "command switch-workspace 1"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:2 [["wm-go" 0] [:om "command switch-workspace 2"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:3 [["wm-go" 0] [:om "command switch-workspace 3"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:4 [["wm-go" 0] [:om "command switch-workspace 4"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:5 [["wm-go" 0] [:om "command switch-workspace 5"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:6 [["wm-go" 0] [:om "command switch-workspace 6"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:q [["wm-go" 0] [:om "command switch-workspace 7"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:w [["wm-go" 0] [:om "command switch-workspace 8"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:e [["wm-go" 0] [:om "command switch-workspace 9"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:a [["wm-go" 0] [:om "command switch-workspace 10"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:s [["wm-go" 0] [:om "command switch-workspace 11"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:d [["wm-go" 0] [:om "command switch-workspace 12"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
-                 [:t [["wm-go" 0] [:om "command switch-workspace 13"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-go"]}]
+                 :as-go
+                 [:caps_lock [["as-go" 0] [:hs "whichkey?action=hide&group=as-go"]]]
+                 [:1 [["as-go" 0] [:as "workspace 1"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:2 [["as-go" 0] [:as "workspace 2"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:3 [["as-go" 0] [:as "workspace 3"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:4 [["as-go" 0] [:as "workspace 4"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:5 [["as-go" 0] [:as "workspace 5"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:6 [["as-go" 0] [:as "workspace 6"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:q [["as-go" 0] [:as "workspace Q"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:w [["as-go" 0] [:as "workspace W"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:e [["as-go" 0] [:as "workspace E"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:a [["as-go" 0] [:as "workspace A"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:s [["as-go" 0] [:as "workspace S"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:d [["as-go" 0] [:as "workspace D"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
+                 [:t [["as-go" 0] [:as "workspace T"]] nil {:afterup [:hs "whichkey?action=hide&group=as-go"]}]
 
-                 :wm-swap
-                 [:caps_lock [["wm-swap" 0] [:hs "whichkey?action=hide&group=wm-swap"]]]
-                 [:h [["wm-swap" 0] [:hs "wm?action=layout&cmd=move-column&dir=left"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
-                 [:j [["wm-swap" 0] [:hs "wm?action=layout&cmd=move-column&dir=down"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
-                 [:k [["wm-swap" 0] [:hs "wm?action=layout&cmd=move-column&dir=up"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
-                 [:l [["wm-swap" 0] [:hs "wm?action=layout&cmd=move-column&dir=right"]] nil {:afterup [:hs "whichkey?action=hide&group=wm-swap"]}]
-                 ;; END menus:wm
+                 :as-swap
+                 [:caps_lock [["as-swap" 0] [:hs "whichkey?action=hide&group=as-swap"]]]
+                 [:h [["as-swap" 0] [:as "swap left"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:j [["as-swap" 0] [:as "swap down"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:k [["as-swap" 0] [:as "swap up"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:l [["as-swap" 0] [:as "swap right"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 ;; END menus:aerospace
                  ]}
-        {:des "wm []"
+        {:des "aerospace []"
          :rules [[:open_bracket ["bracket-l-mode" 1] nil {:afterup ["bracket-l-mode" 0] :alone :open_bracket}]
                  [:close_bracket ["bracket-r-mode" 1] nil {:afterup ["bracket-r-mode" 0] :alone :close_bracket}]
 
                  :bracket-l-mode
-                 [:a [:hs "wm?action=cycle-app&dir=prev"]]
-                 [:w [:om "command move-to-workspace up"]]
-                 [:s [:om "command switch-workspace prev"]]
-                 [:h [:hs "wm?action=resize&axis=h&delta=-200"]]
-                 [:v [:hs "wm?action=resize&axis=v&delta=-100"]]
+                 [:a [:as-py "window cycle-app prev"]]
+                 [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin prev"]]
+                 [:s [:as "workspace prev --no-stdin"]]
+                 [:h [:as "resize width -50"]]
+                 [:v [:as "resize height -50"]]
                  [:d :delete_or_backspace]
-                 [:m [:sh "omniwmctl command move-to-monitor left || omniwmctl command move-to-monitor right"]]
+                 [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around prev"]]
 
                  :bracket-r-mode
-                 [:a [:hs "wm?action=cycle-app&dir=next"]]
-                 [:w [:om "command move-to-workspace down"]]
-                 [:s [:om "command switch-workspace next"]]
-                 [:h [:hs "wm?action=resize&axis=h&delta=200"]]
-                 [:v [:hs "wm?action=resize&axis=v&delta=100"]]
+                 [:a [:as-py "window cycle-app next"]]
+                 [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin next"]]
+                 [:s [:as "workspace next --no-stdin"]]
+                 [:h [:as "resize width +50"]]
+                 [:v [:as "resize height +50"]]
                  [:d :delete_forward]
-                 [:m [:sh "omniwmctl command move-to-monitor right || omniwmctl command move-to-monitor left"]]]}
+                 [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around next"]]]}
         {:des "common ,./"
          :rules [[:slash ["app-mode" 1] :!z-mode {:afterup ["app-mode" 0] :alone :slash}]
 
