@@ -4,7 +4,7 @@ local applescripts = {
 	xnip_capture = [[
 tell application "System Events"
   tell process "Xnip"
-    click menu item 1 of menu 1 of menu bar item 1 of menu bar 2
+    click menu item 1 of menu 1 of menu bar item 3 of menu bar 1
   end tell
 end tell
 ]],
