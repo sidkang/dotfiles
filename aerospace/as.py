@@ -22,7 +22,7 @@ KITTY_BUNDLE_ID = "net.kovidgoyal.kitty"
 KITTY_HOTKEY_TITLE = "kitty-hotkey"
 KITTY_HOTKEY_SESSION = "hotkey"
 REX_BUNDLE_ID = "com.superlogical.rex"
-REX_HOTKEY_SESSION = "⚡"
+REX_HOTKEY_SESSION = "NEXT"
 # Rex titles read "<block title> - <session label>".
 REX_HOTKEY_TITLE_SUFFIX = f" - {REX_HOTKEY_SESSION}"
 REX_HOTKEY_HIDE_WORKSPACE = "T"
@@ -416,25 +416,29 @@ def set_hotkey_keep(enabled: bool) -> None:
             pass
 
 
-def focused_workspace_quick() -> str | None:
-    """The focused workspace in one cheap call.
+def hotkey_quick_state() -> tuple[str | None, str | None, str]:
+    """Focused workspace, window id, and window title in one cheap call.
 
-    Returns None when the workspace has no window, where AeroSpace exits
-    non-zero with "No window is focused".
+    Only the focused window is read, so resolving its title stays cheap.
+    All three come back empty when the workspace has no window, where
+    AeroSpace exits non-zero with "No window is focused".
     """
     result = run_cmd(
         (
             "aerospace",
             "eval",
-            'list-windows --focused --format "#W|%{workspace}"',
+            'list-windows --focused --format "#F|%{workspace}|%{window-id}|%{window-title}"',
         )
     )
     if result.returncode != 0:
-        return None
+        return None, None, ""
     for line in result.stdout.splitlines():
-        if line.startswith("#W|"):
-            return line[3:].strip() or None
-    return None
+        if line.startswith("#F|"):
+            parts = line[3:].split("|", 2)
+            while len(parts) < 3:
+                parts.append("")
+            return parts[0] or None, parts[1] or None, parts[2]
+    return None, None, ""
 
 
 def hotkey_shown_workspace() -> str | None:
@@ -689,9 +693,18 @@ def launch_rex_hotkey() -> None:
             (workspace for _id, workspace, _title, foc in windows if foc),
             focused_workspace(),
         )
-        move_window_to_workspace(
-            existing[0][0], current_workspace, focus_follows=True
+        check_cmd(
+            (
+                "aerospace",
+                "eval",
+                f"move-node-to-workspace --focus-follows-window --window-id {existing[0][0]} {current_workspace}; "
+                f"focus --window-id {existing[0][0]}; "
+                f"layout --window-id {existing[0][0]} floating",
+            )
         )
+        remember_hotkey_window(existing[0][0])
+        mark_hotkey_hidden(False)
+        remember_shown_workspace(current_workspace)
         return
 
     result = rex_run("-C", client_id, "do", "client.window.new")
@@ -729,7 +742,16 @@ def launch_rex_hotkey() -> None:
     if hotkey_window is None:
         notify("Rex hotkey window title did not update", ERROR)
         return
-    focus_window_robustly(hotkey_window[0])
+    # A freshly created window is tiled; launch does not go through
+    # show_hotkey, so float it here.
+    check_cmd(
+        (
+            "aerospace",
+            "eval",
+            f"focus --window-id {hotkey_window[0]}; "
+            f"layout --window-id {hotkey_window[0]} floating",
+        )
+    )
 
     # Seed the fast path so the next toggle skips the full window scan.
     remember_hotkey_window(hotkey_window[0])
@@ -737,21 +759,53 @@ def launch_rex_hotkey() -> None:
     remember_shown_workspace(hotkey_window[1])
 
 
+def present_hotkey(window_id: str, target_workspace: str) -> bool:
+    """Show the window, giving it back the hotkey session first if it lost it.
+
+    Killing the session leaves its macOS window behind, showing whichever
+    session the app fell back to. Reusing that window keeps stray windows
+    from piling up next to the user's real one.
+    """
+    if not show_hotkey(window_id, target_workspace):
+        return False
+
+    _ws, focused_id, title = hotkey_quick_state()
+    if focused_id != window_id or title.endswith(REX_HOTKEY_TITLE_SUFFIX):
+        return True
+
+    session_id = ensure_rex_hotkey_session()
+    client_id = ensure_rex_app_client()
+    select = rex_run(
+        "-C", client_id, "do", "session.select", f"session_id={session_id}"
+    )
+    if select.returncode != 0:
+        return False
+
+    return show_hotkey(window_id, target_workspace)
+
+
 def toggle_rex_hotkey() -> None:
     """Show the hotkey window, or hide it when it is already on screen."""
+    current_ws, focused_id, focused_title = hotkey_quick_state()
+    if current_ws is None:
+        current_ws = focused_workspace()
+
     cached_id = hotkey_cached_id()
-
     if cached_id is not None:
-        current_ws = focused_workspace_quick() or focused_workspace()
-        visible = not HOTKEY_HIDDEN_FILE.exists()
+        ours_and_valid = focused_id == cached_id and focused_title.endswith(
+            REX_HOTKEY_TITLE_SUFFIX
+        )
+        # Not focused, but recorded as on screen right here.
+        visible_here = (
+            focused_id != cached_id
+            and not HOTKEY_HIDDEN_FILE.exists()
+            and hotkey_shown_workspace() == current_ws
+        )
 
-        # Visible on the workspace the user is looking at: hide it,
-        # whether or not it currently holds keyboard focus.
-        if visible and current_ws is not None and hotkey_shown_workspace() == current_ws:
+        if ours_and_valid or visible_here:
             if hide_hotkey(cached_id):
                 return
-
-        if show_hotkey(cached_id, current_ws):
+        elif present_hotkey(cached_id, current_ws):
             return
 
         # The cached window is gone; fall back to a full scan.
@@ -776,7 +830,7 @@ def toggle_rex_hotkey_slow() -> None:
     window_id, window_workspace = matches[0]
     remember_hotkey_window(window_id)
 
-    target = focused_workspace_name or focused_workspace_quick() or focused_workspace()
+    target = focused_workspace_name or hotkey_quick_state()[0] or focused_workspace()
     if show_hotkey(window_id, target):
         return
     notify(f"Failed to show Rex hotkey window {window_id}", ERROR)
