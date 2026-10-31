@@ -1,4 +1,4 @@
-function pi --description 'Run interactive Pi in a persistent zmx session' --wraps pi
+function zpi --description 'Run interactive Pi in a persistent zmx session' --wraps pi
     # Scripts, redirected streams and existing zmx sessions keep normal Pi behavior.
     if not status is-interactive; or not isatty stdin; or not isatty stdout; or set -q ZMX_SESSION
         command pi $argv
