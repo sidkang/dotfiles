@@ -416,15 +416,21 @@ def set_hotkey_keep(enabled: bool) -> None:
 
 
 def focused_workspace_quick() -> str | None:
-    """The focused workspace in one cheap call (no window titles)."""
-    output = check_cmd(
+    """The focused workspace in one cheap call.
+
+    Returns None when the workspace has no window, where AeroSpace exits
+    non-zero with "No window is focused".
+    """
+    result = run_cmd(
         (
             "aerospace",
             "eval",
             'list-windows --focused --format "#W|%{workspace}"',
         )
     )
-    for line in output.splitlines():
+    if result.returncode != 0:
+        return None
+    for line in result.stdout.splitlines():
         if line.startswith("#W|"):
             return line[3:].strip() or None
     return None
@@ -730,7 +736,7 @@ def toggle_rex_hotkey() -> None:
     cached_id = hotkey_cached_id()
 
     if cached_id is not None:
-        current_ws = focused_workspace_quick()
+        current_ws = focused_workspace_quick() or focused_workspace()
         visible = not HOTKEY_HIDDEN_FILE.exists()
 
         # Visible on the workspace the user is looking at: hide it,
@@ -764,7 +770,8 @@ def toggle_rex_hotkey_slow() -> None:
     window_id, window_workspace = matches[0]
     remember_hotkey_window(window_id)
 
-    if show_hotkey(window_id, focused_workspace_name or focused_workspace_quick()):
+    target = focused_workspace_name or focused_workspace_quick() or focused_workspace()
+    if show_hotkey(window_id, target):
         return
     notify(f"Failed to show Rex hotkey window {window_id}", ERROR)
 
