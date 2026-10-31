@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Apply Rex appearance settings from this repo to the local Rex app defaults."""
+"""Apply Rex appearance settings from this repo to the local Rex app defaults.
+
+Source of truth: glacier's preferred Workspace / rex.* settings.
+Machine-local layout (window frames, sidebar width) is left alone.
+"""
 
 from __future__ import annotations
 
@@ -15,10 +19,11 @@ THEME_FILE = Path(__file__).resolve().parent / "themes" / "catppuccin-latte.conf
 PREFS = Path.home() / "Library/Preferences" / f"{DOMAIN}.plist"
 
 FONT_NAME = "Sarasa Term Slab SS17 SC Nerd Font"
-FONT_SIZE = 15.0
+FONT_SIZE = 14.5
 CURSOR_STYLE = "block"
 CURSOR_BLINK_MS = 400
 CURSOR_SHADER = "comet"
+DARK_THEME_ID = "merino-dark"
 
 
 def defaults_write(key: str, *args: str) -> None:
@@ -39,7 +44,7 @@ def ensure_remote_control() -> None:
     defaults_write("rex.client.remoteControl", "-bool", "true")
 
 
-def apply_font_and_cursor() -> None:
+def apply_workspace_settings() -> None:
     defaults_write("Workspace.terminalFontName", "-string", FONT_NAME)
     defaults_write("Workspace.terminalFontPointSize", "-float", str(FONT_SIZE))
     defaults_write("Workspace.terminalCursorStyle", "-string", CURSOR_STYLE)
@@ -53,6 +58,29 @@ def apply_font_and_cursor() -> None:
     defaults_write("Workspace.cursorShadersEnabled", "-bool", "true")
     defaults_write("Workspace.cursorShader", "-string", CURSOR_SHADER)
     defaults_write("Workspace.appearance", "-string", "light")
+    defaults_write("Workspace.darkThemeID", "-string", DARK_THEME_ID)
+    defaults_write("Workspace.interfaceStyle", "-string", "system")
+    defaults_write("Workspace.tabStyle", "-string", "vertical")
+    defaults_write("Workspace.tabIconTintMode", "-string", "off")
+    defaults_write("Workspace.tabIconColorMode", "-string", "always")
+    defaults_write("Workspace.paneDensity", "-string", "compact")
+    defaults_write("Workspace.inactivePaneFadeMode", "-string", "none")
+    defaults_write("Workspace.usesPaneGlass", "-bool", "true")
+    defaults_write("Workspace.usesStandardInactiveWindowPaneStyles", "-bool", "false")
+    defaults_write("Workspace.showsActivePaneBorder", "-bool", "false")
+    defaults_write("Workspace.showsPaneHeaders", "-bool", "false")
+    defaults_write("Workspace.tintsPanesWithProgramBackground", "-bool", "true")
+    defaults_write("Workspace.terminalAllowsLigatures", "-bool", "true")
+    defaults_write("Workspace.terminalFontSmoothing", "-bool", "false")
+    defaults_write("Workspace.terminalUsesDisplayP3", "-bool", "true")
+    defaults_write("Workspace.appIcon", "-string", "light")
+    defaults_write("Workspace.appIconVisibility", "-string", "menuBarOnly")
+    defaults_write("Workspace.animationStyle", "-string", "natural")
+    defaults_write("Workspace.allowsTerminalNotifications", "-bool", "true")
+    defaults_write("Workspace.notificationPosition", "-string", "bottom-right")
+    defaults_write("Workspace.sidebarPosition", "-string", "left")
+    defaults_write("rex.server.automatic-restart-enabled", "-bool", "true")
+    defaults_write("rex.agents.names-sessions", "-bool", "false")
 
 
 def rex_bin() -> Path:
@@ -66,6 +94,49 @@ def rex_bin() -> Path:
         if path.is_file():
             return path
     raise SystemExit("rex binary not found")
+
+
+def local_hostname() -> str:
+    for args in (["scutil", "--get", "LocalHostName"], ["hostname", "-s"]):
+        try:
+            out = subprocess.run(args, check=True, capture_output=True, text=True)
+        except (OSError, subprocess.CalledProcessError):
+            continue
+        name = out.stdout.strip()
+        if name:
+            return name
+    return ""
+
+
+def local_app_client(rex: Path) -> str:
+    """Pick this machine's Rex app client so theme import is unambiguous."""
+    out = subprocess.run(
+        [str(rex), "client", "ls", "--json"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    clients = json.loads(out.stdout).get("clients") or []
+    apps = []
+    for client in clients:
+        info = client.get("info") or {}
+        principal = client.get("principal") or {}
+        if info.get("kind") != "app":
+            continue
+        if principal.get("transport") != "unix":
+            continue
+        label = info.get("label") or client.get("client_id")
+        if label:
+            apps.append(label)
+    if not apps:
+        raise SystemExit("no local Rex app client connected; open Rex first")
+    host = local_hostname().casefold()
+    for label in apps:
+        if label.casefold() == host:
+            return label
+    if len(apps) == 1:
+        return apps[0]
+    raise SystemExit(f"ambiguous local Rex app clients: {', '.join(apps)}")
 
 
 def import_theme_if_needed(data: dict) -> str:
@@ -90,8 +161,17 @@ def import_theme_if_needed(data: dict) -> str:
         raise SystemExit(f"missing theme file: {THEME_FILE}")
 
     ensure_remote_control()
+    rex = rex_bin()
+    client = local_app_client(rex)
     subprocess.run(
-        [str(rex_bin()), "do", "client.theme.import", f"path={THEME_FILE}"],
+        [
+            str(rex),
+            "-C",
+            client,
+            "do",
+            "client.theme.import",
+            f"path={THEME_FILE}",
+        ],
         check=True,
     )
 
@@ -127,13 +207,14 @@ def main() -> int:
         return 1
 
     ensure_remote_control()
-    apply_font_and_cursor()
+    apply_workspace_settings()
     data = load_prefs()
     theme_id = import_theme_if_needed(data)
     print(f"font={FONT_NAME} size={FONT_SIZE}")
     print(f"cursor={CURSOR_STYLE} blink_ms={CURSOR_BLINK_MS} shader={CURSOR_SHADER}")
     print(f"theme={BUNDLE_THEME_NAME} id={theme_id}")
-    print("remote_control=on")
+    print("tabs=vertical pane_glass=on inactive_fade=none")
+    print("remote_control=on automatic_restart=on")
     return 0
 
 
