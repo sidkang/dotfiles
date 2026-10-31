@@ -45,7 +45,6 @@ AppRule = namedtuple(
     defaults=(None, "focus_only", None),
 )
 KittyHotkeyRule = namedtuple("KittyHotkeyRule", "hide_workspace launch_args")
-VisibleWorkspace = namedtuple("VisibleWorkspace", "name monitor_id is_focused")
 
 
 APP_RULES = {
@@ -154,65 +153,13 @@ def focused_workspace() -> str:
     )
 
 
-def list_visible_workspaces() -> list[VisibleWorkspace]:
-    rows = check_cmd(
-        (
-            "aerospace",
-            "list-workspaces",
-            "--monitor",
-            "all",
-            "--visible",
-            "--format",
-            "%{workspace}\t%{monitor-id}\t%{workspace-is-focused}",
-        )
-    )
-    workspaces = []
-    for line in rows.splitlines():
-        if not line:
-            continue
-        name, monitor_id, is_focused = line.split("\t")
-        workspaces.append(
-            VisibleWorkspace(
-                name=name,
-                monitor_id=monitor_id,
-                is_focused=is_focused == "true",
-            )
-        )
-    return workspaces
-
-
 def list_window_ids(*args: str) -> list[str]:
     output = check_cmd(("aerospace", "list-windows", *args, "--format", "%{window-id}"))
     return [line for line in output.splitlines() if line]
 
 
-def list_windows(*args: str) -> list[tuple[str, ...]]:
-    output = check_cmd(
-        (
-            "aerospace",
-            "list-windows",
-            *args,
-            "--format",
-            "%{window-id}\t%{workspace}\t%{app-bundle-id}",
-        )
-    )
-    return [tuple(line.split("\t")) for line in output.splitlines() if line]
-
-
 def focus_window(window_id: str) -> None:
     check_cmd(("aerospace", "focus", "--window-id", window_id))
-
-
-def focus_workspace(workspace: str) -> None:
-    check_cmd(("aerospace", "workspace", workspace))
-
-
-def focus_monitor(monitor_id: str) -> None:
-    check_cmd(("aerospace", "focus-monitor", monitor_id))
-
-
-def summon_workspace(workspace: str) -> None:
-    check_cmd(("aerospace", "summon-workspace", workspace))
 
 
 def focus_window_robustly(window_id: str) -> None:
@@ -435,8 +382,13 @@ def list_rex_os_windows() -> list[tuple[str, str, str, bool]]:
 
 
 # One `aerospace eval` process answers every question the toggle needs.
+# Titles come from `--json` because resolving `%{window-title}` inside a larger
+# format string costs several extra milliseconds per call (it is an AX read)
+# and spikes under load; the JSON path stays flat. The remaining fields are
+# cheap and stay in `--format`.
 HOTKEY_STATE_SCRIPT = (
-    'list-windows --all --format "%{window-id}|%{workspace}|%{app-bundle-id}|%{window-title}|%{workspace-is-focused}"; '
+    'list-windows --all --json; '
+    'list-windows --all --format "W|%{window-id}|%{workspace}|%{app-bundle-id}|%{workspace-is-focused}"; '
     'list-windows --focused --format "#F|%{window-id}"; '
     'list-workspaces --monitor focused --visible --format "#W|%{workspace}"'
 )
@@ -447,25 +399,49 @@ def rex_hotkey_snapshot() -> tuple[
 ]:
     """Rex windows, the focused window id, and the focused workspace in one call."""
     output = check_cmd(("aerospace", "eval", HOTKEY_STATE_SCRIPT))
-    windows: list[tuple[str, str, str, bool]] = []
+
+    titles: dict[str, str] = {}
+    placement: dict[str, tuple[str, str, bool]] = {}
     focused_window: str | None = None
     focused_workspace: str | None = None
+    json_lines: list[str] = []
+    reading_json = True
+
     for line in output.splitlines():
+        if reading_json:
+            if line.startswith("W|"):
+                reading_json = False
+            else:
+                json_lines.append(line)
+                continue
         if not line:
             continue
         if line.startswith("#F|"):
             focused_window = line[3:] or None
-            continue
-        if line.startswith("#W|"):
+        elif line.startswith("#W|"):
             focused_workspace = line[3:] or None
-            continue
-        parts = line.split("|")
-        while len(parts) < 5:
-            parts.append("")
-        window_id, workspace, bundle_id, title, workspace_focused = parts[:5]
+        elif line.startswith("W|"):
+            parts = line[2:].split("|")
+            while len(parts) < 4:
+                parts.append("")
+            window_id, workspace, bundle_id, workspace_focused = parts[:4]
+            placement[window_id] = (
+                workspace,
+                bundle_id,
+                workspace_focused == "true",
+            )
+
+    if json_lines:
+        for item in json.loads("\n".join(json_lines) or "[]"):
+            window_id = item.get("window-id")
+            if window_id is not None:
+                titles[str(window_id)] = item.get("window-title") or ""
+
+    windows: list[tuple[str, str, str, bool]] = []
+    for window_id, (workspace, bundle_id, workspace_focused) in placement.items():
         if bundle_id == REX_BUNDLE_ID:
             windows.append(
-                (window_id, workspace, title, workspace_focused == "true")
+                (window_id, workspace, titles.get(window_id, ""), workspace_focused)
             )
     return windows, focused_window, focused_workspace
 
@@ -672,18 +648,6 @@ def toggle_rex_hotkey() -> None:
     )
 
 
-def cycle_win(direction: str) -> None:
-    window_ids = list_window_ids("--workspace", "focused")
-    if not window_ids:
-        notify("No window in workspace.", ERROR)
-        return
-
-    try:
-        focus_window(next_id(window_ids, focused_window_id(), direction))
-    except ValueError:
-        notify("Invalid direction", ERROR)
-
-
 def cycle_app_win(direction: str) -> None:
     bundle_id = focused_window_value("%{app-bundle-id}")
     if bundle_id is None:
@@ -727,51 +691,6 @@ def move_ghost_win() -> None:
         move_window_to_workspace(window_id, GHOST_WORKSPACE)
 
 
-def swap_workspace() -> None:
-    visible_workspaces = list_visible_workspaces()
-    if len(visible_workspaces) != 2:
-        notify("swap_workspace requires exactly 2 visible workspaces", ERROR)
-        return
-
-    focused = next((ws for ws in visible_workspaces if ws.is_focused), None)
-    if focused is None:
-        notify("Failed to find focused workspace", ERROR)
-        return
-
-    other = next(
-        (ws for ws in visible_workspaces if ws.monitor_id != focused.monitor_id), None
-    )
-    if other is None:
-        notify("Failed to find the other monitor workspace", ERROR)
-        return
-
-    # In AeroSpace, summoning the focused workspace onto the other monitor already
-    # displaces that monitor's visible workspace. So the swap is effectively done
-    # by a single summon. Re-focus the original workspace name afterwards so the
-    # same workspace remains focused after the swap.
-    try:
-        focus_monitor(other.monitor_id)
-        summon_workspace(focused.name)
-        focus_workspace(focused.name)
-    except subprocess.CalledProcessError as exc:
-        message = exc.stderr.strip() or exc.stdout.strip() or str(exc)
-        notify(f"swap_workspace failed: {message}", ERROR)
-        return
-
-    visible_after = list_visible_workspaces()
-    focused_after = next((ws for ws in visible_after if ws.name == focused.name), None)
-    other_after = next((ws for ws in visible_after if ws.name == other.name), None)
-    if focused_after is None or other_after is None:
-        notify("swap_workspace failed to keep both workspaces visible", ERROR)
-        return
-
-    if (
-        focused_after.monitor_id != other.monitor_id
-        or other_after.monitor_id != focused.monitor_id
-    ):
-        notify("swap_workspace finished with unexpected workspace placement", ERROR)
-
-
 def main(argv: Sequence[str]) -> int:
     if len(argv) < 2:
         notify("invalid args", ERROR)
@@ -785,8 +704,6 @@ def main(argv: Sequence[str]) -> int:
             toggle_kitty_hotkey()
         case ["rex", "toggle-hotkey"]:
             toggle_rex_hotkey()
-        case ["window", "cycle", direction]:
-            cycle_win(direction)
         case ["window", "cycle-app", direction]:
             cycle_app_win(direction)
         case ["window", "smart-move", axis, size, direction]:
@@ -795,8 +712,6 @@ def main(argv: Sequence[str]) -> int:
             smart_resize(axis, size)
         case ["window", "move-ghost"]:
             move_ghost_win()
-        case ["workspace", "swap-visible"]:
-            swap_workspace()
         case _:
             notify("invalid args", ERROR)
             print(":(")
