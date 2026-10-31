@@ -3,7 +3,7 @@
   {:default true :sim 50 :delay 180 :alone 150 :held 140}}
  :templates {:kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
              :kitty-py "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';python3 $HOME/.config/kitty/kitty-action.py %s"
-             :rex-do "\"$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex\" do %s"
+             :rex-do "\"$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex\" -C \"$(scutil --get LocalHostName)\" do %s"
              :as "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';aerospace %s"
              :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
              :sh "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';%s"
