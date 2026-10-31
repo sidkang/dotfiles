@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import fcntl
 import json
 import os
 import subprocess
@@ -10,6 +11,7 @@ import sys
 import time
 from collections import namedtuple
 from collections.abc import Sequence
+from contextlib import contextmanager
 from pathlib import Path
 
 
@@ -34,6 +36,7 @@ HOTKEY_ID_FILE = HOTKEY_STATE_DIR / "hotkey-id"
 HOTKEY_HIDDEN_FILE = HOTKEY_STATE_DIR / "hotkey-hidden"
 HOTKEY_KEEP_FILE = HOTKEY_STATE_DIR / "hotkey-keep"
 HOTKEY_WS_FILE = HOTKEY_STATE_DIR / "hotkey-ws"
+HOTKEY_LOCK_FILE = HOTKEY_STATE_DIR / "hotkey-lock"
 FOCUS_RETRY_DELAY_SEC = 0.05
 HS_CLI = os.path.expanduser("~/.local/bin/hs")
 URL_SAFE = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~")
@@ -379,6 +382,9 @@ def hotkey_cached_id() -> str | None:
 
 
 def remember_hotkey_window(window_id: str) -> None:
+    # The workspace-change hook reads this file; skip the write when unchanged.
+    if hotkey_cached_id() == window_id:
+        return
     HOTKEY_STATE_DIR.mkdir(parents=True, exist_ok=True)
     HOTKEY_ID_FILE.write_text(window_id)
 
@@ -402,10 +408,6 @@ def mark_hotkey_hidden(hidden: bool) -> None:
             pass
 
 
-def hotkey_keep_enabled() -> bool:
-    return HOTKEY_KEEP_FILE.exists()
-
-
 def set_hotkey_keep(enabled: bool) -> None:
     HOTKEY_STATE_DIR.mkdir(parents=True, exist_ok=True)
     if enabled:
@@ -417,29 +419,21 @@ def set_hotkey_keep(enabled: bool) -> None:
             pass
 
 
-def hotkey_quick_state() -> tuple[str | None, str | None, str]:
-    """Focused workspace, window id, and window title in one cheap call.
+@contextmanager
+def hotkey_lock():
+    """Yield True when this process owns the toggle, False when another does.
 
-    Only the focused window is read, so resolving its title stays cheap.
-    All three come back empty when the workspace has no window, where
-    AeroSpace exits non-zero with "No window is focused".
+    A second press during a slow launch would otherwise see no hotkey window
+    yet and open another one (plus another throwaway session).
     """
-    result = run_cmd(
-        (
-            "aerospace",
-            "eval",
-            'list-windows --focused --format "#F|%{workspace}|%{window-id}|%{window-title}"',
-        )
-    )
-    if result.returncode != 0:
-        return None, None, ""
-    for line in result.stdout.splitlines():
-        if line.startswith("#F|"):
-            parts = line[3:].split("|", 2)
-            while len(parts) < 3:
-                parts.append("")
-            return parts[0] or None, parts[1] or None, parts[2]
-    return None, None, ""
+    HOTKEY_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    with open(HOTKEY_LOCK_FILE, "w") as handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            yield False
+            return
+        yield True
 
 
 def resolve_show_workspace(candidate: str | None) -> str:
@@ -466,51 +460,114 @@ def remember_shown_workspace(workspace: str) -> None:
     HOTKEY_WS_FILE.write_text(workspace)
 
 
+RexWindow = namedtuple("RexWindow", "window_id workspace title")
+
+FOCUSED_WORKSPACE_QUERY = (
+    'list-workspaces --monitor focused --visible --format "#W|%{workspace}"'
+)
+FOCUSED_WINDOW_QUERY = 'list-windows --focused --format "#F|%{window-id}"'
+# One `aerospace eval` answers every question a toggle needs. Titles are read
+# only for Rex windows (each is an AX call). The focused window comes last:
+# AeroSpace fails there on an empty workspace, and that must not cost the rest.
+HOTKEY_STATE_SCRIPT = "; ".join(
+    (
+        f"list-windows --monitor all --app-bundle-id {REX_BUNDLE_ID} "
+        '--format "R|%{window-id}|%{workspace}|%{window-title}"',
+        FOCUSED_WORKSPACE_QUERY,
+        FOCUSED_WINDOW_QUERY,
+    )
+)
+
+
+def aerospace_eval(*commands: str) -> subprocess.CompletedProcess[str]:
+    return run_cmd(("aerospace", "eval", "; ".join(commands)))
+
+
+def parse_hotkey_state(
+    output: str,
+) -> tuple[list[RexWindow], str | None, str | None]:
+    """Rex windows, the focused workspace, and the focused window id."""
+    windows: list[RexWindow] = []
+    workspace: str | None = None
+    focused: str | None = None
+    for line in output.splitlines():
+        if line.startswith("R|"):
+            # The title is last because it may contain "|".
+            parts = line[2:].split("|", 2)
+            if len(parts) == 3:
+                windows.append(RexWindow(*parts))
+        elif line.startswith("#W|"):
+            workspace = line[3:] or None
+        elif line.startswith("#F|"):
+            focused = line[3:] or None
+    return windows, workspace, focused
+
+
+def hotkey_state() -> tuple[list[RexWindow], str, str | None]:
+    result = run_cmd(("aerospace", "eval", HOTKEY_STATE_SCRIPT))
+    windows, workspace, focused = parse_hotkey_state(result.stdout)
+    if workspace is None:
+        raise RuntimeError(result.stderr.strip() or "AeroSpace returned no workspace")
+    return windows, workspace, focused
+
+
+def find_hotkey_window(windows: Sequence[RexWindow]) -> tuple[RexWindow | None, bool]:
+    """The hotkey window, and whether it lost its session.
+
+    Killing the session leaves its macOS window behind, showing whichever
+    session the app fell back to. Reusing that window (found by its recorded
+    id) keeps stray windows from piling up next to the user's real one.
+    """
+    cached = hotkey_cached_id()
+    matches = [w for w in windows if w.title.endswith(REX_HOTKEY_TITLE_SUFFIX)]
+    if matches:
+        if len(matches) > 1:
+            notify("Multiple Rex hotkey windows found", ERROR)
+        return next((w for w in matches if w.window_id == cached), matches[0]), False
+    return next((w for w in windows if w.window_id == cached), None), True
+
+
 def hide_hotkey(window_id: str) -> bool:
-    result = run_cmd(
-        (
-            "aerospace",
-            "eval",
-            f"move-node-to-workspace --window-id {window_id} {REX_HOTKEY_HIDE_WORKSPACE}",
-        )
+    result = aerospace_eval(
+        f"move-node-to-workspace --window-id {window_id} {REX_HOTKEY_HIDE_WORKSPACE}",
+        FOCUSED_WORKSPACE_QUERY,
     )
     if result.returncode != 0:
         return False
+    remember_hotkey_window(window_id)
     mark_hotkey_hidden(True)
 
     # The window is parked; make sure the user is not parked with it.
-    if focused_workspace() == REX_HOTKEY_HIDE_WORKSPACE:
+    if parse_hotkey_state(result.stdout)[1] == REX_HOTKEY_HIDE_WORKSPACE:
         fallback = resolve_show_workspace(None)
         check_cmd(("aerospace", "workspace", fallback))
         remember_shown_workspace(fallback)
     return True
 
 
-def show_hotkey(window_id: str, target_workspace: str | None) -> bool:
-    """Summon the hotkey window, float it, and centre it. False means it is gone."""
-    target_workspace = resolve_show_workspace(
-        target_workspace or focused_workspace()
-    )
+def show_hotkey(window_id: str, workspace: str | None) -> tuple[bool, str | None]:
+    """Summon the window and float it; also report which window ended up focused.
 
-    result = run_cmd(
-        (
-            "aerospace",
-            "eval",
-            f"move-node-to-workspace --focus-follows-window --window-id {window_id} {target_workspace}; "
-            f"focus --window-id {window_id}; "
-            # Target the window explicitly: floating whatever happens to be
-            # focused would catch the previously active window instead.
-            f"layout --window-id {window_id} floating",
-        )
+    False means the window is gone.
+    """
+    target = resolve_show_workspace(workspace)
+    result = aerospace_eval(
+        f"move-node-to-workspace --focus-follows-window --window-id {window_id} {target}",
+        f"focus --window-id {window_id}",
+        # Target the window explicitly: floating whatever happens to be
+        # focused would catch the previously active window instead.
+        f"layout --window-id {window_id} floating",
+        FOCUSED_WINDOW_QUERY,
     )
     if result.returncode != 0:
         # A non-zero status here means the window id no longer exists.
         # "already belongs to workspace" is only a warning, not an error.
-        return False
+        return False, None
 
+    remember_hotkey_window(window_id)
     mark_hotkey_hidden(False)
-    remember_shown_workspace(target_workspace)
-    return True
+    remember_shown_workspace(target)
+    return True, parse_hotkey_state(result.stdout)[2]
 
 
 def rex_bin() -> str:
@@ -532,98 +589,23 @@ def rex_json(*args: str):
     return json.loads(text)
 
 
-def list_rex_os_windows() -> list[tuple[str, str, str, bool]]:
-    return rex_hotkey_snapshot()[0]
-
-
-# One `aerospace eval` process answers every question the toggle needs.
-# Titles come from `--json` because resolving `%{window-title}` inside a larger
-# format string costs several extra milliseconds per call (it is an AX read)
-# and spikes under load; the JSON path stays flat. The remaining fields are
-# cheap and stay in `--format`.
-HOTKEY_STATE_SCRIPT = (
-    'list-windows --all --json; '
-    'list-windows --all --format "W|%{window-id}|%{workspace}|%{app-bundle-id}|%{workspace-is-focused}"; '
-    'list-windows --focused --format "#F|%{window-id}"; '
-    'list-workspaces --monitor focused --visible --format "#W|%{workspace}"'
-)
-
-
-def rex_hotkey_snapshot() -> tuple[
-    list[tuple[str, str, str, bool]], str | None, str | None
-]:
-    """Rex windows, the focused window id, and the focused workspace in one call."""
-    output = check_cmd(("aerospace", "eval", HOTKEY_STATE_SCRIPT))
-
-    titles: dict[str, str] = {}
-    placement: dict[str, tuple[str, str, bool]] = {}
-    focused_window: str | None = None
-    focused_workspace: str | None = None
-    json_lines: list[str] = []
-    reading_json = True
-
-    for line in output.splitlines():
-        if reading_json:
-            if line.startswith("W|"):
-                reading_json = False
-            else:
-                json_lines.append(line)
-                continue
-        if not line:
-            continue
-        if line.startswith("#F|"):
-            focused_window = line[3:] or None
-        elif line.startswith("#W|"):
-            focused_workspace = line[3:] or None
-        elif line.startswith("W|"):
-            parts = line[2:].split("|")
-            while len(parts) < 4:
-                parts.append("")
-            window_id, workspace, bundle_id, workspace_focused = parts[:4]
-            placement[window_id] = (
-                workspace,
-                bundle_id,
-                workspace_focused == "true",
-            )
-
-    if json_lines:
-        for item in json.loads("\n".join(json_lines) or "[]"):
-            window_id = item.get("window-id")
-            if window_id is not None:
-                titles[str(window_id)] = item.get("window-title") or ""
-
-    windows: list[tuple[str, str, str, bool]] = []
-    for window_id, (workspace, bundle_id, workspace_focused) in placement.items():
-        if bundle_id == REX_BUNDLE_ID:
-            windows.append(
-                (window_id, workspace, titles.get(window_id, ""), workspace_focused)
-            )
-    return windows, focused_window, focused_workspace
-
-
-def find_rex_hotkey_window() -> tuple[str, str] | None:
-    windows, _focused_window, _focused_workspace = rex_hotkey_snapshot()
-    matches = [
-        (window_id, workspace)
-        for window_id, workspace, title, _focused in windows
-        if title.endswith(REX_HOTKEY_TITLE_SUFFIX)
-    ]
-    if not matches:
-        return None
-    if len(matches) > 1:
-        notify("Multiple Rex hotkey windows found", ERROR)
-    return matches[0]
-
-
 def connected_rex_app_client_id() -> str | None:
+    """This Mac's Rex app client.
+
+    Rex apps on other Macs also connect to this server, over TCP. Driving one
+    of them opens windows and throwaway sessions on that machine, where the
+    orphan cleanup cannot reach. Only the local app connects over a unix socket.
+    """
     payload = rex_json("client", "ls")
     if not isinstance(payload, dict):
         return None
     for client in payload.get("clients", []):
         info = client.get("info") or {}
+        principal = client.get("principal") or {}
         if (
             client.get("connection_state") == "connected"
             and info.get("kind") == "app"
+            and principal.get("transport") == "unix"
         ):
             return client.get("client_id")
     return None
@@ -654,41 +636,51 @@ def ensure_rex_app_client() -> str:
     raise TimeoutError("Rex app client did not connect")
 
 
-def list_rex_session_labels() -> set[str]:
+def rex_session_ids() -> dict[str, str]:
     payload = rex_json("ls")
     if not isinstance(payload, dict):
-        return set()
-    labels = set()
-    for session in payload.get("sessions", []):
-        label = session.get("label")
-        if label:
-            labels.add(label)
-    return labels
+        return {}
+    return {
+        session["label"]: session.get("session_id", "")
+        for session in payload.get("sessions", [])
+        if session.get("label")
+    }
 
 
-def ensure_rex_hotkey_session() -> str:
-    payload = rex_json("ls")
-    if isinstance(payload, dict):
-        for session in payload.get("sessions", []):
-            if session.get("label") == REX_HOTKEY_SESSION:
-                session_id = session.get("session_id")
-                if session_id:
-                    return session_id
+def ensure_rex_hotkey_session() -> tuple[str, set[str]]:
+    """The hotkey session id, creating it if needed, and all session labels."""
+    sessions = rex_session_ids()
+    labels = set(sessions)
+    session_id = sessions.get(REX_HOTKEY_SESSION)
+    if session_id:
+        return session_id, labels
 
     created = rex_json("new", REX_HOTKEY_SESSION)
     if not isinstance(created, dict) or not created.get("session_id"):
         notify("Failed to create Rex hotkey session", ERROR)
         raise RuntimeError("Failed to create Rex hotkey session")
-    return created["session_id"]
+    labels.add(REX_HOTKEY_SESSION)
+    return created["session_id"], labels
 
 
-def wait_for_new_rex_window(before_ids: set[str]) -> str | None:
+def select_hotkey_session(
+    window_id: str, focused_id: str | None, session_id: str, client_id: str
+) -> bool:
+    """Show the hotkey session in its window; the app acts on its active window."""
+    if focused_id != window_id:
+        focus_window_robustly(window_id)
+    select = rex_run(
+        "-C", client_id, "do", "session.select", f"session_id={session_id}"
+    )
+    return select.returncode == 0
+
+
+def wait_for_new_rex_window(before_ids: set[str]) -> RexWindow | None:
     deadline = time.time() + REX_WINDOW_WAIT_SEC
     while time.time() < deadline:
-        after = {window_id for window_id, _ws, _title, _foc in list_rex_os_windows()}
-        created = after - before_ids
+        created = [w for w in hotkey_state()[0] if w.window_id not in before_ids]
         if len(created) == 1:
-            return next(iter(created))
+            return created[0]
         if len(created) > 1:
             notify("Multiple new Rex windows appeared", ERROR)
             return None
@@ -697,34 +689,20 @@ def wait_for_new_rex_window(before_ids: set[str]) -> str | None:
 
 
 def launch_rex_hotkey() -> None:
-    session_id = ensure_rex_hotkey_session()
+    session_id, before_labels = ensure_rex_hotkey_session()
     client_id = ensure_rex_app_client()
-    windows = list_rex_os_windows()
-    before_ids = {window_id for window_id, _ws, _title, _foc in windows}
-    before_labels = list_rex_session_labels()
+    # Read the windows only now: starting the app may have restored some.
+    windows, current_workspace, focused_id = hotkey_state()
 
-    existing = [
-        (window_id, workspace)
-        for window_id, workspace, title, _foc in windows
-        if title.endswith(REX_HOTKEY_TITLE_SUFFIX)
-    ]
-    if existing:
-        current_workspace = next(
-            (workspace for _id, workspace, _title, foc in windows if foc),
-            focused_workspace(),
-        )
-        check_cmd(
-            (
-                "aerospace",
-                "eval",
-                f"move-node-to-workspace --focus-follows-window --window-id {existing[0][0]} {current_workspace}; "
-                f"focus --window-id {existing[0][0]}; "
-                f"layout --window-id {existing[0][0]} floating",
+    existing, lost_session = find_hotkey_window(windows)
+    if existing is not None:
+        ok, focused_id = show_hotkey(existing.window_id, current_workspace)
+        if ok and lost_session:
+            ok = select_hotkey_session(
+                existing.window_id, focused_id, session_id, client_id
             )
-        )
-        remember_hotkey_window(existing[0][0])
-        mark_hotkey_hidden(False)
-        remember_shown_workspace(resolve_show_workspace(current_workspace))
+        if not ok:
+            notify("Failed to show Rex hotkey session", ERROR)
         return
 
     result = rex_run("-C", client_id, "do", "client.window.new")
@@ -732,128 +710,62 @@ def launch_rex_hotkey() -> None:
         notify("Failed to open Rex window", ERROR)
         return
 
-    window_id = wait_for_new_rex_window(before_ids)
-    if window_id is None:
-        # Reuse an existing Rex window if the app refused a second OS window.
-        windows = list_rex_os_windows()
-        if not windows:
+    try:
+        window = wait_for_new_rex_window({w.window_id for w in windows})
+        if window is None:
+            # Never fall back to another Rex window: that is the user's own.
             notify("Rex hotkey window did not appear", ERROR)
             return
-        window_id = windows[0][0]
-
-    focus_window_robustly(window_id)
-    select = rex_run(
-        "-C",
-        client_id,
-        "do",
-        "session.select",
-        f"session_id={session_id}",
-    )
-    if select.returncode != 0:
-        notify("Failed to show Rex hotkey session", ERROR)
-        return
-
-    # client.window.new may create a throwaway session; drop orphans we just added.
-    for label in sorted(list_rex_session_labels() - before_labels):
-        if label != REX_HOTKEY_SESSION:
-            rex_run("session", "kill", label)
-
-    hotkey_window = find_rex_hotkey_window()
-    if hotkey_window is None:
-        notify("Rex hotkey window title did not update", ERROR)
-        return
-    # A freshly created window is tiled; launch does not go through
-    # show_hotkey, so float it here.
-    check_cmd(
-        (
-            "aerospace",
-            "eval",
-            f"focus --window-id {hotkey_window[0]}; "
-            f"layout --window-id {hotkey_window[0]} floating",
-        )
-    )
-
-    # Seed the fast path so the next toggle skips the full window scan.
-    remember_hotkey_window(hotkey_window[0])
-    mark_hotkey_hidden(False)
-    remember_shown_workspace(resolve_show_workspace(hotkey_window[1]))
-
-
-def present_hotkey(window_id: str, target_workspace: str) -> bool:
-    """Show the window, giving it back the hotkey session first if it lost it.
-
-    Killing the session leaves its macOS window behind, showing whichever
-    session the app fell back to. Reusing that window keeps stray windows
-    from piling up next to the user's real one.
-    """
-    if not show_hotkey(window_id, target_workspace):
-        return False
-
-    _ws, focused_id, title = hotkey_quick_state()
-    if focused_id != window_id or title.endswith(REX_HOTKEY_TITLE_SUFFIX):
-        return True
-
-    session_id = ensure_rex_hotkey_session()
-    client_id = ensure_rex_app_client()
-    select = rex_run(
-        "-C", client_id, "do", "session.select", f"session_id={session_id}"
-    )
-    if select.returncode != 0:
-        return False
-
-    return show_hotkey(window_id, target_workspace)
+        # A fresh window is tiled and shows a throwaway session: float it,
+        # then give it the hotkey session.
+        ok, focused_id = show_hotkey(window.window_id, window.workspace)
+        if not ok or not select_hotkey_session(
+            window.window_id, focused_id, session_id, client_id
+        ):
+            notify("Failed to show Rex hotkey session", ERROR)
+    finally:
+        # client.window.new may create a throwaway session; drop what it added.
+        for label in sorted(set(rex_session_ids()) - before_labels):
+            if label != REX_HOTKEY_SESSION:
+                rex_run("session", "kill", label)
 
 
 def toggle_rex_hotkey() -> None:
     """Show the hotkey window, or hide it when it is already on screen."""
-    current_ws, focused_id, focused_title = hotkey_quick_state()
-    if current_ws is None:
-        current_ws = focused_workspace()
-
-    cached_id = hotkey_cached_id()
-    if cached_id is not None:
-        ours_and_valid = focused_id == cached_id and focused_title.endswith(
-            REX_HOTKEY_TITLE_SUFFIX
-        )
-        # Not focused, but recorded as on screen right here.
-        visible_here = (
-            focused_id != cached_id
-            and not HOTKEY_HIDDEN_FILE.exists()
-            and hotkey_shown_workspace() == current_ws
-        )
-
-        if ours_and_valid or visible_here:
-            if hide_hotkey(cached_id):
-                return
-        elif present_hotkey(cached_id, current_ws):
+    with hotkey_lock() as owned:
+        if not owned:
             return
 
-        # The cached window is gone; fall back to a full scan.
-        clear_hotkey_cache()
+        windows, current_workspace, focused_id = hotkey_state()
+        hotkey, lost_session = find_hotkey_window(windows)
+        if hotkey is None:
+            clear_hotkey_cache()
+            launch_rex_hotkey()
+            return
 
-    toggle_rex_hotkey_slow()
+        # Where the window actually is decides the action, not recorded state.
+        if (
+            not lost_session
+            and hotkey.workspace == current_workspace
+            and current_workspace != REX_HOTKEY_HIDE_WORKSPACE
+        ):
+            if not hide_hotkey(hotkey.window_id):
+                clear_hotkey_cache()
+                notify(f"Failed to hide Rex hotkey window {hotkey.window_id}", ERROR)
+            return
 
-
-def toggle_rex_hotkey_slow() -> None:
-    windows, _focused_window, focused_workspace_name = rex_hotkey_snapshot()
-    matches = [
-        (window_id, workspace)
-        for window_id, workspace, title, _foc in windows
-        if title.endswith(REX_HOTKEY_TITLE_SUFFIX)
-    ]
-    if not matches:
-        launch_rex_hotkey()
-        return
-    if len(matches) > 1:
-        notify("Multiple Rex hotkey windows found", ERROR)
-
-    window_id, window_workspace = matches[0]
-    remember_hotkey_window(window_id)
-
-    target = focused_workspace_name or hotkey_quick_state()[0] or focused_workspace()
-    if show_hotkey(window_id, target):
-        return
-    notify(f"Failed to show Rex hotkey window {window_id}", ERROR)
+        ok, focused_id = show_hotkey(hotkey.window_id, current_workspace)
+        if not ok:
+            clear_hotkey_cache()
+            notify(f"Failed to show Rex hotkey window {hotkey.window_id}", ERROR)
+            return
+        if lost_session:
+            session_id, _labels = ensure_rex_hotkey_session()
+            client_id = ensure_rex_app_client()
+            if not select_hotkey_session(
+                hotkey.window_id, focused_id, session_id, client_id
+            ):
+                notify("Failed to restore Rex hotkey session", ERROR)
 
 
 def cycle_app_win(direction: str) -> None:
