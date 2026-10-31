@@ -22,7 +22,7 @@ KITTY_BUNDLE_ID = "net.kovidgoyal.kitty"
 KITTY_HOTKEY_TITLE = "kitty-hotkey"
 KITTY_HOTKEY_SESSION = "hotkey"
 REX_BUNDLE_ID = "com.superlogical.rex"
-REX_HOTKEY_SESSION = "NEXT"
+REX_HOTKEY_SESSION = "arc"
 # Rex titles read "<block title> - <session label>".
 REX_HOTKEY_TITLE_SUFFIX = f" - {REX_HOTKEY_SESSION}"
 REX_HOTKEY_HIDE_WORKSPACE = "T"
