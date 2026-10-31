@@ -3,6 +3,7 @@
   {:default true :sim 50 :delay 180 :alone 150 :held 140}}
  :templates {:kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
              :kitty-py "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';python3 $HOME/.config/kitty/kitty-action.py %s"
+             :rex-do "\"$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex\" do %s"
              :as "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';aerospace %s"
              :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
              :sh "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';%s"
@@ -16,8 +17,9 @@
  :layers {}
  :applications {:chrome ["^com\\.google\\.Chrome$"]
                 :logseq ["^com\\.electron\\.logseq$"]
-                :terminals ["^com\\.googlecode\\.iterm2$" "^net\\.kovidgoyal\\.kitty$"]
+                :terminals ["^com\\.googlecode\\.iterm2$" "^net\\.kovidgoyal\\.kitty$" "^com\\.superlogical\\.rex$"]
                 :kitty ["^net\\.kovidgoyal\\.kitty$"]
+                :rex ["^com\\.superlogical\\.rex$"]
                 :vscode ["^com\\.microsoft\\.VSCode$"]
                 :chatgpt-app ["^com\\.openai\\.chat$"]
                 :office ["^com\\.microsoft\\.Word$" "^com\\.microsoft\\.Excel$"]}
@@ -56,7 +58,7 @@
                  [:escape
                   ["escape-mode" 1]
                   nil
-                  {:delayed {:invoked [[:as-py "kitty toggle-hotkey"] ["escape-mode" 0]]
+                  {:delayed {:invoked [[:as-py "rex toggle-hotkey"] ["escape-mode" 0]]
                              :canceled ["escape-mode" 0]}}]
 
                  [:f1 [:as "focus-back-and-forth"]]
@@ -236,6 +238,40 @@
                  [:m [:kitty-py "toggle worker"]]
                  [:x [:kitty-do "close-window --match state:focused"]]
                  [:z [:kitty-do "action -m state:focused toggle_layout stack"]]
+
+                 [:condi :rex :app-mode]
+                 [:1 [:rex-do "client.tab.goto index=1"]]
+                 [:2 [:rex-do "client.tab.goto index=2"]]
+                 [:3 [:rex-do "client.tab.goto index=3"]]
+                 [:4 [:rex-do "client.tab.goto index=4"]]
+                 [:5 [:rex-do "client.tab.goto index=5"]]
+                 [:6 [:rex-do "client.tab.goto index=6"]]
+                 [:7 [:rex-do "client.tab.goto index=7"]]
+                 [:8 [:rex-do "client.tab.goto index=8"]]
+                 [:comma  [:rex-do "client.tab.previous"]]
+                 [:period [:rex-do "client.tab.next"]]
+                 [:up_arrow [:rex-do "client.prompt.previous"]]
+                 [:down_arrow [:rex-do "client.prompt.next"]]
+                 [:p [:rex-do "client.palette.toggle"]]
+                 [:v [:rex-do "pane.split direction=down"]]
+                 [:s [:rex-do "pane.split direction=right"]]
+                 [:t [:rex-do "client.tab.new"]]
+                 [:!St [:rex-do "client.tab.rename"]]
+                 [:h [:rex-do "pane.focus.left"]]
+                 [:j [:rex-do "pane.focus.down"]]
+                 [:k [:rex-do "pane.focus.up"]]
+                 [:l [:rex-do "pane.focus.right"]]
+                 [:!Sh [:rex-do "pane.move.left"]]
+                 [:!Sj [:rex-do "pane.move.down"]]
+                 [:!Sk [:rex-do "pane.move.up"]]
+                 [:!Sl [:rex-do "pane.move.right"]]
+                 [:!Oh [:rex-do "pane.resize direction=left amount=5"]]
+                 [:!Oj [:rex-do "pane.resize direction=down amount=5"]]
+                 [:!Ok [:rex-do "pane.resize direction=up amount=5"]]
+                 [:!Ol [:rex-do "pane.resize direction=right amount=5"]]
+                 [:equal_sign [:rex-do "pane.balance"]]
+                 [:x [:rex-do "pane.close"]]
+                 [:z [:rex-do "pane.zoom"]]
 
                  [:condi :chatgpt-app :app-mode]
                  [:1 [:!C1]]

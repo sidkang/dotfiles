@@ -1,0 +1,11 @@
+["rex:plan"]
+description = "Preview only rex theme deployment"
+run = "mise dot apply --dry-run \"~/.config/rex/themes\""
+
+["rex:apply"]
+description = "Deploy only rex theme files; no installation or settings"
+run = "mise dot apply \"~/.config/rex/themes\""
+
+["rex:settings"]
+description = "Apply Rex font, cursor, Catppuccin Latte theme, and enable Remote Control"
+run = "python3 \"{{ config_root }}/rex/apply-settings.py\""

@@ -87,6 +87,12 @@ if test -d /Applications/Obsidian.app/Contents/MacOS
     fish_add_path -g /Applications/Obsidian.app/Contents/MacOS
 end
 
+if test -x '/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex'
+    fish_add_path -g '/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS'
+else if test -x '/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex'
+    fish_add_path -g '/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS'
+end
+
 if test -d /opt/homebrew/opt/rustup/bin
     fish_add_path -g /opt/homebrew/opt/rustup/bin
 end
