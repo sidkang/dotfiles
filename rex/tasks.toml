@@ -1,11 +1,15 @@
 ["rex:plan"]
-description = "Preview only rex theme deployment"
-run = "mise dot apply --dry-run \"~/.config/rex/themes\""
+description = "Preview only rex deployment"
+run = "mise dot apply --dry-run \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\""
 
 ["rex:apply"]
-description = "Deploy only rex theme files; no installation or settings"
-run = "mise dot apply \"~/.config/rex/themes\""
+description = "Deploy only rex themes, server start script and LaunchAgent; no installation or settings"
+run = "mise dot apply \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\""
 
 ["rex:settings"]
 description = "Apply glacier-preferred Rex appearance, Catppuccin Latte theme, and Remote Control"
 run = "python3 \"{{ config_root }}/rex/apply-settings.py\""
+
+["rex:server-start"]
+description = "Start the Rex server LaunchAgent if not loaded (does not restart a running server)"
+run = "launchctl print \"gui/$(id -u)/com.sid.rex-server\" >/dev/null 2>&1 || launchctl bootstrap \"gui/$(id -u)\" \"$HOME/Library/LaunchAgents/com.sid.rex-server.plist\""

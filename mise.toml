@@ -19,6 +19,8 @@ includes = ["*/tasks.toml"]
 "~/.config/karabiner.edn" = { source = "goku/karabiner.edn", mode = "symlink" }
 "~/.config/kitty" = { source = "kitty", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store", "__pycache__", "research", "com.sid.kitten.plist"] }
 "~/.config/rex/themes" = { source = "rex/themes", mode = "symlink-each", exclude = [".DS_Store"] }
+"~/.config/rex/server-start.sh" = { source = "rex/server-start.sh", mode = "symlink" }
+"~/Library/LaunchAgents/com.sid.rex-server.plist" = { source = "rex/com.sid.rex-server.plist", mode = "symlink" }
 "~/Library/LaunchAgents/com.sid.kitten.plist" = { source = "kitty/com.sid.kitten.plist", mode = "symlink" }
 # mise reads and runs these globally; config.local.toml stays local.
 "~/.config/mise/config.toml" = { source = "mise/config.toml", mode = "symlink" }
