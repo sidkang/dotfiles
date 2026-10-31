@@ -22,10 +22,6 @@ mise kitty:plan
 # 按需要分别执行，没有自动串联。
 mise kitty:install
 mise kitty:apply
-
-# 服务操作另外选择；apply 不启动、不重启。
-mise kitty:start
-mise kitty:reload          # 要求确认，会重启后台实例
 ```
 
 其他应用使用相同的 `<app>:install`、`<app>:plan`、`<app>:apply` 命名。没有配置的软件不单独建目录：命令行工具在 `tools/Brewfile`，GUI 应用在 `apps/Brewfile`，用 `mise tools:install` / `mise apps:install` 安装全部，或追加名称只装指定项（如 `mise tools:install go rustup`）。`mise tasks` 查看全部任务。
@@ -46,8 +42,6 @@ mise kitty:reload          # 要求确认，会重启后台实例
 |---|---|
 | `mise bat:cache` | 重建 Bat 缓存 |
 | `mise hammerspoon:setup` | 修改 Hammerspoon 的 `MJConfigFile` 偏好 |
-| `mise kitty:start` | 后台服务未运行时启动 Kitty |
-| `mise kitty:reload` | 重启 Kitty 后台实例，要求确认 |
 | `mise pi:extensions` | 更新 Pi 扩展，可能执行 npm 生命周期脚本，要求确认 |
 
 安装任务本身也可能执行 Homebrew formula/cask 的安装脚本；应用首次启动还可能由 Lazy、Mason、SpoonInstall 等下载插件。任务拆分不代表这些操作天然安全。
@@ -56,7 +50,7 @@ mise kitty:reload          # 要求确认，会重启后台实例
 - Node、Go、uv 默认由 Homebrew 提供；mise 只保留需要时由项目显式选择的旧版 Node。其他现有 mise 工具选择见 `mise/config.toml`，不随任务自动安装。
 - **IPython**：Fish 设置 `IPYTHONDIR=~/.config/ipython`；只部署默认 profile 的配置，历史数据库和其他运行状态留在本机。启动时尝试加载 `icecream.ic`，未安装则跳过。
 - pi 的 `subagent-manager/` 使用复制；本机修改后用 `mise dot add ~/.config/pi/agent/subagent-manager` 收回仓库。部署前检查，不自动覆盖。
-- SSH 只保存 age 密文；远端更新用 `mise ssh:apply` 一次解密完成应用和校验，不留备份。保存、检查及首次恢复见 [SSH 操作](ssh/README.md)，不随部署执行。
+- SSH 配置和密钥只在本地维护，不归档、部署或与仓库同步。
 - `mise dot unapply` 不会恢复部署前的文件。
 
 依赖审计及待决定项见 [DEPENDENCIES.md](DEPENDENCIES.md)。纳管例外和私有数据边界见 [CONFIG-POLICY.md](CONFIG-POLICY.md)。
@@ -67,13 +61,13 @@ mise kitty:reload          # 要求确认，会重启后台实例
 jj status
 jj diff
 # 若缺少检查依赖，先审查 scripts/Brewfile，再显式 mise scripts:install。
-mise check                 # 任务校验、SSH 密文比对、工作树及历史泄密扫描
+mise check                 # 任务校验、工作树及历史泄密扫描
 jj commit -m "feat(<程序>): ..."
 jj bookmark move master --to @-
 jj git push
 ```
 
-私有文件先加入 `.gitignore`，再运行 jj。SSH 配置修改后先运行 `mise ssh:save`；`check` 不自动保存，可能要求 Touch ID。泄密检查直接使用已有 `gitleaks`，不自动安装。
+私有文件先加入 `.gitignore`，再运行 jj。泄密检查直接使用已有 `gitleaks`，不自动安装。
 
 ## 获取更新
 

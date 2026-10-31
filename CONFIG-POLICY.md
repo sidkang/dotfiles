@@ -6,6 +6,7 @@
 
 | 程序或范围 | 路径及边界 |
 |---|---|
+| SSH | `~/.ssh/`，包括 config、密钥、连接历史和 agent 状态；不归档、不部署、不与仓库同步 |
 | GitHub CLI | `~/.config/gh/` |
 | Jupyter / JupyterLab | `~/.config/jupyter/`，包括用户设置和工作区 |
 | Colab CLI | `~/.config/colab-cli/` |
@@ -18,10 +19,6 @@
 | Fish 通用变量 | `~/.config/fish/fish_variables`，不整体纳管 |
 
 不纳管不代表删除软件或本机文件。应用安装的补全和第三方依赖优先通过安装步骤复现，不直接收录本机副本。
-
-## 加密配置例外
-
-- SSH：只保存 `~/.ssh/config` 的 age 密文；SSH 密钥、连接历史和 agent 状态不纳管，解密密钥留在仓库外。操作见 [ssh/README.md](ssh/README.md)。
 
 ## 禁止收录
 

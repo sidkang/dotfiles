@@ -1,3 +1,0 @@
-["ssh:install"]
-description = "Install only ssh dependencies; no deployment or setup"
-run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/ssh/Brewfile\""

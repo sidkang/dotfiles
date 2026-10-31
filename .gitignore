@@ -4,6 +4,10 @@
 !.env.example
 *.local.toml
 
+# SSH configuration and keys stay local.
+/ssh/
+/.ssh/
+
 # Private or third-party files that stay local (Syncthing still copies them)
 espanso/match/mine.yml
 espanso/match/packages/

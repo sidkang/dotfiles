@@ -25,7 +25,7 @@
 | Neovim | Git、Fish、tree-sitter-cli、ripgrep、fd | 插件安装、Fish formatter、treesitter 构建和查找功能 |
 | Git | hunk | `git/config` 默认 pager |
 | Pi | Node、zmx | Pi 运行时以及 `fish/functions/pi.fish` 的交互包装 |
-| SSH / age | age、age-plugin-se | age 文档和 SSH 显式加解密任务 |
+| age 工具 | age、age-plugin-se、sops | `age/Brewfile` 仅提供显式安装，不管理 SSH 配置 |
 | rbw | rbw、pinentry-mac | 用户确认的密码管理基础工具；不读取本机密码库配置 |
 | 发布检查 | jj、gitleaks | `scripts/check-secrets.py` |
 
