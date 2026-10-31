@@ -5,7 +5,13 @@
   "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "medium",
   "modelThinkingLevels": {
-    "gemini/gemini-3.8-flash": "high"
+    "codex/gpt-6-astra": "low",
+    "codex/gpt-6.1-sol": "medium",
+    "claude/opus-5.5": "medium",
+    "claude/sonnet-5.5": "high",
+    "ds/deepseek-flash": "high",
+    "gemini/gemini-3.8-flash": "high",
+    "xai/grok-4.5": "high"
   },
   "editorPaddingX": 1,
   "enabledModels": [
