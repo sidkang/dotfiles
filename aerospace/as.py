@@ -22,8 +22,9 @@ KITTY_BUNDLE_ID = "net.kovidgoyal.kitty"
 KITTY_HOTKEY_TITLE = "kitty-hotkey"
 KITTY_HOTKEY_SESSION = "hotkey"
 REX_BUNDLE_ID = "com.superlogical.rex"
-REX_HOTKEY_SESSION = "hotkey"
-REX_HOTKEY_TITLE_SUFFIX = " - hotkey"
+REX_HOTKEY_SESSION = "⚡"
+# Rex titles read "<block title> - <session label>".
+REX_HOTKEY_TITLE_SUFFIX = f" - {REX_HOTKEY_SESSION}"
 REX_HOTKEY_HIDE_WORKSPACE = "T"
 REX_CLIENT_WAIT_SEC = 5.0
 REX_WINDOW_WAIT_SEC = 3.0
@@ -729,6 +730,11 @@ def launch_rex_hotkey() -> None:
         notify("Rex hotkey window title did not update", ERROR)
         return
     focus_window_robustly(hotkey_window[0])
+
+    # Seed the fast path so the next toggle skips the full window scan.
+    remember_hotkey_window(hotkey_window[0])
+    mark_hotkey_hidden(False)
+    remember_shown_workspace(hotkey_window[1])
 
 
 def toggle_rex_hotkey() -> None:
