@@ -10,6 +10,7 @@ import sys
 import time
 from collections import namedtuple
 from collections.abc import Sequence
+from pathlib import Path
 
 
 INFO = "info"
@@ -26,6 +27,11 @@ REX_HOTKEY_TITLE_SUFFIX = " - hotkey"
 REX_HOTKEY_HIDE_WORKSPACE = "T"
 REX_CLIENT_WAIT_SEC = 5.0
 REX_WINDOW_WAIT_SEC = 3.0
+HOTKEY_STATE_DIR = Path(os.path.expanduser("~/.local/state/aerospace"))
+HOTKEY_ID_FILE = HOTKEY_STATE_DIR / "hotkey-id"
+HOTKEY_HIDDEN_FILE = HOTKEY_STATE_DIR / "hotkey-hidden"
+HOTKEY_KEEP_FILE = HOTKEY_STATE_DIR / "hotkey-keep"
+HOTKEY_WS_FILE = HOTKEY_STATE_DIR / "hotkey-ws"
 FOCUS_RETRY_DELAY_SEC = 0.05
 HS_CLI = os.path.expanduser("~/.local/bin/hs")
 URL_SAFE = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~")
@@ -108,10 +114,14 @@ def quote(text: str) -> str:
     return "".join(c if c in URL_SAFE else "".join(f"%{b:02X}" for b in c.encode()) for c in text)
 
 
+def hammerspoon_url(route: str, **params: str) -> str:
+    query = "&".join(f"{key}={quote(value)}" for key, value in params.items())
+    return f"{route}?{query}"
+
+
 def hammerspoon(route: str, **params: str) -> None:
     """Call a Hammerspoon URL route over IPC; fall back to `open` if Hammerspoon is not reachable."""
-    query = "&".join(f"{key}={quote(value)}" for key, value in params.items())
-    url = f"{route}?{query}"
+    url = hammerspoon_url(route, **params)
     if run_cmd((HS_CLI, "-q", "-c", f'hsurl("{url}")')).returncode != 0:
         run_cmd(("open", "-g", f"hammerspoon://{url}"))
 
@@ -358,6 +368,120 @@ def toggle_kitty_hotkey() -> None:
         focus_window_robustly(window_id)
 
 
+def hotkey_cached_id() -> str | None:
+    try:
+        value = HOTKEY_ID_FILE.read_text().strip()
+    except OSError:
+        return None
+    return value or None
+
+
+def remember_hotkey_window(window_id: str) -> None:
+    HOTKEY_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    HOTKEY_ID_FILE.write_text(window_id)
+
+
+def clear_hotkey_cache() -> None:
+    for path in (HOTKEY_ID_FILE, HOTKEY_HIDDEN_FILE):
+        try:
+            path.unlink()
+        except OSError:
+            pass
+
+
+def mark_hotkey_hidden(hidden: bool) -> None:
+    HOTKEY_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    if hidden:
+        HOTKEY_HIDDEN_FILE.touch()
+    else:
+        try:
+            HOTKEY_HIDDEN_FILE.unlink()
+        except OSError:
+            pass
+
+
+def hotkey_keep_enabled() -> bool:
+    return HOTKEY_KEEP_FILE.exists()
+
+
+def set_hotkey_keep(enabled: bool) -> None:
+    HOTKEY_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    if enabled:
+        HOTKEY_KEEP_FILE.touch()
+    else:
+        try:
+            HOTKEY_KEEP_FILE.unlink()
+        except OSError:
+            pass
+
+
+def focused_workspace_quick() -> str | None:
+    """The focused workspace in one cheap call (no window titles)."""
+    output = check_cmd(
+        (
+            "aerospace",
+            "eval",
+            'list-windows --focused --format "#W|%{workspace}"',
+        )
+    )
+    for line in output.splitlines():
+        if line.startswith("#W|"):
+            return line[3:].strip() or None
+    return None
+
+
+def hotkey_shown_workspace() -> str | None:
+    try:
+        return HOTKEY_WS_FILE.read_text().strip() or None
+    except OSError:
+        return None
+
+
+def remember_shown_workspace(workspace: str) -> None:
+    HOTKEY_STATE_DIR.mkdir(parents=True, exist_ok=True)
+    HOTKEY_WS_FILE.write_text(workspace)
+
+
+def hide_hotkey(window_id: str) -> bool:
+    result = run_cmd(
+        (
+            "aerospace",
+            "eval",
+            f"move-node-to-workspace --window-id {window_id} {REX_HOTKEY_HIDE_WORKSPACE}",
+        )
+    )
+    if result.returncode != 0:
+        return False
+    mark_hotkey_hidden(True)
+    return True
+
+
+def show_hotkey(window_id: str, target_workspace: str | None) -> bool:
+    """Summon the hotkey window, float it, and centre it. False means it is gone."""
+    if target_workspace is None:
+        target_workspace = focused_workspace()
+
+    result = run_cmd(
+        (
+            "aerospace",
+            "eval",
+            f"move-node-to-workspace --focus-follows-window --window-id {window_id} {target_workspace}; "
+            f"focus --window-id {window_id}; "
+            # Target the window explicitly: floating whatever happens to be
+            # focused would catch the previously active window instead.
+            f"layout --window-id {window_id} floating",
+        )
+    )
+    if result.returncode != 0:
+        # A non-zero status here means the window id no longer exists.
+        # "already belongs to workspace" is only a warning, not an error.
+        return False
+
+    mark_hotkey_hidden(False)
+    remember_shown_workspace(target_workspace)
+    return True
+
+
 def rex_bin() -> str:
     for path in REX_BIN_CANDIDATES:
         if os.path.isfile(path) and os.access(path, os.X_OK):
@@ -602,7 +726,30 @@ def launch_rex_hotkey() -> None:
 
 
 def toggle_rex_hotkey() -> None:
-    windows, focused_window, focused_workspace_name = rex_hotkey_snapshot()
+    """Show the hotkey window, or hide it when it is already on screen."""
+    cached_id = hotkey_cached_id()
+
+    if cached_id is not None:
+        current_ws = focused_workspace_quick()
+        visible = not HOTKEY_HIDDEN_FILE.exists()
+
+        # Visible on the workspace the user is looking at: hide it,
+        # whether or not it currently holds keyboard focus.
+        if visible and current_ws is not None and hotkey_shown_workspace() == current_ws:
+            if hide_hotkey(cached_id):
+                return
+
+        if show_hotkey(cached_id, current_ws):
+            return
+
+        # The cached window is gone; fall back to a full scan.
+        clear_hotkey_cache()
+
+    toggle_rex_hotkey_slow()
+
+
+def toggle_rex_hotkey_slow() -> None:
+    windows, _focused_window, focused_workspace_name = rex_hotkey_snapshot()
     matches = [
         (window_id, workspace)
         for window_id, workspace, title, _foc in windows
@@ -615,37 +762,11 @@ def toggle_rex_hotkey() -> None:
         notify("Multiple Rex hotkey windows found", ERROR)
 
     window_id, window_workspace = matches[0]
+    remember_hotkey_window(window_id)
 
-    # Second and last aerospace call: the state change itself.
-    if focused_window is not None and focused_window == window_id:
-        check_cmd(
-            (
-                "aerospace",
-                "eval",
-                f"move-node-to-workspace --window-id {window_id} {REX_HOTKEY_HIDE_WORKSPACE}",
-            )
-        )
+    if show_hotkey(window_id, focused_workspace_name or focused_workspace_quick()):
         return
-
-    if focused_workspace_name is None:
-        focused_workspace_name = next(
-            (workspace for _id, workspace, _title, foc in windows if foc),
-            None,
-        )
-
-    if focused_workspace_name == window_workspace:
-        focus_window(window_id)
-        return
-
-    target = focused_workspace_name or focused_workspace()
-    check_cmd(
-        (
-            "aerospace",
-            "eval",
-            f"move-node-to-workspace --focus-follows-window --window-id {window_id} {target}; "
-            f"focus --window-id {window_id}",
-        )
-    )
+    notify(f"Failed to show Rex hotkey window {window_id}", ERROR)
 
 
 def cycle_app_win(direction: str) -> None:
@@ -704,6 +825,9 @@ def main(argv: Sequence[str]) -> int:
             toggle_kitty_hotkey()
         case ["rex", "toggle-hotkey"]:
             toggle_rex_hotkey()
+        case ["rex", "hotkey-keep", state]:
+            set_hotkey_keep(state == "on")
+            notify(f"Rex hotkey workspace follow: {state}")
         case ["window", "cycle-app", direction]:
             cycle_app_win(direction)
         case ["window", "smart-move", axis, size, direction]:

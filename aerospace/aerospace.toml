@@ -52,10 +52,22 @@ automatically-unhide-macos-hidden-apps = false
 
 persistent-workspaces = ["1", "2", "3", "4", "5", "6", "Q", "W", "E", "A", "S", "D", "T"]
 
-# /bin/sh + Hammerspoon IPC: roughly 3x cheaper than fish -c + open
+# /bin/sh + Hammerspoon IPC: roughly 3x cheaper than fish -c + open.
+# The hotkey block sits behind file tests, so non-keep mode costs nothing.
+# `read` is a shell builtin on purpose: AeroSpace runs this hook with a PATH
+# that has no /bin, so `cat` is not available here.
 exec-on-workspace-change = ["/bin/sh", "-c", '''
 url="notify?msg=$AEROSPACE_FOCUSED_WORKSPACE&level=info"
 "$HOME/.local/bin/hs" -q -c "hsurl(\"$url\")" || open -g "hammerspoon://$url"
+state="$HOME/.local/state/aerospace"
+if [ -f "$state/hotkey-keep" ] && [ ! -f "$state/hotkey-hidden" ] && [ -f "$state/hotkey-id" ]; then
+  hotkey_id=""
+  read -r hotkey_id < "$state/hotkey-id"
+  if [ -n "$hotkey_id" ]; then
+    /opt/homebrew/bin/aerospace eval "move-node-to-workspace --window-id $hotkey_id $AEROSPACE_FOCUSED_WORKSPACE" >/dev/null 2>&1
+    printf '%s' "$AEROSPACE_FOCUSED_WORKSPACE" > "$state/hotkey-ws"
+  fi
+fi
 ''']
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).
