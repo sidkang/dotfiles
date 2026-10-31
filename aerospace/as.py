@@ -26,6 +26,7 @@ REX_HOTKEY_SESSION = "NEXT"
 # Rex titles read "<block title> - <session label>".
 REX_HOTKEY_TITLE_SUFFIX = f" - {REX_HOTKEY_SESSION}"
 REX_HOTKEY_HIDE_WORKSPACE = "T"
+DEFAULT_WORKSPACE = "1"
 REX_CLIENT_WAIT_SEC = 5.0
 REX_WINDOW_WAIT_SEC = 3.0
 HOTKEY_STATE_DIR = Path(os.path.expanduser("~/.local/state/aerospace"))
@@ -441,6 +442,18 @@ def hotkey_quick_state() -> tuple[str | None, str | None, str]:
     return None, None, ""
 
 
+def resolve_show_workspace(candidate: str | None) -> str:
+    """Pick a workspace that is not the hiding one.
+
+    Showing the window on the holding workspace leaves the user looking at
+    nothing and makes the next toggle appear to do nothing.
+    """
+    for value in (candidate, hotkey_shown_workspace()):
+        if value and value != REX_HOTKEY_HIDE_WORKSPACE:
+            return value
+    return DEFAULT_WORKSPACE
+
+
 def hotkey_shown_workspace() -> str | None:
     try:
         return HOTKEY_WS_FILE.read_text().strip() or None
@@ -464,13 +477,20 @@ def hide_hotkey(window_id: str) -> bool:
     if result.returncode != 0:
         return False
     mark_hotkey_hidden(True)
+
+    # The window is parked; make sure the user is not parked with it.
+    if focused_workspace() == REX_HOTKEY_HIDE_WORKSPACE:
+        fallback = resolve_show_workspace(None)
+        check_cmd(("aerospace", "workspace", fallback))
+        remember_shown_workspace(fallback)
     return True
 
 
 def show_hotkey(window_id: str, target_workspace: str | None) -> bool:
     """Summon the hotkey window, float it, and centre it. False means it is gone."""
-    if target_workspace is None:
-        target_workspace = focused_workspace()
+    target_workspace = resolve_show_workspace(
+        target_workspace or focused_workspace()
+    )
 
     result = run_cmd(
         (
@@ -704,7 +724,7 @@ def launch_rex_hotkey() -> None:
         )
         remember_hotkey_window(existing[0][0])
         mark_hotkey_hidden(False)
-        remember_shown_workspace(current_workspace)
+        remember_shown_workspace(resolve_show_workspace(current_workspace))
         return
 
     result = rex_run("-C", client_id, "do", "client.window.new")
@@ -756,7 +776,7 @@ def launch_rex_hotkey() -> None:
     # Seed the fast path so the next toggle skips the full window scan.
     remember_hotkey_window(hotkey_window[0])
     mark_hotkey_hidden(False)
-    remember_shown_workspace(hotkey_window[1])
+    remember_shown_workspace(resolve_show_workspace(hotkey_window[1]))
 
 
 def present_hotkey(window_id: str, target_workspace: str) -> bool:
