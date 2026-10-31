@@ -29,6 +29,8 @@ includes = ["*/tasks.toml"]
 "/opt/homebrew/etc/nebula/config.yml" = { source = "nebula/glacier.yml", mode = "symlink" }
 # lazy-lock.json and the uv .venv stay local.
 "~/.config/nvim" = { source = "nvim", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store", "readme.md"] }
+# Only Lua configuration; Rex client preferences and session state stay local.
+"~/.config/rex/init.lua" = { source = "rex/init.lua", mode = "symlink" }
 "~/.config/starship.toml" = { source = "starship/starship.toml", mode = "symlink" }
 "~/.config/swiftbar" = { source = "swiftbar", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store", "test_*.py", "__pycache__", "secrets.py", "pbcopy", ".venv"] }
 # pi (PI_CODING_AGENT_DIR, set in fish): config files are linked one by one so local state
