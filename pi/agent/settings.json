@@ -19,7 +19,7 @@
     "codex/gpt-6-astra",
     "claude/sonnet-5.5",
     "claude/opus-5.5",
-    "xai/grok-4.5",
+    "xai/grok-4.6",
     "gemini/gemini-3.8-flash"
   ],
   "packages": [
