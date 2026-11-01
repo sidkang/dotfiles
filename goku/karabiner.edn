@@ -181,6 +181,18 @@
                  [:v [:as-py "window smart-resize height +50"]]
                  [:d :delete_forward]
                  [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around next"]]]}
+        {:des "rex ,."
+         :rules [[:condi :rex]
+                 [:comma ["rex-comma-mode" 1] :!app-mode {:afterup ["rex-comma-mode" 0] :alone :comma}]
+                 [:period ["rex-period-mode" 1] :!app-mode {:afterup ["rex-period-mode" 0] :alone :period}]
+
+                 :rex-comma-mode
+                 [:h [:rex-do "pane.resize direction=left amount=5"]]
+                 [:v [:rex-do "pane.resize direction=down amount=5"]]
+
+                 :rex-period-mode
+                 [:h [:rex-do "pane.resize direction=right amount=5"]]
+                 [:v [:rex-do "pane.resize direction=up amount=5"]]]}
         {:des "common ,./"
          :rules [[:slash ["app-mode" 1] :!z-mode {:afterup ["app-mode" 0] :alone :slash}]
 
@@ -257,6 +269,7 @@
                  [:s [:rex-do "pane.split direction=down"]]
                  [:t [:rex-do "client.tab.new"]]
                  [:!St [:rex-do "client.tab.rename"]]
+                 [:f [:rex-do "pane.float"]]
                  [:h [:rex-do "pane.focus.left"]]
                  [:j [:rex-do "pane.focus.down"]]
                  [:k [:rex-do "pane.focus.up"]]
@@ -265,11 +278,6 @@
                  [:!Sj [:rex-do "pane.move.down"]]
                  [:!Sk [:rex-do "pane.move.up"]]
                  [:!Sl [:rex-do "pane.move.right"]]
-                 [:!Oh [:rex-do "pane.resize direction=left amount=5"]]
-                 [:!Oj [:rex-do "pane.resize direction=down amount=5"]]
-                 [:!Ok [:rex-do "pane.resize direction=up amount=5"]]
-                 [:!Ol [:rex-do "pane.resize direction=right amount=5"]]
-                 [:equal_sign [:rex-do "pane.balance"]]
                  [:x [:rex-do "pane.close"]]
                  [:z [:rex-do "pane.zoom"]]
 
