@@ -13,3 +13,8 @@ run = "python3 \"{{ config_root }}/rex/apply-settings.py\""
 ["rex:server-start"]
 description = "Start the Rex server LaunchAgent if not loaded (does not restart a running server)"
 run = "launchctl print \"gui/$(id -u)/com.sid.rex-server\" >/dev/null 2>&1 || launchctl bootstrap \"gui/$(id -u)\" \"$HOME/Library/LaunchAgents/com.sid.rex-server.plist\""
+
+["rex:completions"]
+description = "Generate Fish completion for rex into ~/.config/fish/completions; no deployment"
+run = "bash \"{{ config_root }}/rex/install-fish-completion.sh\""
+
