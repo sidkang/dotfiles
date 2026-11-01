@@ -13,7 +13,7 @@
     "claude/sonnet-safe": "high",
     "ds/deepseek-flash": "high",
     "gemini/gemini-3.8-flash": "high",
-    "xai/grok-4.5": "high"
+    "xai/grok-4.6": "high"
   },
   "editorPaddingX": 1,
   "enabledModels": [
@@ -24,6 +24,7 @@
     "xai/grok-4.6",
     "ds/deepseek-flash",
     "gemini/gemini-3.8-flash",
+    "gemini/gemini-4-argon",
     "codex/gpt-6.1-sol"
   ],
   "packages": [
@@ -66,12 +67,12 @@
     },
     "merge": {
       "enabled": false,
-      "model": "xai/grok-4.5:low"
+      "model": "xai/grok-4.6:low"
     },
     "fetch": {
       "extract": {
         "kernel": "firecrawl",
-        "model": "xai/grok-4.5:low"
+        "model": "xai/grok-4.6:low"
       }
     }
   },
