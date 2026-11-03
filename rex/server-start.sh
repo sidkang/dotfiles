@@ -1,28 +1,29 @@
 #!/bin/sh
-# Start the Rex server with anonymous HTTP listeners.
-# cube listens only on its LAN address; glacier listens on the VPN and LAN addresses.
+# Start the Rex server with anonymous HTTP listeners on this host's fixed addresses.
+# glacier: VPN only. cube: both LAN addresses. Other hosts: no network listener.
 # `rex server start` is idempotent: a running server keeps its own listeners.
 rex="$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
 port=7297
 
-vpn=10.8.0.1
-lan=
-vpn_up=
-host=$(scutil --get LocalHostName)
+case $(scutil --get LocalHostName) in
+  glacier) addrs="10.8.0.1" ;;
+  cube) addrs="10.0.1.12 10.0.1.112" ;;
+  *) addrs= ;;
+esac
+
+want=0
+for a in $addrs; do want=$((want + 1)); done
+
+# Wait for every address to be configured, then bind only those that exist.
 for _ in $(seq 30); do
-  lan=$(ipconfig getifaddr en0)
-  case "$host" in
-    cube) [ "$lan" = 10.0.1.12 ] && break ;;
-    glacier)
-      ifconfig | grep -q "inet $vpn " && vpn_up=1
-      [ -n "$lan" ] && [ -n "$vpn_up" ] && break ;;
-    *) lan=; break ;;
-  esac
+  set --
+  have=$(ifconfig)
+  for a in $addrs; do
+    case $have in *"inet $a "*) set -- "$@" --extra-listen "http://$a:$port" ;; esac
+  done
+  [ $(($# / 2)) -eq "$want" ] && break
   sleep 1
 done
-[ "$host" = cube ] && [ "$lan" != 10.0.1.12 ] && lan=
 
-set -- --allow-anonymous
-[ -n "$vpn_up" ] && set -- "$@" --extra-listen "http://$vpn:$port"
-[ -n "$lan" ] && set -- "$@" --extra-listen "http://$lan:$port"
+[ $# -gt 0 ] && set -- --allow-anonymous "$@"
 exec "$rex" server start "$@"
