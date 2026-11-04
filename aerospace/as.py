@@ -178,11 +178,19 @@ def smart_resize(axis: str, size: str) -> None:
         notify(f"Invalid resize axis: {axis}", ERROR)
         return
 
-    if focused_window_value("%{window-layout}") == "floating":
+    layout = focused_window_value("%{window-layout}")
+    if layout is None:
+        notify("Oops, no focused window.", ERROR)
+        return
+    if layout == "floating":
         hammerspoon("floatwindow", action="resize", axis=axis, size=size)
         return
 
-    check_cmd(("aerospace", "resize", axis, size))
+    if run_cmd(("aerospace", "resize", axis, size)).returncode != 0:
+        # AeroSpace words every "no tiled sibling along this axis" failure as
+        # "doesn't support floating windows yet", also for tiled windows
+        # (single window, accordion, native fullscreen). Say what is true.
+        notify(f"Cannot resize {axis} here: layout is {layout}", INFO)
 
 
 def next_id(ids: Sequence[str], current_id: str | None, direction: str) -> str:
@@ -364,17 +372,27 @@ def show_hotkey(window_id: str, workspace: str) -> bool:
     # Showing it on the hiding workspace would leave the user looking at
     # nothing and make the next toggle appear to do nothing.
     target = DEFAULT_WORKSPACE if workspace == REX_HOTKEY_HIDE_WORKSPACE else workspace
-    result = aerospace_eval(
-        f"move-node-to-workspace --focus-follows-window --window-id {window_id} {target}",
-        f"focus --window-id {window_id}",
-        # Target the window explicitly: floating whatever happens to be
-        # focused would catch the previously active window instead.
-        f"layout --window-id {window_id} floating",
-        FOCUSED_WINDOW_QUERY,
+    # `&&`, not `;`: eval reports only the last command's status, so with `;`
+    # a vanished window id would go unnoticed.
+    result = run_cmd(
+        (
+            "aerospace",
+            "eval",
+            " && ".join(
+                (
+                    f"move-node-to-workspace --focus-follows-window --window-id {window_id} {target}",
+                    f"focus --window-id {window_id}",
+                    # Target the window explicitly: floating whatever happens to be
+                    # focused would catch the previously active window instead.
+                    f"layout --window-id {window_id} floating",
+                    FOCUSED_WINDOW_QUERY,
+                )
+            ),
+        )
     )
     if result.returncode != 0:
-        # A non-zero status here means the window id no longer exists.
-        # "already belongs to workspace" is only a warning, not an error.
+        # The window id no longer exists. "already belongs to workspace" and
+        # "already floating" are warnings with status 0.
         return False
     if parse_hotkey_state(result.stdout)[2] != window_id:
         focus_window_robustly(window_id)
@@ -498,7 +516,7 @@ def cycle_app_win(direction: str) -> None:
         notify("Oops, no focused window.", ERROR)
         return
     if len(window_ids) == 1:
-        notify("There is only 1 window for this app.", ERROR)
+        notify("There is only 1 window for this app.", INFO)
         return
 
     try:
