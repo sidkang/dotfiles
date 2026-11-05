@@ -73,9 +73,6 @@ return {
 		title = "Z 模式",
 		footer = "Caps 退出",
 		items = {
-			{ key = "1", desc = "显示器输入切到 {USB-C|teal}" },
-			{ key = "2", desc = "显示器输入切到 {DP|blue}" },
-			{ key = "3", desc = "显示器输入切到 {HDMI|mauve}" },
 			{ key = "Q", desc = "进入 {PBP 菜单|green}" },
 			{ key = "O", desc = "划词翻译 ({Bob|blue})" },
 			{ key = "P", desc = "截图翻译 ({Bob|teal})" },

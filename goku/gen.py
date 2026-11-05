@@ -89,9 +89,53 @@ def render_groups(menus: list[dict]) -> str:
     return "".join(out)
 
 
+def edn_templates(text: str) -> set[str]:
+    match = re.search(r":templates \{(.*?)\}\n\s*:simlayers", text, re.S)
+    if match is None:
+        raise SystemExit("karabiner.edn: cannot find the :templates map")
+    return set(re.findall(r'^\s*:([\w-]+) "', match.group(1), re.M))
+
+
+def validate(menus: list[dict], templates: set[str]) -> None:
+    errors: list[str] = []
+    ids: set[str] = set()
+    for index, menu in enumerate(menus, 1):
+        name = menu.get("id") or f"#{index}"
+        for field in ("id", "title", "items"):
+            if not menu.get(field):
+                errors.append(f"menu {name}: missing {field}")
+        if menu.get("id") in ids:
+            errors.append(f"menu {name}: duplicate id")
+        ids.add(menu.get("id"))
+        generated = menu.get("generate", True)
+        if generated and not menu.get("region"):
+            errors.append(f"menu {name}: missing region")
+
+        keys = [menu["exit"]] if menu.get("exit") else []
+        for item in menu.get("items", []):
+            where = f"menu {name}, item {item.get('label') or item.get('key') or item.get('keys')}"
+            if not item.get("desc"):
+                errors.append(f"{where}: missing desc")
+            if not (item.get("label") or item.get("key")):
+                errors.append(f"{where}: missing label or key")
+            if not generated:
+                continue
+            if not (item.get("key") or item.get("keys")):
+                errors.append(f"{where}: missing key or keys")
+            template, sep, _ = item.get("cmd", "").partition(":")
+            if not sep or template not in templates:
+                errors.append(f"{where}: unknown template '{template}' in cmd '{item.get('cmd', '')}'")
+            keys.extend(item.get("keys") or [item.get("key")])
+        errors.extend(f"menu {name}: duplicate key '{key}'" for key in sorted({k for k in keys if keys.count(k) > 1}))
+    if errors:
+        raise SystemExit("menus.toml:\n  " + "\n  ".join(errors))
+
+
 def main(argv: list[str]) -> int:
     menus = tomllib.loads(MENUS.read_text())["menu"]
-    edn = update_edn(EDN.read_text(), menus)
+    edn_text = EDN.read_text()
+    validate(menus, edn_templates(edn_text))
+    edn = update_edn(edn_text, menus)
     groups = render_groups(menus)
 
     if "--check" in argv:

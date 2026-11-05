@@ -193,6 +193,25 @@ def smart_resize(axis: str, size: str) -> None:
         notify(f"Cannot resize {axis} here: layout is {layout}", INFO)
 
 
+def aerospace_soft(args: Sequence[str]) -> None:
+    """Run a command that routinely fails for lack of a target (swap, join-with, layout).
+
+    Say why in plain words; the failure is not a bug, so it is only info.
+    """
+    result = run_cmd(("aerospace", *args))
+    if result.returncode == 0:
+        return
+
+    message = (result.stderr or result.stdout).strip()
+    if not message:
+        # `swap` fails without a message.
+        if focused_window_value("%{window-layout}") == "floating":
+            message = "not supported for floating windows"
+        else:
+            message = "no window in that direction"
+    notify(f"{' '.join(args)}: {message}", INFO)
+
+
 def next_id(ids: Sequence[str], current_id: str | None, direction: str) -> str:
     if current_id not in ids:
         return ids[0]
@@ -556,6 +575,8 @@ def main(argv: Sequence[str]) -> int:
     match list(argv[1:]):
         case ["app", "toggle", app_name]:
             toggle_app(app_name)
+        case ["aerospace", *args] if args:
+            aerospace_soft(args)
         case ["rex", "toggle-hotkey"]:
             toggle_rex_hotkey()
         case ["window", "cycle-app", direction]:

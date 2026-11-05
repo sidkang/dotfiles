@@ -2,11 +2,11 @@
  {:goku
   {:default true :sim 50 :delay 180 :alone 150 :held 140}}
  :templates {:kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
-             :kitty-py "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';python3 $HOME/.config/kitty/kitty-action.py %s"
+             :kitty-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/kitty/kitty-action.py %s"
              :rex-do "\"$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex\" -C \"$(scutil --get LocalHostName)\" do %s"
-             :as "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';aerospace %s"
+             :as "/opt/homebrew/bin/aerospace %s"
              :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
-             :sh "export PATH='/opt/homebrew/bin:/usr/bin:$PATH';%s"
+             :sh "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";%s"
              :hs "$HOME/.local/bin/hs -q -c 'hsurl(\"%s\")'"
              :hs-notify "$HOME/.local/bin/hs -q -c 'hsurl(\"notify?msg=%s\")'"
              :m1ddc "/opt/homebrew/bin/m1ddc %s"}
@@ -84,10 +84,10 @@
                  [:k [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop up"]]
                  [:l [:as "focus --boundaries all-monitors-outer-frame --boundaries-action stop right"]]
 
-                 [:!Th [:as "join-with left"]]
-                 [:!Tj [:as "join-with down"]]
-                 [:!Tk [:as "join-with up"]]
-                 [:!Tl [:as "join-with right"]]
+                 [:!Th [:as-py "aerospace join-with left"]]
+                 [:!Tj [:as-py "aerospace join-with down"]]
+                 [:!Tk [:as-py "aerospace join-with up"]]
+                 [:!Tl [:as-py "aerospace join-with right"]]
 
                  [:!Sh [:as-py "window smart-move h -20 left"]]
                  [:!Sj [:as-py "window smart-move v +20 down"]]
@@ -120,8 +120,8 @@
 
                  :as-toggle
                  [:caps_lock [["as-toggle" 0] [:hs "whichkey?action=hide&group=as-toggle"]]]
-                 [:j [["as-toggle" 0] [:as "layout tiles accordion"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
-                 [:k [["as-toggle" 0] [:as "layout horizontal vertical"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:j [["as-toggle" 0] [:as-py "aerospace layout tiles accordion"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
+                 [:k [["as-toggle" 0] [:as-py "aerospace layout horizontal vertical"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
                  [:f [["as-toggle" 0] [:as "layout floating tiling"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
                  [:e [["as-toggle" 0] [:sh "killall AeroSpace borders;open -a AeroSpace"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
                  [:b [["as-toggle" 0] [:as "balance-sizes"]] nil {:afterup [:hs "whichkey?action=hide&group=as-toggle"]}]
@@ -154,10 +154,10 @@
 
                  :as-swap
                  [:caps_lock [["as-swap" 0] [:hs "whichkey?action=hide&group=as-swap"]]]
-                 [:h [["as-swap" 0] [:as "swap left"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
-                 [:j [["as-swap" 0] [:as "swap down"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
-                 [:k [["as-swap" 0] [:as "swap up"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
-                 [:l [["as-swap" 0] [:as "swap right"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:h [["as-swap" 0] [:as-py "aerospace swap left"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:j [["as-swap" 0] [:as-py "aerospace swap down"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:k [["as-swap" 0] [:as-py "aerospace swap up"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
+                 [:l [["as-swap" 0] [:as-py "aerospace swap right"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
                  ;; END menus:aerospace
                  ]}
         {:des "aerospace []"
@@ -343,9 +343,6 @@
         {:des "z mode"
          :rules [:z-mode
                  [:caps_lock [["z-mode" 0] [:hs "whichkey?action=hide"]]]
-                 [:1 [:m1ddc "set input 16"]]
-                 [:2 [:m1ddc "set input 15"]]
-                 [:3 [:m1ddc "set input 17"]]
 
                  [:q [["m1ddc-pbp" 1] [:hs "whichkey?action=show&group=m1ddc-pbp"]]]
                  ;; BEGIN menus:z (generated from menus.toml)

@@ -41,8 +41,8 @@ region = "aerospace"
 title = "布局与工具"
 exit = "caps_lock"
 items = [
-  { key = "j", cmd = "as:layout tiles accordion", desc = "{平铺|teal} ⇄ {手风琴|blue}" },
-  { key = "k", cmd = "as:layout horizontal vertical", desc = "{水平|teal} ⇄ {垂直|blue}" },
+  { key = "j", cmd = "as-py:aerospace layout tiles accordion", desc = "{平铺|teal} ⇄ {手风琴|blue}" },
+  { key = "k", cmd = "as-py:aerospace layout horizontal vertical", desc = "{水平|teal} ⇄ {垂直|blue}" },
   { key = "f", cmd = "as:layout floating tiling", desc = "{浮动|mauve} ⇄ {平铺|teal}" },
   { key = "e", cmd = "sh:killall AeroSpace borders;open -a AeroSpace", desc = "重启 {AeroSpace|red} 与边框" },
   { key = "b", cmd = "as:balance-sizes", desc = "{平衡|green}窗口大小" },
@@ -80,10 +80,10 @@ region = "aerospace"
 title = "交换窗口"
 exit = "caps_lock"
 items = [
-  { key = "h", cmd = "as:swap left", desc = "交换到{左侧|teal}" },
-  { key = "j", cmd = "as:swap down", desc = "交换到{下方|green}" },
-  { key = "k", cmd = "as:swap up", desc = "交换到{上方|mauve}" },
-  { key = "l", cmd = "as:swap right", desc = "交换到{右侧|blue}" },
+  { key = "h", cmd = "as-py:aerospace swap left", desc = "交换到{左侧|teal}" },
+  { key = "j", cmd = "as-py:aerospace swap down", desc = "交换到{下方|green}" },
+  { key = "k", cmd = "as-py:aerospace swap up", desc = "交换到{上方|mauve}" },
+  { key = "l", cmd = "as-py:aerospace swap right", desc = "交换到{右侧|blue}" },
 ]
 
 [[menu]]
@@ -92,9 +92,6 @@ title = "Z 模式"
 generate = false
 footer = "Caps 退出"
 items = [
-  { label = "1", desc = "显示器输入切到 {USB-C|teal}" },
-  { label = "2", desc = "显示器输入切到 {DP|blue}" },
-  { label = "3", desc = "显示器输入切到 {HDMI|mauve}" },
   { label = "Q", desc = "进入 {PBP 菜单|green}" },
   { label = "O", desc = "划词翻译 ({Bob|blue})" },
   { label = "P", desc = "截图翻译 ({Bob|teal})" },
