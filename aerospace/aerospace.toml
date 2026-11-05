@@ -102,11 +102,6 @@ if.during-aerospace-startup = true
 run = "move-node-to-workspace 2"
 
 [[on-window-detected]]
-if.app-id = "com.electron.logseq"
-if.during-aerospace-startup = true
-run = "move-node-to-workspace 4"
-
-[[on-window-detected]]
 if.app-id = "md.obsidian"
 run = "move-node-to-workspace Q"
 

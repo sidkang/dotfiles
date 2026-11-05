@@ -11,17 +11,17 @@ jj 管版本，`mise dot` 管部署。根 `mise.toml` 保存部署映射；各�
 - `Brewfile`：该应用的安装依赖，共享依赖由各使用方重复声明，Homebrew 去重。
 - `tasks.toml`：该应用独立的安装、部署和维护任务。
 
-以 Kitty 为例：
+以 Goku 为例：
 
 ```sh
 # 先看依赖，再看命令与实际部署差异；这些步骤都不安装。
-less kitty/Brewfile
-mise run --dry-run kitty:install
-mise kitty:plan
+less goku/Brewfile
+mise run --dry-run goku:install
+mise goku:plan
 
 # 按需要分别执行，没有自动串联。
-mise kitty:install
-mise kitty:apply
+mise goku:install
+mise goku:apply
 ```
 
 其他应用使用相同的 `<app>:install`、`<app>:plan`、`<app>:apply` 命名。没有配置的软件不单独建目录：命令行工具在 `tools/Brewfile`，GUI 应用在 `apps/Brewfile`，用 `mise tools:install` / `mise apps:install` 安装全部，或追加名称只装指定项（如 `mise tools:install go rustup`）。`mise tasks` 查看全部任务。

@@ -18,7 +18,7 @@
 | 应用 | 依赖 | 依据 |
 |---|---|---|
 | Fish | gh、starship、zoxide | `fish/config.fish` 的交互初始化；后两项有守卫，但已确认为常用功能 |
-| Kitty | fzf、jq、Python、两款字体 | `kitty/context_switcher.py`、`fish/conf.d/kitty.fish`、`kitty/kitty.conf` |
+| Rex | Sarasa SS17 字体、Python | `rex/apply-settings.py` |
 | AeroSpace | borders、Python 3.14、Fish、Hammerspoon | `aerospace/aerospace.toml` 的启动与 workspace hook、`aerospace/as.py` |
 | Goku | Karabiner-Elements、borders、Python 3.14、AeroSpace、Hammerspoon | `goku/karabiner.edn` 的窗口管理层直接调用这些应用；不会代为部署或初始化它们 |
 | Hammerspoon | ImageMagick、AeroSpace、Karabiner-Elements | 壁纸处理、`sids.aerospace_window_hints` 和 `sids.whichkey` 调用 |
@@ -30,8 +30,6 @@
 | 发布检查 | jj、gitleaks | `scripts/check-secrets.py` |
 
 无配置的基础工具（Go、rustup、Node、uv、rbw、pinentry-mac、rsync）归入 `tools/Brewfile`，GUI 应用（Chrome、IINA、tinycast）归入 `apps/Brewfile`；sops 在 `age/Brewfile`，gh、zoxide 由 `fish/Brewfile` 安装。
-
-本机 `/opt/homebrew/bin/kitten` 已验证可执行。`jq` 在本机由 `/usr/bin/jq` 提供，不能误报为命令缺失；Kitty 的 Brewfile 仍显式声明 jq，以保证安装可复现。新增的安装声明本轮**未执行**。
 
 ## 功能依赖与尚缺命令
 
@@ -63,7 +61,7 @@
 
 ## 已验证与未执行
 
-已运行原生 `mise tasks validate`、按应用任务 dry-run、Kitty/Git/Bat 的真实部署预览，以及不读取私密内容的安装清单和命令路径检查。部署预览不再触发 Bat 缓存、软件安装或其他应用 setup；所有安装元数据均被排除于 symlink-each 部署。
+已运行原生 `mise tasks validate`、按应用任务 dry-run、Git/Bat 的真实部署预览，以及不读取私密内容的安装清单和命令路径检查。部署预览不再触发 Bat 缓存、软件安装或其他应用 setup；所有安装元数据均被排除于 symlink-each 部署。
 
 没有运行安装、实际部署、插件更新、服务重载、SSH 解密或 Jupyter 启动。未验证新机器端到端初始化，未验证外部服务、硬件切换和所有应用运行时功能。
 

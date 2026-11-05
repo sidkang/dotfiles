@@ -1,3 +1,7 @@
+["rex:install"]
+description = "Install only rex dependencies; no deployment or setup"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/rex/Brewfile\""
+
 ["rex:plan"]
 description = "Preview only rex deployment"
 run = "mise dot apply --dry-run \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\""

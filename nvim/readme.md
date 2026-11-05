@@ -16,9 +16,3 @@ Mason 管理 LSP 与 formatter。Caddyfile / TOML 格式化另需 `caddy` / `tap
 - `<leader>g*`：git / jj（mini.git；mini.diff 在 jj 仓库对比 `@-`）
 - `gs*`：surround
 
-REPL（Python / sh）：
-
-- `<localleader>i`：选择 kitty target
-- `<localleader>l/s/v`：发送 line / motion / selection
-- `<localleader>c/n`：发送 cell / cell and next
-- `<localleader>r/x`：向 target 发送 Enter / Ctrl-C

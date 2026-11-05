@@ -13,4 +13,4 @@ rex.action {
   end,
 }
 
--- No custom keybindings yet: Kitty migration groups C-F are not approved.
+-- No custom keybindings yet.

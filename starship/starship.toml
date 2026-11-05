@@ -1,6 +1,6 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-# Active palette — synchronized with kitty/catppuccin-latte-custom.conf.
+# Active palette — synchronized with rex/themes/catppuccin-latte.
 palette = "catppuccin_latte_custom"
 # Official Latte is "catppuccin_latte"; alternatives: "alabaster", "everforest_light", "iceberg_light", "rose_pine_dawn", "dawnfox", "noctis_lux", or "tomorrow_default"
 

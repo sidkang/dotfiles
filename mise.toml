@@ -17,7 +17,6 @@ includes = ["*/tasks.toml"]
 # Only the global config; jj/repos stays local.
 "~/.config/jj/config.toml" = { source = "jj/config.toml", mode = "symlink" }
 "~/.config/karabiner.edn" = { source = "goku/karabiner.edn", mode = "symlink" }
-"~/.config/kitty" = { source = "kitty", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store", "__pycache__", "research"] }
 "~/.config/rex/themes" = { source = "rex/themes", mode = "symlink-each", exclude = [".DS_Store"] }
 "~/.config/rex/server-start.sh" = { source = "rex/server-start.sh", mode = "symlink" }
 "~/Library/LaunchAgents/com.sid.rex-server.plist" = { source = "rex/com.sid.rex-server.plist", mode = "symlink" }

@@ -1,0 +1,3 @@
+# rex/apply-settings.py selects this font and runs on Python.
+cask "font-sarasa-ss17-sc-nerd-font"
+brew "python"

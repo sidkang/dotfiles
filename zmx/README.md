@@ -44,7 +44,7 @@ short human-friendly identifier, not a concurrency lock: simultaneous launches
 can theoretically choose the same unused name. No lock or session database is
 maintained. Pi conversation names remain independent and can change via `/name`.
 
-Kitty's Cmd+P integration is unchanged. For now use zmx's native list/attach.
+Use zmx's native list/attach.
 
 ## Check
 
