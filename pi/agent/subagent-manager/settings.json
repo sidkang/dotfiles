@@ -1,5 +1,6 @@
 {
   "maxConcurrent": 8,
+  "maxThreads": 300,
   "subagentExtensions": true,
   "toolFiltering": "allowed",
   "modelSelection": "pick-first-available"
