@@ -16,7 +16,6 @@ items = [
   { label = "F", desc = "{打开|blue}应用" },
   { label = "G", desc = "{切换|blue}工作区" },
   { label = "S", desc = "{交换|peach}窗口位置" },
-  { label = "Z", desc = "进入 {Z 模式|teal}" },
   { label = "V", desc = "{关闭|mauve}窗口" },
   { label = "HJKL", desc = "移动{焦点|green}" },
   { label = "⇧ HJKL", desc = "移动{窗口|green}" },
@@ -84,21 +83,6 @@ items = [
   { key = "j", cmd = "as-py:aerospace swap down", desc = "交换到{下方|green}" },
   { key = "k", cmd = "as-py:aerospace swap up", desc = "交换到{上方|mauve}" },
   { key = "l", cmd = "as-py:aerospace swap right", desc = "交换到{右侧|blue}" },
-]
-
-[[menu]]
-id = "z-mode"
-title = "Z 模式"
-generate = false
-footer = "Caps 退出"
-items = [
-  { label = "Q", desc = "进入 {PBP 菜单|green}" },
-  { label = "O", desc = "划词翻译 ({Bob|blue})" },
-  { label = "P", desc = "截图翻译 ({Bob|teal})" },
-  { label = "9", desc = "打开 {Hammerspoon|peach} 控制台" },
-  { label = "0", desc = "重载 {Hammerspoon|red} 配置" },
-  { label = "=", desc = "发送{错误通知|yellow}" },
-  { label = "/", desc = "{Xnip|sky} 截图" },
 ]
 
 [[menu]]

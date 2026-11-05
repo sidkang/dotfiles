@@ -9,7 +9,6 @@ return {
 			{ key = "F", desc = "{打开|blue}应用" },
 			{ key = "G", desc = "{切换|blue}工作区" },
 			{ key = "S", desc = "{交换|peach}窗口位置" },
-			{ key = "Z", desc = "进入 {Z 模式|teal}" },
 			{ key = "V", desc = "{关闭|mauve}窗口" },
 			{ key = "HJKL", desc = "移动{焦点|green}" },
 			{ key = "⇧ HJKL", desc = "移动{窗口|green}" },
@@ -67,19 +66,6 @@ return {
 			{ key = "J", desc = "交换到{下方|green}" },
 			{ key = "K", desc = "交换到{上方|mauve}" },
 			{ key = "L", desc = "交换到{右侧|blue}" },
-		},
-	},
-	["z-mode"] = {
-		title = "Z 模式",
-		footer = "Caps 退出",
-		items = {
-			{ key = "Q", desc = "进入 {PBP 菜单|green}" },
-			{ key = "O", desc = "划词翻译 ({Bob|blue})" },
-			{ key = "P", desc = "截图翻译 ({Bob|teal})" },
-			{ key = "9", desc = "打开 {Hammerspoon|peach} 控制台" },
-			{ key = "0", desc = "重载 {Hammerspoon|red} 配置" },
-			{ key = "=", desc = "发送{错误通知|yellow}" },
-			{ key = "/", desc = "{Xnip|sky} 截图" },
 		},
 	},
 	["m1ddc-pbp"] = {

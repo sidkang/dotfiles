@@ -7,6 +7,6 @@ Routes (`hs -c 'hsurl("…")'`, or `hammerspoon://…`):
 - `whichkey?action=show&group=<id>`: show after 0.45 s, or replace the visible guide
 - `whichkey?action=hide[&group=<id>]`: cancel or hide; with `group`, only if that group is the one showing
 
-A guide that never receives `hide` disappears after 12 s. The card follows the system light/dark appearance.
+A guide that never receives `hide` disappears after 12 s. Whenever a guide of a group with `exit` goes away, its sticky Karabiner modes are reset through `karabiner_cli`. The card follows the system light/dark appearance.
 
 Preview without showing: `hs -c 'require("sids.whichkey").snapshot("as-go", "/tmp/as-go.png")'`.

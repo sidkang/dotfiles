@@ -1,26 +1,19 @@
 {:profiles
  {:goku
   {:default true :sim 50 :delay 180 :alone 150 :held 140}}
- :templates {:kitty-do "/opt/homebrew/bin/kitten @ --to unix:/tmp/kitten %s"
-             :kitty-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/kitty/kitty-action.py %s"
-             :rex-do "\"$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex\" -C \"$(scutil --get LocalHostName)\" do %s"
+ :simlayer-threshold 180
+ :templates {:rex-do "\"$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex\" -C \"$(scutil --get LocalHostName)\" do %s"
              :as "/opt/homebrew/bin/aerospace %s"
              :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
              :sh "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";%s"
              :hs "$HOME/.local/bin/hs -q -c 'hsurl(\"%s\")'"
-             :hs-notify "$HOME/.local/bin/hs -q -c 'hsurl(\"notify?msg=%s\")'"
              :m1ddc "/opt/homebrew/bin/m1ddc %s"}
  :simlayers {:z-mode {:key :z}
              :f-mode {:key :f}
              :w-mode {:key :w}
              :t-mode {:key :t}}
- :layers {}
  :applications {:chrome ["^com\\.google\\.Chrome$"]
-                :logseq ["^com\\.electron\\.logseq$"]
-                :terminals ["^com\\.googlecode\\.iterm2$" "^net\\.kovidgoyal\\.kitty$" "^com\\.superlogical\\.rex$"]
-                :kitty ["^net\\.kovidgoyal\\.kitty$"]
                 :rex ["^com\\.superlogical\\.rex$"]
-                :vscode ["^com\\.microsoft\\.VSCode$"]
                 :chatgpt-app ["^com\\.openai\\.chat$"]
                 :office ["^com\\.microsoft\\.Word$" "^com\\.microsoft\\.Excel$"]}
  :input-sources {:cn {:language "^zh\\-Hans$" :input_source_id "Shuangpin$"}
@@ -75,7 +68,6 @@
                  [:f [["as-open" 1] [:hs "whichkey?action=show&group=as-open"]]]
                  [:g [["as-go" 1] [:hs "whichkey?action=show&group=as-go"]]]
                  [:s [["as-swap" 1] [:hs "whichkey?action=show&group=as-swap"]]]
-                 [:z [["z-mode" 1] [:hs "whichkey?action=show&group=z-mode"]]]
 
                  [:v [:as "close"]]
 
@@ -212,45 +204,6 @@
                  [:comma :!CSopen_bracket]
                  [:period :!CSclose_bracket]
 
-                 [:condi :kitty :app-mode]
-                 [:1 [:kitty-do "focus-tab --match index:0"]]
-                 [:2 [:kitty-do "focus-tab --match index:1"]]
-                 [:3 [:kitty-do "focus-tab --match index:2"]]
-                 [:4 [:kitty-do "focus-tab --match index:3"]]
-                 [:5 [:kitty-do "focus-tab --match index:4"]]
-                 [:6 [:kitty-do "focus-tab --match index:5"]]
-                 [:7 [:kitty-do "focus-tab --match index:6"]]
-                 [:8 [:kitty-do "focus-tab --match index:7"]]
-                 [:comma  [:kitty-do "action previous_tab"]]
-                 [:period [:kitty-do "action next_tab"]]
-                 [:up_arrow [:kitty-do "action -m state:focused scroll_to_prompt -1"]]
-                 [:down_arrow [:kitty-do "action -m state:focused scroll_to_prompt 1"]]
-                 [:p [:kitty-do "action -m state:focused command_palette"]]
-                 [:v [:kitty-do "launch --match state:focused --type window --location vsplit --cwd=current"]]
-                 [:s [:kitty-do "launch --match state:focused --type window --location hsplit --cwd=current"]]
-                 [:t [:kitty-do "launch --match state:focused --type tab --cwd=current"]]
-                 [:f [:kitty-do "action -m state:focused focus_visible_window"]]
-                 [:!St [:kitty-do "action -m state:focused set_tab_title"]]
-                 [:g [:kitty-do "action -m state:focused swap_with_window"]]
-                 [:h [:kitty-do "focus-window --match state:focused --match neighbor:left"]]
-                 [:j [:kitty-do "focus-window --match state:focused --match neighbor:bottom"]]
-                 [:k [:kitty-do "focus-window --match state:focused --match neighbor:top"]]
-                 [:l [:kitty-do "focus-window --match state:focused --match neighbor:right"]]
-                 [:!Sh [:kitty-do "action -m state:focused move_window left"]]
-                 [:!Sj [:kitty-do "action -m state:focused move_window down"]]
-                 [:!Sk [:kitty-do "action -m state:focused move_window up"]]
-                 [:!Sl [:kitty-do "action -m state:focused move_window right"]]
-                 [:!Oh [:kitty-do "resize-window --match state:focused --axis horizontal --increment -5"]]
-                 [:!Oj [:kitty-do "resize-window --match state:focused --axis vertical --increment 5"]]
-                 [:!Ok [:kitty-do "resize-window --match state:focused --axis vertical --increment -5"]]
-                 [:!Ol [:kitty-do "resize-window --match state:focused --axis horizontal --increment 5"]]
-                 [:r [:kitty-do "action -m state:focused layout_action rotate"]]
-                 [:equal_sign [:kitty-do "action -m state:focused layout_action equalize"]]
-                 [:!Sr [:kitty-do "action -m state:focused next_layout"]]
-                 [:m [:kitty-py "toggle worker"]]
-                 [:x [:kitty-do "close-window --match state:focused"]]
-                 [:z [:kitty-do "action -m state:focused toggle_layout stack"]]
-
                  [:condi :rex :app-mode]
                  [:1 [:rex-do "client.tab.goto index=1"]]
                  [:2 [:rex-do "client.tab.goto index=2"]]
@@ -292,14 +245,8 @@
                  [:condi :office :app-mode]
                  [:h :!CSh]
 
-                 :caps-mode
-                 [:return_or_enter :!CTreturn_or_enter :caps-mode]
-
-                 :logseq
-                 [:!Ck [:!Ck {:input :en}]]
-                 [:y :return_or_enter ["caps-mode" 1]]
-
                  [:condi]
+                 [:!Treturn_or_enter :!CTreturn_or_enter :!rex]
                  [:x :!Cw :app-mode]]}
         {:des "Mouse mode"
          :rules [:f-mode
@@ -342,8 +289,6 @@
 
         {:des "z mode"
          :rules [:z-mode
-                 [:caps_lock [["z-mode" 0] [:hs "whichkey?action=hide"]]]
-
                  [:q [["m1ddc-pbp" 1] [:hs "whichkey?action=show&group=m1ddc-pbp"]]]
                  ;; BEGIN menus:z (generated from menus.toml)
                  :m1ddc-pbp
@@ -365,11 +310,7 @@
                  [:p [:hs "callBob?action=snipTranslate"]]
                  [:9 [:hs "openConsole"]]
                  [:0 [:hs "reloadConfig"]]
-
-                 [:equal_sign [:hs-notify "-1&level=error"]]
                  [:slash [:hs "scpt?name=xnip_capture"]]]}
 
-        {:des "caps-mode"
-         :rules [[:caps_lock :left_control :terminals {:alone :escape}]
-                 [:caps_lock :left_control :vscode {:alone :escape}]
-                 [:caps_lock ["caps-mode" 1] nil {:afterup ["caps-mode" 0] :alone :escape}]]}]}
+        {:des "caps: control, tap for escape"
+         :rules [[:caps_lock :left_control nil {:alone :escape}]]}]}

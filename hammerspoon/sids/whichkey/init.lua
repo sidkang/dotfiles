@@ -2,13 +2,16 @@
 --   whichkey?action=show&group=<id>   show after a short delay (replaces the visible guide)
 --   whichkey?action=hide[&group=<id>] cancel the pending guide / hide it (only if it is <id>, when given)
 -- Groups are generated from goku/menus.toml (see groups.lua).
+-- A group with `exit` is a sticky Karabiner mode: it lasts exactly as long as its card, so
+-- whenever the card goes away (hide or time limit) the mode variables are reset here.
 local ui = require("sids.whichkey.ui")
 local groups = require("sids.whichkey.groups")
 
 local M = {}
 
 local showDelaySeconds = 0.45
-local maxVisibleSeconds = 12 -- safety net if a hide never arrives
+local maxVisibleSeconds = 12 -- also ends a sticky mode that was left open
+local karabinerCli = "/opt/homebrew/bin/karabiner_cli"
 
 local state = {
 	canvas = nil,
@@ -16,6 +19,8 @@ local state = {
 	expireTimer = nil,
 	pendingGroup = nil,
 	visibleGroup = nil,
+	stickyActive = false,
+	clearTask = nil,
 }
 
 local function stopTimer(name)
@@ -29,6 +34,27 @@ local function hideCanvas()
 	stopTimer("expireTimer")
 	state.visibleGroup = nil
 	if state.canvas ~= nil then state.canvas:hide() end
+end
+
+local function clearStickyModes()
+	if not state.stickyActive then return end
+	state.stickyActive = false
+
+	local variables = {}
+	for id, group in pairs(groups) do
+		if group.exit then variables[id] = 0 end
+	end
+	state.clearTask = hs.task.new(karabinerCli, nil, { "--set-variables", hs.json.encode(variables) })
+	state.clearTask:start()
+end
+
+local function hide(groupName)
+	if groupName == nil or state.pendingGroup == groupName then
+		stopTimer("showTimer")
+		state.pendingGroup = nil
+	end
+	if groupName == nil or state.visibleGroup == groupName then hideCanvas() end
+	if state.pendingGroup == nil and state.visibleGroup == nil then clearStickyModes() end
 end
 
 local function render(groupName)
@@ -53,11 +79,12 @@ local function render(groupName)
 
 	state.visibleGroup = groupName
 	stopTimer("expireTimer")
-	state.expireTimer = hs.timer.doAfter(maxVisibleSeconds, hideCanvas)
+	state.expireTimer = hs.timer.doAfter(maxVisibleSeconds, function() hide() end)
 end
 
 local function show(groupName)
 	stopTimer("showTimer")
+	if groups[groupName] ~= nil and groups[groupName].exit then state.stickyActive = true end
 	if state.visibleGroup ~= nil then
 		state.pendingGroup = nil
 		render(groupName)
@@ -71,14 +98,6 @@ local function show(groupName)
 	end)
 end
 
-local function hide(groupName)
-	if groupName == nil or state.pendingGroup == groupName then
-		stopTimer("showTimer")
-		state.pendingGroup = nil
-	end
-	if groupName == nil or state.visibleGroup == groupName then hideCanvas() end
-end
-
 --- Render a group to a PNG without showing it (development aid).
 function M.snapshot(groupName, path)
 	local frame, elements = ui.build(groups[groupName], hs.screen.mainScreen():frame())
@@ -90,6 +109,10 @@ function M.snapshot(groupName, path)
 end
 
 function M.setup(route)
+	-- A reload destroys the card and its timers, so a mode left on would never end.
+	state.stickyActive = true
+	clearStickyModes()
+
 	hs.urlevent.bind(route, function(_, params)
 		local action = params["action"]
 		if action == "show" and params["group"] ~= nil then

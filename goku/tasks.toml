@@ -14,6 +14,19 @@ run = "mise dot apply \"~/.config/karabiner.edn\""
 description = "Regenerate karabiner.edn menus and WhichKey groups from goku/menus.toml; no deployment"
 run = "python3 \"{{ config_root }}/goku/gen.py\""
 
+["goku:heat-on"]
+description = "Start the usage receiver LaunchAgent and log which Karabiner rules fire; letters are never recorded"
+run = "python3 \"{{ config_root }}/goku/heat.py\" on"
+
+["goku:heat-off"]
+description = "Stop the usage receiver and remove the logging rules; the log stays"
+run = "python3 \"{{ config_root }}/goku/heat.py\" off"
+
+["goku:heat"]
+description = "Show the per-layer keyboard heatmap; pass --days N to change the window"
+raw = true
+run = "python3 \"{{ config_root }}/goku/heat.py\" report"
+
 ["goku:check"]
 description = "Fail if the generated menus are out of date"
 run = "python3 \"{{ config_root }}/goku/gen.py\" --check"

@@ -20,8 +20,8 @@
 | Fish | gh、starship、zoxide | `fish/config.fish` 的交互初始化；后两项有守卫，但已确认为常用功能 |
 | Kitty | fzf、jq、Python、两款字体 | `kitty/context_switcher.py`、`fish/conf.d/kitty.fish`、`kitty/kitty.conf` |
 | AeroSpace | borders、Python 3.14、Fish、Hammerspoon | `aerospace/aerospace.toml` 的启动与 workspace hook、`aerospace/as.py` |
-| Goku | Karabiner-Elements、borders、Python 3.14、AeroSpace、Hammerspoon、Kitty | `goku/karabiner.edn` 的窗口管理层直接调用这些应用；不会代为部署或初始化它们 |
-| Hammerspoon | ImageMagick、AeroSpace | 壁纸处理及 `sids.aerospace_window_hints` 调用 |
+| Goku | Karabiner-Elements、borders、Python 3.14、AeroSpace、Hammerspoon | `goku/karabiner.edn` 的窗口管理层直接调用这些应用；不会代为部署或初始化它们 |
+| Hammerspoon | ImageMagick、AeroSpace、Karabiner-Elements | 壁纸处理、`sids.aerospace_window_hints` 和 `sids.whichkey` 调用 |
 | Neovim | Git、Fish、tree-sitter-cli、ripgrep、fd | 插件安装、Fish formatter、treesitter 构建和查找功能 |
 | Git | hunk | `git/config` 默认 pager |
 | Pi | Node、zmx | Pi 运行时以及 `fish/functions/pi.fish` 的交互包装 |
@@ -42,7 +42,7 @@
 | Neovim 特定文件类型格式化 | taplo、prettier、caddy、joker | 已写 `nvim/Brewfile`；本机未找到 caddy，joker 是可选后备 |
 | mise `name` 任务 | yq | 已写 `mise/Brewfile`；本机未找到 yq |
 | Fish `fmd` | autocorrect | `fish/functions/fmd.fish` 引用；本机未找到，安装来源与是否保留功能待决定，未新增自动安装 |
-| Goku 显示器切换 | m1ddc | `goku/karabiner.edn` 引用；本机未找到，是否使用该硬件功能待决定 |
+| Goku 显示器切换 | m1ddc | `goku/karabiner.edn` 引用；Cube 上使用，本机不安装 |
 | 发布检查 | Homebrew gitleaks | Brewfile 已声明；本机只有 mise shim，没有 Homebrew formula。检查会明确失败，不下载 |
 
 条件 PATH、缩写和命令存在检测本身不意味着必须安装其指向的应用。Fish 中 Claude、Julia、Codex、Gemini、OpenClaw/Docker/OrbStack 等入口未自动变成安装要求；未检查外部服务仓库或认证状态。
