@@ -19,15 +19,15 @@ INFO = "info"
 ERROR = "error"
 GHOST_WORKSPACE = "BIN"
 REX_BUNDLE_ID = "com.superlogical.rex"
-# Rex does not bind a session to a macOS window, so the hotkey window is
-# identified by its recorded AeroSpace id only.
+# Rex exposes no macOS window identity, so the hotkey window is identified by
+# where it is: hidden on this workspace, or floating when shown. Other Rex
+# windows must stay tiled.
 REX_HOTKEY_HIDE_WORKSPACE = "T"
 DEFAULT_WORKSPACE = "1"
 REX_CLIENT_WAIT_SEC = 5.0
 REX_WINDOW_WAIT_SEC = 3.0
 HOTKEY_LOCK_WAIT_SEC = 1.0
 HOTKEY_STATE_DIR = Path(os.path.expanduser("~/.local/state/aerospace"))
-HOTKEY_ID_FILE = HOTKEY_STATE_DIR / "hotkey-id"
 HOTKEY_LOCK_FILE = HOTKEY_STATE_DIR / "hotkey-lock"
 FOCUS_RETRY_DELAY_SEC = 0.05
 HS_CLI = os.path.expanduser("~/.local/bin/hs")
@@ -272,23 +272,6 @@ def toggle_app(app_name: str) -> None:
     move_window_to_workspace(window_id, rule.home_workspace, focus_follows=True)
 
 
-def hotkey_cached_id() -> str | None:
-    try:
-        value = HOTKEY_ID_FILE.read_text().strip()
-    except OSError:
-        return None
-    return value or None
-
-
-def remember_hotkey_window(window_id: str) -> None:
-    HOTKEY_STATE_DIR.mkdir(parents=True, exist_ok=True)
-    HOTKEY_ID_FILE.write_text(window_id)
-
-
-def clear_hotkey_cache() -> None:
-    HOTKEY_ID_FILE.unlink(missing_ok=True)
-
-
 @contextmanager
 def hotkey_lock():
     """Yield True when this process owns the toggle, False after waiting too long.
@@ -315,7 +298,7 @@ def hotkey_lock():
         yield owned
 
 
-RexWindow = namedtuple("RexWindow", "window_id workspace")
+RexWindow = namedtuple("RexWindow", "window_id workspace layout")
 
 FOCUSED_WORKSPACE_QUERY = (
     'list-workspaces --monitor focused --visible --format "#W|%{workspace}"'
@@ -327,7 +310,7 @@ FOCUSED_WINDOW_QUERY = 'list-windows --focused --format "#F|%{window-id}"'
 HOTKEY_STATE_SCRIPT = "; ".join(
     (
         f"list-windows --monitor all --app-bundle-id {REX_BUNDLE_ID} "
-        '--format "R|%{window-id}|%{workspace}"',
+        '--format "R|%{window-id}|%{workspace}|%{window-layout}"',
         FOCUSED_WORKSPACE_QUERY,
         FOCUSED_WINDOW_QUERY,
     )
@@ -348,7 +331,7 @@ def parse_hotkey_state(
     for line in output.splitlines():
         if line.startswith("R|"):
             parts = line[2:].split("|")
-            if len(parts) == 2:
+            if len(parts) == 3:
                 windows.append(RexWindow(*parts))
         elif line.startswith("#W|"):
             workspace = line[3:] or None
@@ -366,13 +349,17 @@ def hotkey_state() -> tuple[list[RexWindow], str, str | None]:
 
 
 def find_hotkey_window(windows: Sequence[RexWindow]) -> RexWindow | None:
-    """The Rex window recorded as the hotkey window, if it still exists.
-
-    Which session a window shows says nothing about its role, so only the
-    recorded id counts.
-    """
-    cached = hotkey_cached_id()
-    return next((w for w in windows if w.window_id == cached), None)
+    """The hidden window, else a floating one, else the only Rex window."""
+    hidden = [w for w in windows if w.workspace == REX_HOTKEY_HIDE_WORKSPACE]
+    if hidden:
+        return hidden[0]
+    floating = [w for w in windows if w.layout == "floating"]
+    if floating:
+        return floating[0]
+    # A lone window is adopted rather than opening a second one.
+    if len(windows) == 1:
+        return windows[0]
+    return None
 
 
 def hide_hotkey(window_id: str) -> bool:
@@ -482,11 +469,9 @@ def launch_rex_hotkey() -> None:
 
     window = wait_for_new_rex_window(before_ids)
     if window is None:
-        # Never fall back to another Rex window: that is the user's own.
         notify("Rex hotkey window did not appear", ERROR)
         return
-    remember_hotkey_window(window.window_id)
-    # A fresh window is tiled: float it.
+    # A fresh window is tiled: floating it marks it as the hotkey window.
     if not show_hotkey(window.window_id, window.workspace):
         notify("Failed to show Rex hotkey window", ERROR)
 
@@ -499,27 +484,24 @@ def toggle_rex_hotkey() -> None:
             return
 
         windows, current_workspace, focused_id = hotkey_state()
-        hotkey = find_hotkey_window(windows)
-        if hotkey is None:
-            clear_hotkey_cache()
-            launch_rex_hotkey()
-            return
-
-        # Where the window actually is decides the action, not recorded state.
+        # A focused floating Rex window is the one on screen: hide it.
         # Visible but unfocused (covered, or focus is elsewhere) means the
         # user wants it in front, not gone.
+        focused = next((w for w in windows if w.window_id == focused_id), None)
         if (
-            hotkey.workspace == current_workspace
+            focused is not None
+            and focused.layout == "floating"
             and current_workspace != REX_HOTKEY_HIDE_WORKSPACE
-            and hotkey.window_id == focused_id
         ):
-            ok = hide_hotkey(hotkey.window_id)
-            action = "hide"
+            hotkey, ok, action = focused, hide_hotkey(focused.window_id), "hide"
         else:
+            hotkey = find_hotkey_window(windows)
+            if hotkey is None:
+                launch_rex_hotkey()
+                return
             ok = show_hotkey(hotkey.window_id, current_workspace)
             action = "show"
         if not ok:
-            clear_hotkey_cache()
             notify(f"Failed to {action} Rex hotkey window {hotkey.window_id}", ERROR)
 
 
