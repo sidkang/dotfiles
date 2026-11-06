@@ -5,6 +5,9 @@ models:
   - claude/opus-5.5
   - claude/fable-5.1
   - ds/deepseek-flash
+  - gemini/gemini-3.8-flash
+  - xai/grok-4.6
+  - gemini/gemini-4-argon
 thinkingLevel: medium
 tools:
   allow:

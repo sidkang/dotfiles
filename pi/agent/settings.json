@@ -100,7 +100,8 @@
   },
   "pi-image-gen": {
     "defaultProvider": "pi-codex",
-    "defaultModel": "gpt-image-2.5-flare",
+    "defaultModel": "gpt-image-2.6-flare",
+    "svgModel": "gpt-6.1-sol",
     "requestTimeoutMs": 300000,
     "openRouterDiscovery": false,
     "spriteGeneration": {
@@ -115,7 +116,7 @@
         },
         "models": [
           {
-            "id": "gpt-image-2.5-flare",
+            "id": "gpt-image-2.6-flare",
             "capabilities": {
               "qualityValues": [
                 "low",
@@ -128,7 +129,7 @@
             }
           },
           {
-            "id": "gpt-image-2.5-sunburst",
+            "id": "gpt-image-2.6-sunburst",
             "capabilities": {
               "qualityValues": [
                 "low",
