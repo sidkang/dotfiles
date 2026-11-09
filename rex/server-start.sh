@@ -1,7 +1,6 @@
 #!/bin/sh
-# Start the Rex server with anonymous HTTP listeners on this host's fixed addresses.
+# Run the Rex server in the foreground so launchd KeepAlive can restart it on crash.
 # glacier: VPN only. cube: both LAN addresses. Other hosts: no network listener.
-# `rex server start` is idempotent: a running server keeps its own listeners.
 rex="$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
 port=7297
 
@@ -26,4 +25,4 @@ for _ in $(seq 30); do
 done
 
 [ $# -gt 0 ] && set -- --allow-anonymous "$@"
-exec "$rex" server start "$@"
+exec "$rex" server run "$@"

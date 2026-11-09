@@ -79,7 +79,7 @@ def apply_workspace_settings() -> None:
     defaults_write("Workspace.allowsTerminalNotifications", "-bool", "true")
     defaults_write("Workspace.notificationPosition", "-string", "bottom-right")
     defaults_write("Workspace.sidebarPosition", "-string", "left")
-    defaults_write("rex.server.automatic-restart-enabled", "-bool", "true")
+    defaults_write("rex.server.automatic-restart-enabled", "-bool", "false")
     defaults_write("rex.agents.names-sessions", "-bool", "false")
 
 
@@ -214,7 +214,7 @@ def main() -> int:
     print(f"cursor={CURSOR_STYLE} blink_ms={CURSOR_BLINK_MS} shader={CURSOR_SHADER}")
     print(f"theme={BUNDLE_THEME_NAME} id={theme_id}")
     print("tabs=vertical pane_glass=on inactive_fade=none")
-    print("remote_control=on automatic_restart=on")
+    print("remote_control=on automatic_restart=off")
     return 0
 
 
