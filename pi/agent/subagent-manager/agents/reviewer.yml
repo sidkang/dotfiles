@@ -4,6 +4,7 @@ models:
   - claude/opus-5.5
   - ds/deepseek-flash
   - gemini/gemini-4-argon
+  - codex/gpt-6-astra
 thinkingLevel: low
 tools:
   allow:
