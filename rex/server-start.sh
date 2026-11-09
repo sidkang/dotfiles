@@ -1,7 +1,19 @@
 #!/bin/sh
-# Run the Rex server in the foreground so launchd KeepAlive can restart it on crash.
-# glacier: VPN only. cube: both LAN addresses. Other hosts: no network listener.
-rex="$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
+# Run the Sparkle-updated Rex helper in the foreground so launchd KeepAlive
+# can restart it on crash. glacier: VPN only. cube: both LAN addresses.
+# Other hosts: no network listener.
+rex=
+for p in \
+  "/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex" \
+  "/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex" \
+  "$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
+do
+  if [ -x "$p" ]; then
+    rex=$p
+    break
+  fi
+done
+[ -n "$rex" ] || exit 1
 port=7297
 
 case $(scutil --get LocalHostName) in

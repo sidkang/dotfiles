@@ -33,11 +33,11 @@ FOCUS_RETRY_DELAY_SEC = 0.05
 HS_CLI = os.path.expanduser("~/.local/bin/hs")
 URL_SAFE = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~")
 REX_BIN_CANDIDATES = (
+    "/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex",
+    "/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex",
     os.path.expanduser(
         "~/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
     ),
-    "/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex",
-    "/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex",
 )
 REX_APP_CANDIDATES = ("Rex Beta", "Rex")
 

@@ -4,11 +4,11 @@ run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/rex/Brewfile\
 
 ["rex:plan"]
 description = "Preview only rex deployment"
-run = "mise dot apply --dry-run \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\""
+run = "mise dot apply --dry-run \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\" \"~/Library/LaunchAgents/com.sid.rex-server-reload.plist\""
 
 ["rex:apply"]
-description = "Deploy only rex themes, server start script and LaunchAgent; no installation or settings"
-run = "mise dot apply \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\""
+description = "Deploy only rex themes, server start script and LaunchAgents; no installation or settings"
+run = "mise dot apply \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\" \"~/Library/LaunchAgents/com.sid.rex-server-reload.plist\""
 
 ["rex:settings"]
 description = "Apply glacier-preferred Rex appearance, Catppuccin Latte theme, and Remote Control"

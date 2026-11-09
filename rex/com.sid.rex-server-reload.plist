@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.sid.rex-server-reload</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>exec launchctl kickstart -k "gui/$(id -u)/com.sid.rex-server"</string>
+    </array>
+    <key>RunAtLoad</key>
+    <false/>
+    <key>WatchPaths</key>
+    <array>
+        <string>/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex</string>
+        <string>/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex</string>
+    </array>
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+</dict>
+</plist>

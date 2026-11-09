@@ -85,10 +85,10 @@ def apply_workspace_settings() -> None:
 
 def rex_bin() -> Path:
     candidates = [
-        Path.home()
-        / "Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex",
         Path("/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex"),
         Path("/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex"),
+        Path.home()
+        / "Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex",
     ]
     for path in candidates:
         if path.is_file():
