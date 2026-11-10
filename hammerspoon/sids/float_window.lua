@@ -18,6 +18,18 @@ local stashedSizes = {}
 
 local function notify(message) hs.alert.show(message) end
 
+-- hs.window.get scans every window (~55ms), so keep the objects it returns.
+local windowsById = {}
+
+local function windowForId(id)
+	local win = windowsById[id]
+	-- A destroyed window's AX element no longer answers.
+	if win ~= nil and win:role() ~= nil then return win end
+	win = hs.window.get(id)
+	windowsById[id] = win
+	return win
+end
+
 local function copyFrame(frame)
 	return {
 		x = frame.x,
@@ -161,7 +173,7 @@ local function handleRoute(_, params)
 	end
 
 	-- An explicit window id avoids racing the focus change that precedes the call.
-	local win = params["window"] and hs.window.get(tonumber(params["window"])) or getFocusedWindow()
+	local win = params["window"] and windowForId(tonumber(params["window"])) or getFocusedWindow()
 	if win == nil then return end
 
 	if action == "stash" then

@@ -52,7 +52,8 @@
                   ["escape-mode" 1]
                   nil
                   {:delayed {:invoked [[:as-py "rex toggle-hotkey"] ["escape-mode" 0]]
-                             :canceled ["escape-mode" 0]}}]
+                             :canceled ["escape-mode" 0]}
+                   :params {:delay 120}}]
 
                  [:f1 [:as "focus-back-and-forth"]]
 
