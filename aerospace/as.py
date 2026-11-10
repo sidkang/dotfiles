@@ -300,8 +300,9 @@ def hotkey_lock():
 
 RexWindow = namedtuple("RexWindow", "window_id workspace layout")
 
-FOCUSED_WORKSPACE_QUERY = (
-    'list-workspaces --monitor focused --visible --format "#W|%{workspace}"'
+# The hotkey window follows the mouse pointer, not the keyboard focus.
+MOUSE_WORKSPACE_QUERY = (
+    'list-workspaces --monitor mouse --visible --format "#W|%{workspace}"'
 )
 FOCUSED_WINDOW_QUERY = 'list-windows --focused --format "#F|%{window-id}"'
 # One `aerospace eval` answers every question a toggle needs. The focused
@@ -311,7 +312,7 @@ HOTKEY_STATE_SCRIPT = "; ".join(
     (
         f"list-windows --monitor all --app-bundle-id {REX_BUNDLE_ID} "
         '--format "R|%{window-id}|%{workspace}|%{window-layout}"',
-        FOCUSED_WORKSPACE_QUERY,
+        MOUSE_WORKSPACE_QUERY,
         FOCUSED_WINDOW_QUERY,
     )
 )
@@ -324,7 +325,7 @@ def aerospace_eval(*commands: str) -> subprocess.CompletedProcess[str]:
 def parse_hotkey_state(
     output: str,
 ) -> tuple[list[RexWindow], str | None, str | None]:
-    """Rex windows, the focused workspace, and the focused window id."""
+    """Rex windows, the workspace under the mouse, and the focused window id."""
     windows: list[RexWindow] = []
     workspace: str | None = None
     focused: str | None = None
@@ -362,22 +363,36 @@ def find_hotkey_window(windows: Sequence[RexWindow]) -> RexWindow | None:
     return None
 
 
+def stash_hotkey_size(window_id: str) -> None:
+    """Have Hammerspoon remember the window's size before it leaves its screen."""
+    hammerspoon("floatwindow", action="stash", window=window_id)
+
+
 def hide_hotkey(window_id: str) -> bool:
     """Park the window on the hiding workspace; the user stays where they are."""
+    stash_hotkey_size(window_id)
     result = aerospace_eval(
         f"move-node-to-workspace --window-id {window_id} {REX_HOTKEY_HIDE_WORKSPACE}"
     )
     return result.returncode == 0
 
 
-def show_hotkey(window_id: str, workspace: str) -> bool:
-    """Summon the window, float it and make sure it has focus.
+def show_hotkey(window: RexWindow, workspace: str, center: bool = False) -> bool:
+    """Summon the window to `workspace`, float it and make sure it has focus.
 
+    Crossing workspaces centers the window at its remembered share of the
+    new screen; `center` forces centering.
     False means the window is gone.
     """
+    window_id = window.window_id
     # Showing it on the hiding workspace would leave the user looking at
     # nothing and make the next toggle appear to do nothing.
     target = DEFAULT_WORKSPACE if workspace == REX_HOTKEY_HIDE_WORKSPACE else workspace
+    if window.workspace != target:
+        center = True
+        # A tiled window's frame is its tile, not a size worth keeping.
+        if window.layout == "floating":
+            stash_hotkey_size(window_id)
     # `&&`, not `;`: eval reports only the last command's status, so with `;`
     # a vanished window id would go unnoticed.
     result = run_cmd(
@@ -402,6 +417,8 @@ def show_hotkey(window_id: str, workspace: str) -> bool:
         return False
     if parse_hotkey_state(result.stdout)[2] != window_id:
         focus_window_robustly(window_id)
+    if center:
+        hammerspoon("floatwindow", action="move", target="center", window=window_id)
     return True
 
 
@@ -457,7 +474,7 @@ def ensure_rex_app(client: str) -> None:
     raise TimeoutError("Rex app client did not connect")
 
 
-def launch_rex_hotkey() -> None:
+def launch_rex_hotkey(workspace: str) -> None:
     client = rex_local_client()
     ensure_rex_app(client)
     # Read the windows only now: starting the app may have restored some.
@@ -472,7 +489,7 @@ def launch_rex_hotkey() -> None:
         notify("Rex hotkey window did not appear", ERROR)
         return
     # A fresh window is tiled: floating it marks it as the hotkey window.
-    if not show_hotkey(window.window_id, window.workspace):
+    if not show_hotkey(window, workspace, center=True):
         notify("Failed to show Rex hotkey window", ERROR)
 
 
@@ -483,23 +500,24 @@ def toggle_rex_hotkey() -> None:
             notify("Rex hotkey is still busy", ERROR)
             return
 
-        windows, current_workspace, focused_id = hotkey_state()
-        # A focused floating Rex window is the one on screen: hide it.
-        # Visible but unfocused (covered, or focus is elsewhere) means the
-        # user wants it in front, not gone.
+        windows, mouse_workspace, focused_id = hotkey_state()
+        # A focused floating Rex window under the mouse is the one on screen:
+        # hide it. Visible but unfocused (covered, or focus is elsewhere), or
+        # on another monitor than the mouse, means the user wants it here and
+        # in front, not gone.
         focused = next((w for w in windows if w.window_id == focused_id), None)
         if (
             focused is not None
             and focused.layout == "floating"
-            and current_workspace != REX_HOTKEY_HIDE_WORKSPACE
+            and focused.workspace == mouse_workspace != REX_HOTKEY_HIDE_WORKSPACE
         ):
             hotkey, ok, action = focused, hide_hotkey(focused.window_id), "hide"
         else:
             hotkey = find_hotkey_window(windows)
             if hotkey is None:
-                launch_rex_hotkey()
+                launch_rex_hotkey(mouse_workspace)
                 return
-            ok = show_hotkey(hotkey.window_id, current_workspace)
+            ok = show_hotkey(hotkey, mouse_workspace)
             action = "show"
         if not ok:
             notify(f"Failed to {action} Rex hotkey window {hotkey.window_id}", ERROR)

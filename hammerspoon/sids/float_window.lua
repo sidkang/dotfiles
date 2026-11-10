@@ -12,6 +12,10 @@ local config = {
 	minHeight = 240,
 }
 
+-- Last on-screen size per window id, as a share of the screen bounds. A window
+-- summoned to another screen is scaled by it, so sizes survive screen changes.
+local stashedSizes = {}
+
 local function notify(message) hs.alert.show(message) end
 
 local function copyFrame(frame)
@@ -73,8 +77,28 @@ end
 
 local function centerWindow(win)
 	local bounds = getBounds(win)
-	local frame = clampFrame(copyFrame(win:frame()), bounds)
-	win:setFrame(centerFrame(frame, bounds))
+	local frame = copyFrame(win:frame())
+	local share = stashedSizes[win:id()]
+	if share ~= nil then
+		frame.w = math.floor(share.w * bounds.w)
+		frame.h = math.floor(share.h * bounds.h)
+	end
+	win:setFrame(centerFrame(clampFrame(frame, bounds), bounds))
+end
+
+-- Call before the window leaves its screen. A window that is hidden or off
+-- screen has no meaningful size, so keep the previous one.
+local function stashSize(win)
+	local frame = win:frame()
+	local cx, cy = frame.x + frame.w / 2, frame.y + frame.h / 2
+	for _, screen in ipairs(hs.screen.allScreens()) do
+		local f = screen:fullFrame()
+		if cx >= f.x and cx < f.x + f.w and cy >= f.y and cy < f.y + f.h then
+			local bounds = getBounds(win)
+			stashedSizes[win:id()] = { w = frame.w / bounds.w, h = frame.h / bounds.h }
+			return
+		end
+	end
 end
 
 local function moveWindow(win, axis, size)
@@ -136,8 +160,14 @@ local function handleRoute(_, params)
 		return
 	end
 
-	local win = getFocusedWindow()
+	-- An explicit window id avoids racing the focus change that precedes the call.
+	local win = params["window"] and hs.window.get(tonumber(params["window"])) or getFocusedWindow()
 	if win == nil then return end
+
+	if action == "stash" then
+		stashSize(win)
+		return
+	end
 
 	if action == "move" then
 		if target == "center" then
