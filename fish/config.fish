@@ -1,7 +1,4 @@
 ######################### ENV ################################################
-set -gx HOMEBREW_NO_AUTO_UPDATE 1
-set -gx HOMEBREW_NO_ANALYTICS 1
-set -gx HOMEBREW_NO_INSTALL_CLEANUP 1
 set -gx LC_ALL en_US.UTF-8
 set -gx LANG en_US.UTF-8
 set -gx EDITOR nvim
@@ -46,19 +43,6 @@ if command -q claude
 end
 
 ########################## PATH ################################################
-if test -e /opt/homebrew/bin/brew
-    set -gx HOMEBREW_PREFIX /opt/homebrew
-    set -gx HOMEBREW_CELLAR /opt/homebrew/Cellar
-    set -gx HOMEBREW_REPOSITORY /opt/homebrew
-    # set -gx HOMEBREW_CORE_GIT_REMOTE https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git
-
-    fish_add_path -g /opt/homebrew/bin /opt/homebrew/sbin
-    set -q INFOPATH; or set -gx INFOPATH
-    contains /opt/homebrew/share/info $INFOPATH; or set -gx INFOPATH /opt/homebrew/share/info $INFOPATH
-else if test -e /home/linuxbrew/.linuxbrew/bin/brew
-    eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv fish)
-end
-
 if test -d /Library/TeX/texbin
     fish_add_path -g /Library/TeX/texbin
 end
@@ -258,15 +242,3 @@ end
 
 ########################## REFERENCE ############################################
 # fish_add_path "/Users/sid/.local/share/../bin"
-
-# Backup platform-specific brew bootstrap reference.
-# switch (uname -a)
-#     case "*Linux*x86_64*"
-#         # eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv)
-#     case "*x86_64*"
-#     case "*arm64*"
-#         # eval (/opt/homebrew/bin/brew shellenv)
-#     case "*"
-#         echo something wrong.
-#         return 1
-# end
