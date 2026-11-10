@@ -26,6 +26,9 @@ REX_HOTKEY_HIDE_WORKSPACE = "T"
 DEFAULT_WORKSPACE = "1"
 REX_CLIENT_WAIT_SEC = 5.0
 REX_WINDOW_WAIT_SEC = 3.0
+# Rex's own Settings window ("Settings - Server") is not a terminal window and
+# must never be taken for the hotkey window.
+REX_SETTINGS_TITLE_PREFIX = "Settings"
 HOTKEY_LOCK_WAIT_SEC = 1.0
 HOTKEY_STATE_DIR = Path(os.path.expanduser("~/.local/state/aerospace"))
 HOTKEY_LOCK_FILE = HOTKEY_STATE_DIR / "hotkey-lock"
@@ -311,7 +314,7 @@ FOCUSED_WINDOW_QUERY = 'list-windows --focused --format "#F|%{window-id}"'
 HOTKEY_STATE_SCRIPT = "; ".join(
     (
         f"list-windows --monitor all --app-bundle-id {REX_BUNDLE_ID} "
-        '--format "R|%{window-id}|%{workspace}|%{window-layout}"',
+        '--format "R|%{window-id}|%{workspace}|%{window-layout}|%{window-title}"',
         MOUSE_WORKSPACE_QUERY,
         FOCUSED_WINDOW_QUERY,
     )
@@ -331,9 +334,10 @@ def parse_hotkey_state(
     focused: str | None = None
     for line in output.splitlines():
         if line.startswith("R|"):
-            parts = line[2:].split("|")
-            if len(parts) == 3:
-                windows.append(RexWindow(*parts))
+            # The title comes last because it may contain "|".
+            parts = line[2:].split("|", 3)
+            if len(parts) == 4 and not parts[3].startswith(REX_SETTINGS_TITLE_PREFIX):
+                windows.append(RexWindow(*parts[:3]))
         elif line.startswith("#W|"):
             workspace = line[3:] or None
         elif line.startswith("#F|"):
