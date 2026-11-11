@@ -8,6 +8,7 @@ models:
   - gemini/gemini-4-hydrogen
   - xai/grok-4.6
   - gemini/gemini-4-carbon
+  - gemini/gemini-4-argon
 thinkingLevel: medium
 tools:
   allow:
