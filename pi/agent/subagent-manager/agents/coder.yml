@@ -1,4 +1,4 @@
-description: Own iterative implementation, refactoring, debugging, and frontend UI through a checked patch. Pick claude/sonnet-5.5 for frontend and UI, codex/gpt-6.1-sol for backend, claude/opus-5.5 for complex debugging, ambiguous features, and cross-module refactoring, and ds/deepseek-flash for bulk mechanical edits; use claude/fable-5.2 only when asked or after claude/opus-5.5 has failed. Not for lookup-only questions, review-only passes, or long-form prose.
+description: Own iterative implementation, refactoring, debugging, and frontend UI through a checked patch. Pick claude/sonnet-5.5 for frontend and UI, codex/gpt-6.1-sol for backend, claude/opus-5.5 for complex debugging, ambiguous features, and cross-module refactoring, and ds/deepseek-flash for bulk mechanical edits; use gemini/gemini-4-carbon only when asked or after claude/opus-5.5 has failed. Not for lookup-only questions, review-only passes, or long-form prose.
 models:
   - claude/sonnet-5.5
   - codex/gpt-6.1-sol
@@ -7,7 +7,7 @@ models:
   - ds/deepseek-flash
   - gemini/gemini-3.8-flash
   - xai/grok-4.6
-  - gemini/gemini-4-argon
+  - gemini/gemini-4-carbon
 thinkingLevel: medium
 tools:
   allow:

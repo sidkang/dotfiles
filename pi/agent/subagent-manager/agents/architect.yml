@@ -2,7 +2,7 @@ models:
   - claude/opus-5.5
   - claude/fable-5.2
   - codex/gpt-6-astra
-  - gemini/gemini-4-argon
+  - gemini/gemini-4-carbon
 thinkingLevel: medium
 tools:
   allow:
