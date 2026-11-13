@@ -4,19 +4,15 @@ run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/rex/Brewfile\
 
 ["rex:plan"]
 description = "Preview only rex deployment"
-run = "mise dot apply --dry-run \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/.config/rex/init.lua\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\" \"~/Library/LaunchAgents/com.sid.rex-server-reload.plist\""
+run = "mise dot apply --dry-run \"~/.config/rex/themes\" \"~/.config/rex/init.lua\""
 
 ["rex:apply"]
-description = "Deploy only rex themes, Lua config, server start script and LaunchAgents; no installation or settings"
-run = "mise dot apply \"~/.config/rex/themes\" \"~/.config/rex/server-start.sh\" \"~/.config/rex/init.lua\" \"~/Library/LaunchAgents/com.sid.rex-server.plist\" \"~/Library/LaunchAgents/com.sid.rex-server-reload.plist\""
+description = "Deploy only rex themes and Lua config; no installation, server, or settings"
+run = "mise dot apply \"~/.config/rex/themes\" \"~/.config/rex/init.lua\""
 
 ["rex:settings"]
 description = "Apply glacier-preferred Rex appearance, Catppuccin Latte theme, and Remote Control"
 run = "python3 \"{{ config_root }}/rex/apply-settings.py\""
-
-["rex:server-start"]
-description = "Start the Rex server LaunchAgent if not loaded (does not restart a running server)"
-run = "launchctl print \"gui/$(id -u)/com.sid.rex-server\" >/dev/null 2>&1 || launchctl bootstrap \"gui/$(id -u)\" \"$HOME/Library/LaunchAgents/com.sid.rex-server.plist\""
 
 ["rex:completions"]
 description = "Generate Fish completion for rex into ~/.config/fish/completions; no deployment"
