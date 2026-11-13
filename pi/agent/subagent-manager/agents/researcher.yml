@@ -3,6 +3,7 @@ models:
   - codex/gpt-6.1-sol
   - ds/deepseek-flash
   - claude/sonnet-5.5
+  - gemini/gemini-4-hydrogen
 thinkingLevel: medium
 tools:
   allow:

@@ -13,6 +13,9 @@
     "claude/sonnet-safe": "high",
     "ds/deepseek-flash": "high",
     "gemini/gemini-3.8-flash": "high",
+    "gemini/gemini-4-hydrogen": "high",
+    "gemini/gemini-4-argon": "medium",
+    "gemini/gemini-4-carbon": "medium",
     "xai/grok-4.6": "high"
   },
   "editorPaddingX": 1,
@@ -25,7 +28,9 @@
     "ds/deepseek-flash",
     "gemini/gemini-3.8-flash",
     "gemini/gemini-4-argon",
-    "codex/gpt-6.1-sol"
+    "codex/gpt-6.1-sol",
+    "gemini/gemini-4-carbon",
+    "gemini/gemini-4-hydrogen"
   ],
   "packages": [
     "npm:@ff-labs/pi-fff",

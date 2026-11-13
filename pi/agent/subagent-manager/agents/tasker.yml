@@ -3,7 +3,7 @@ models:
   - xai/grok-4.6
   - codex/gpt-6.1-sol
   - ds/deepseek-flash
-  - gemini/gemini-3.8-flash
+  - gemini/gemini-4-hydrogen
 thinkingLevel: low
 tools:
   allow:
