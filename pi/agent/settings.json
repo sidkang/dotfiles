@@ -20,29 +20,22 @@
   },
   "editorPaddingX": 1,
   "enabledModels": [
-    "claude/sonnet-5.5",
-    "claude/sonnet-safe",
+    "claude/fable-5.2",
     "claude/opus-5.5",
-    "claude/opus-safe",
-    "xai/grok-4.6",
-    "ds/deepseek-flash",
-    "gemini/gemini-3.8-flash",
-    "gemini/gemini-4-argon",
-    "codex/gpt-6.1-sol",
+    "claude/sonnet-5.5",
     "gemini/gemini-4-carbon",
-    "gemini/gemini-4-hydrogen"
+    "gemini/gemini-4-argon",
+    "gemini/gemini-4-hydrogen",
+    "ds/deepseek-flash",
+    "codex/gpt-6.1-sol"
   ],
   "packages": [
     "npm:@ff-labs/pi-fff",
     "git:github.com/sidkang/pi-subagent-manager",
     {
       "source": "git:github.com/sidkang/pi-stuff",
-      "extensions": [
-        "!extensions/session-env.ts"
-      ],
-      "skills": [
-        "!extensions/pi-image-gen/skills/sprite-gen"
-      ]
+      "extensions": ["!extensions/session-env.ts"],
+      "skills": ["!extensions/pi-image-gen/skills/sprite-gen"]
     }
   ],
   "enableInstallTelemetry": false,
@@ -52,9 +45,7 @@
   "terminal": {
     "clearOnShrink": true
   },
-  "defaultTools": [
-    "+codemode"
-  ],
+  "defaultTools": ["+codemode"],
   "treeFilterMode": "no-tools",
   "steeringMode": "all",
   "transport": "sse",
@@ -89,18 +80,12 @@
   },
   "codexTools": {
     "fastMode": {
-      "eligibleModels": [
-        "gpt-6-astra",
-        "gpt-6.1-sol",
-        "gpt-6-luna"
-      ],
+      "eligibleModels": ["gpt-6-astra", "gpt-6.1-sol", "gpt-6-luna"],
       "defaultEnabledModels": []
     },
     "responsesCompaction": {
       "enabled": true,
-      "providers": [
-        "codex"
-      ]
+      "providers": ["codex"]
     }
   },
   "pi-image-gen": {
@@ -123,27 +108,13 @@
           {
             "id": "gpt-image-2.6-flare",
             "capabilities": {
-              "qualityValues": [
-                "low",
-                "medium",
-                "high",
-                "xhigh",
-                "max",
-                "auto"
-              ]
+              "qualityValues": ["low", "medium", "high", "xhigh", "max", "auto"]
             }
           },
           {
             "id": "gpt-image-2.6-sunburst",
             "capabilities": {
-              "qualityValues": [
-                "low",
-                "medium",
-                "high",
-                "xhigh",
-                "max",
-                "auto"
-              ]
+              "qualityValues": ["low", "medium", "high", "xhigh", "max", "auto"]
             }
           }
         ]
