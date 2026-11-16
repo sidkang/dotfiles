@@ -42,6 +42,8 @@ includes = ["*/tasks.toml"]
 "~/.config/yazi" = { source = "yazi", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
 # zjstatus loads from its pinned GitHub release URL; zellij caches it.
 "~/.config/zellij" = { source = "zellij", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
+# Only the global instruction file; ~/.gemini state, auth, and sessions stay local.
+"~/.gemini/AGENTS.md" = { source = "agy/AGENTS.md", mode = "symlink" }
 # Espanso reloads and installs packages inside these directories, so link them whole.
 "~/Library/Application Support/espanso/config" = { source = "espanso/config", mode = "symlink" }
 "~/Library/Application Support/espanso/match" = { source = "espanso/match", mode = "symlink" }
