@@ -14,6 +14,7 @@
 | herdr | `~/.config/herdr/`、`~/.local/state/herdr/`；不安装或部署 |
 | tmux | `~/.config/tmux/`、仓库 `archive/tmux/`；仅归档，不安装或部署 |
 | JJ 本机仓库配置和状态 | `~/.config/jj/repos/` |
+| Git 本机配置 | `~/.config/git/config`（引入仓库托管的 `shared.config`） |
 | mise 本机覆盖 | `~/.config/mise/config.local.toml` |
 | Neovim 插件锁文件 | `~/.config/nvim/lazy-lock.json` |
 | Fish 通用变量 | `~/.config/fish/fish_variables`，不整体纳管 |

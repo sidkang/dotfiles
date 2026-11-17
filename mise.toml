@@ -9,6 +9,7 @@ includes = ["*/tasks.toml"]
 "~/.config/bottom" = { source = "bottom", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/btop" = { source = "btop", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/fish" = { source = "fish", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
+# Shared config and ignore only; ~/.config/git/config stays local and includes shared.config.
 "~/.config/git" = { source = "git", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/hammerspoon" = { source = "hammerspoon", mode = "symlink-each", exclude = ["Brewfile", "tasks.toml", "README.md", "AGENTS.md", ".DS_Store"] }
 "~/.config/hunk/config.toml" = { source = "hunk/config.toml", mode = "symlink" }
