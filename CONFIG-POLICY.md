@@ -17,6 +17,7 @@
 | mise 本机覆盖 | `~/.config/mise/config.local.toml` |
 | Neovim 插件锁文件 | `~/.config/nvim/lazy-lock.json` |
 | Fish 通用变量 | `~/.config/fish/fish_variables`，不整体纳管 |
+| Antigravity CLI 本机设置与状态 | `~/.gemini/antigravity-cli/settings.json` 及 `~/.gemini/` 下的认证、会话与运行状态 |
 
 不纳管不代表删除软件或本机文件。应用安装的补全和第三方依赖优先通过安装步骤复现，不直接收录本机副本。
 

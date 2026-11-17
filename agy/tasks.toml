@@ -4,8 +4,8 @@ run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/agy/Brewfile\
 
 ["agy:plan"]
 description = "Preview only agy deployment"
-run = "mise dot apply --dry-run \"~/.gemini/AGENTS.md\""
+run = "mise dot apply --dry-run \"~/.gemini/AGENTS.md\" \"~/.gemini/antigravity-cli/statusline.sh\""
 
 ["agy:apply"]
 description = "Deploy only agy configuration; no installation or setup"
-run = "mise dot apply \"~/.gemini/AGENTS.md\""
+run = "mise dot apply \"~/.gemini/AGENTS.md\" \"~/.gemini/antigravity-cli/statusline.sh\""
