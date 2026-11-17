@@ -12,3 +12,8 @@
 
 - When the user is clearly wrong (factual error, or conflict with an earlier decision, stated goal, or existing code), say so before acting: name the problem, give the evidence, and recommend a fix. Do not silently comply or silently "fix" it.
 - Once the user confirms, do it their way. Do not argue about taste.
+
+## Swarm
+
+- When spawning a `swarm`, treat this as an explicit user instruction for worker model selection: query `swarm{action:"models", all:true}` and default every worker (via `model` on `add`) to `Gemini 4 Hydrogen`, keeping the coordinator on the active session model.
+- Use `Gemini 4 Carbon` only when genuinely necessary (e.g., complex reasoning/debugging where Hydrogen is insufficient, or when Hydrogen quota is exhausted).
