@@ -5,8 +5,8 @@
   "defaultModel": "sonnet-5.5",
   "defaultThinkingLevel": "medium",
   "modelThinkingLevels": {
-    "codex/gpt-6-astra": "low",
-    "codex/gpt-6.1-sol": "medium",
+    "codex/gpt-6.2-astra": "low",
+    "codex/gpt-6.2-sol": "medium",
     "claude/opus-5.5": "medium",
     "claude/opus-safe": "medium",
     "claude/sonnet-5.5": "high",
@@ -21,7 +21,7 @@
     "claude/opus-5.5",
     "claude/sonnet-5.5",
     "ds/deepseek-flash",
-    "codex/gpt-6.1-sol"
+    "codex/gpt-6.2-sol"
   ],
   "packages": [
     "npm:@ff-labs/pi-fff",
@@ -81,8 +81,8 @@
   "codexTools": {
     "fastMode": {
       "eligibleModels": [
-        "gpt-6-astra",
-        "gpt-6.1-sol",
+        "gpt-6.2-astra",
+        "gpt-6.2-sol",
         "gpt-6-luna"
       ],
       "defaultEnabledModels": []
@@ -97,7 +97,7 @@
   "pi-image-gen": {
     "defaultProvider": "pi-codex",
     "defaultModel": "gpt-image-2.6-flare",
-    "svgModel": "gpt-6.1-sol",
+    "svgModel": "gpt-6.2-sol",
     "requestTimeoutMs": 300000,
     "openRouterDiscovery": false,
     "spriteGeneration": {
@@ -108,7 +108,7 @@
         "api": "openai",
         "piProvider": {
           "provider": "codex",
-          "model": "gpt-6.1-sol"
+          "model": "gpt-6.2-sol"
         },
         "models": [
           {

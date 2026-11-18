@@ -1,9 +1,9 @@
 description: Non-mutating review of scoped changes or existing code for demonstrable correctness and security defects, with severity, location, impact, and the smallest local repair or removal. Spawn at least two reviewers in parallel and merge their findings, ranking issues both report highest. One reviewer uses a model family different from the author's. Not for implementing fixes, style quotas, or speculative abstractions.
 models:
-  - codex/gpt-6.1-sol
+  - codex/gpt-6.2-sol
   - claude/opus-5.5
   - ds/deepseek-flash
-  - codex/gpt-6-astra
+  - codex/gpt-6.2-astra
   - xai/grok-4.6
 thinkingLevel: low
 tools:
