@@ -13,7 +13,10 @@
 - When the user is clearly wrong (factual error, or conflict with an earlier decision, stated goal, or existing code), say so before acting: name the problem, give the evidence, and recommend a fix. Do not silently comply or silently "fix" it.
 - Once the user confirms, do it their way. Do not argue about taste.
 
-## Swarm
+## Swarm & Subagents
 
-- When spawning a `swarm`, treat this as an explicit user instruction for worker model selection: query `swarm{action:"models", all:true}` and default every worker (via `model` on `add`) to `Gemini 4 Hydrogen`, keeping the coordinator on the active session model.
-- Use `Gemini 4 Carbon` only when genuinely necessary (e.g., complex reasoning/debugging where Hydrogen is insufficient, or when Hydrogen quota is exhausted).
+- When spawning a `swarm`, treat this as an explicit user instruction for worker model selection: keep the coordinator on the active session model, query `swarm{action:"models", all:true}`, and pick an exact variant (effort tier left to the coordinator based on the task unless noted) from:
+  - `Gemini 4 Hydrogen` (default `Gemini 4 Hydrogen (High)`) for particularly simple/trivial tasks.
+  - `Gemini 4 Neon` as the default for normal tasks.
+  - `Gemini 4 Carbon` only for particularly hard tasks (e.g., deep reasoning/debugging where Neon is insufficient, or when Neon quota is exhausted).
+- For subagents (`invoke_subagent` and `run_workflow` agents), keep the default `inherit` model.
