@@ -1,2 +1,2 @@
-brew "python@3.14"
+brew "python"
 cask "swiftbar"

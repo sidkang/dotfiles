@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/python3.14
+#!/opt/homebrew/bin/python3
 # <xbar.title>OpenCode + Pi Token Usage</xbar.title>
 # <xbar.version>v0.5</xbar.version>
 # <xbar.author>Sid</xbar.author>

@@ -86,8 +86,8 @@ shell = "bash -c"
 run = """
 set -euo pipefail
 
-uv tool install --upgrade --python /opt/homebrew/bin/python3.14 --no-python-downloads jupyterlab
-uv tool install --upgrade --python /opt/homebrew/bin/python3.14 --no-python-downloads notebook
+uv tool install --upgrade --python /opt/homebrew/bin/python3 --no-python-downloads jupyterlab
+uv tool install --upgrade --python /opt/homebrew/bin/python3 --no-python-downloads notebook
 """
 
 [tasks."jupy:lab"]

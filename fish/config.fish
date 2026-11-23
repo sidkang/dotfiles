@@ -210,8 +210,6 @@ end
 
 abbr -a vim nvim
 
-abbr ts tailscale
-
 abbr -a yt4 "yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4\""
 
 function cq

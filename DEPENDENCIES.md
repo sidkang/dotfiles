@@ -19,12 +19,12 @@
 |---|---|---|
 | Fish | gh、starship、zoxide | `fish/config.fish` 的交互初始化；后两项有守卫，但已确认为常用功能 |
 | Rex | Sarasa SS17 字体、Python | `rex/apply-settings.py` |
-| AeroSpace | borders、Python 3.14、Fish、Hammerspoon | `aerospace/aerospace.toml` 的启动与 workspace hook、`aerospace/as.py` |
-| Goku | Karabiner-Elements、borders、Python 3.14、AeroSpace、Hammerspoon | `goku/karabiner.edn` 的窗口管理层直接调用这些应用；不会代为部署或初始化它们 |
+| AeroSpace | borders、Python、Fish、Hammerspoon | `aerospace/aerospace.toml` 的启动与 workspace hook、`aerospace/as.py` |
+| Goku | Karabiner-Elements、borders、Python、AeroSpace、Hammerspoon | `goku/karabiner.edn` 的窗口管理层直接调用这些应用；不会代为部署或初始化它们 |
 | Hammerspoon | ImageMagick、AeroSpace、Karabiner-Elements | 壁纸处理、`sids.aerospace_window_hints` 和 `sids.whichkey` 调用 |
 | Neovim | Git、Fish、tree-sitter-cli、ripgrep、fd | 插件安装、Fish formatter、treesitter 构建和查找功能 |
 | Git | hunk | `git/config` 默认 pager |
-| Pi | Node、zmx | Pi 运行时以及 `fish/functions/pi.fish` 的交互包装 |
+| Pi | Node | `pi` 直接运行；仅 Fish 的 `zpi` 需要 zmx，通过 `zmx:install` 单独安装 |
 | age 工具 | age、age-plugin-se、sops | `age/Brewfile` 仅提供显式安装，不管理 SSH 配置 |
 | rbw | rbw、pinentry-mac | 用户确认的密码管理基础工具；不读取本机密码库配置 |
 | 发布检查 | jj、gitleaks | `scripts/check-secrets.py` |
@@ -35,8 +35,8 @@
 
 | 应用 / 功能 | 依赖 | 处理 |
 |---|---|---|
-| Fish 列表、搜索、系统信息、视频处理、格式化、下载与 Android 工具 | eza、fd、fastfetch、ffmpeg、prettier、tailscale、yt-dlp、android-platform-tools | 已写 `fish/Brewfile`，随显式 Fish 安装任务安装 |
-| Git difftastic aliases | difftastic（命令 `difft`） | 已写 `git/Brewfile`；本机未找到 difft |
+| Fish 列表、搜索、系统信息、视频处理、格式化、下载与 Android 工具 | eza、fd、fastfetch、ffmpeg、prettier、yt-dlp、android-platform-tools | 已写 `fish/Brewfile`，随显式 Fish 安装任务安装 |
+| Git difftastic aliases | difftastic（命令 `difft`） | 不随 `git:install` 安装；只在选用这些别名时手动安装 |
 | Neovim 特定文件类型格式化 | taplo、prettier、caddy、joker | 已写 `nvim/Brewfile`；本机未找到 caddy，joker 是可选后备 |
 | mise `name` 任务 | yq | 已写 `mise/Brewfile`；本机未找到 yq |
 | Fish `fmd` | autocorrect | `fish/functions/fmd.fish` 引用；本机未找到，安装来源与是否保留功能待决定，未新增自动安装 |

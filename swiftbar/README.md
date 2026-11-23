@@ -13,7 +13,7 @@ mise swiftbar:test
 ```
 
 安装、部署、设置目录及刷新均独立，不自动串联。插件只用 Python 标准库，
-直接使用 Homebrew Python 3.14，不再使用旧 mise 虚拟环境。
+直接使用 Homebrew 默认的 `python3`。
 
 `token-usage.10m.py` 每十分钟刷新；`swiftbar_menu.py` 是辅助模块，
 由 `.swiftbarignore` 排除。测试和安装元数据不部署。

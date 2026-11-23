@@ -36,4 +36,4 @@ exit 1
 
 ["swiftbar:test"]
 description = "Run SwiftBar tests with synthetic data only"
-run = "PYTHONDONTWRITEBYTECODE=1 /opt/homebrew/bin/python3.14 -m unittest discover -s \"{{ config_root }}/swiftbar\" -p \"test_*.py\""
+run = "PYTHONDONTWRITEBYTECODE=1 /opt/homebrew/bin/python3 -m unittest discover -s \"{{ config_root }}/swiftbar\" -p \"test_*.py\""

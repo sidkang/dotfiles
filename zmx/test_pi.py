@@ -62,7 +62,7 @@ sys.exit(17 if name == "pi" else 0)
             script.chmod(0o755)
         env = {**os.environ, "PATH": f"{base}:/opt/homebrew/bin:/usr/bin:/bin", "CALL_LOG": str(log), "TERM": "xterm-256color"}
         env.pop("ZMX_SESSION", None)
-        source = f"source {shlex.quote(str(ROOT / 'fish/functions/pi.fish'))}; "
+        source = f"source {shlex.quote(str(ROOT / 'fish/functions/zpi.fish'))}; "
         cases = [
             ([], True), (["-c"], True), (["-r"], True),
             (["--mode", "text"], True), (["--", "--print"], True),
@@ -74,7 +74,7 @@ sys.exit(17 if name == "pi" else 0)
             (["auth", "check"], False), (["mcp", "list"], False),
         ]
         for args, wrapped in cases:
-            code, output = terminal([FISH, "--no-config", "-ic", source + "pi " + shlex.join(args)], env, project)
+            code, output = terminal([FISH, "--no-config", "-ic", source + "zpi " + shlex.join(args)], env, project)
             call = json.loads(log.read_text().splitlines()[-1])
             assert call[0] == ("zmx" if wrapped else "pi"), (args, call, output)
             assert code == (0 if wrapped else 17), (args, code, output)
@@ -86,17 +86,17 @@ sys.exit(17 if name == "pi" else 0)
                 assert call[1:] == args, call
         # Non-interactive shell, redirected stdin/stdout, and nested zmx bypass.
         for options, body, extra in [
-            (["-c"], "pi", {}),
-            (["-ic"], "pi </dev/null", {}),
-            (["-ic"], "pi >/dev/null", {}),
-            (["-ic"], "pi", {"ZMX_SESSION": "existing"}),
+            (["-c"], "zpi", {}),
+            (["-ic"], "zpi </dev/null", {}),
+            (["-ic"], "zpi >/dev/null", {}),
+            (["-ic"], "zpi", {"ZMX_SESSION": "existing"}),
         ]:
             code, output = terminal([FISH, "--no-config", *options, source + body], {**env, **extra}, project)
             assert json.loads(log.read_text().splitlines()[-1]) == ["pi"], output
             assert code == 17, (code, output)
         # Force aa (occupied), then bb, without making production code injectable.
         random = "function random; set -g draws (math 1 + $draws); if test $draws -le 2; echo a; else; echo b; end; end; set -g draws 0; "
-        code, output = terminal([FISH, "--no-config", "-ic", source + random + "pi"], env, project)
+        code, output = terminal([FISH, "--no-config", "-ic", source + random + "zpi"], env, project)
         call = json.loads(log.read_text().splitlines()[-1])
         assert code == 0 and call[2] == "project-space-bb", (call, output)
         print(f"PASS: {len(cases) + 5} wrapper cases (routing, arguments, exit status, collision retry)")

@@ -2,9 +2,25 @@
 
 jj 管版本，`mise dot` 管部署。根 `mise.toml` 保存部署映射；各应用的安装要求和操作放在自己的目录。
 
-## 按应用操作
+## 新 Mac 恢复
 
-支持 macOS，需 Git、Homebrew 和 mise（最低版本见 `mise.toml`）。新机器先通过 Homebrew 安装 `git`、`jj`、`mise`，克隆后审查配置并运行 `mise trust`。
+每项先检查，缺少才安装；一项验证通过再继续。不改默认 shell，不在安装时部署配置、登录账号或启动服务。
+
+1. **系统前置**：`xcode-select -p` 未配置时，在桌面运行 `xcode-select --install`，完成后检查 `git --version`。Homebrew 未安装时用[官方安装器](https://brew.sh/)，再检查 `/opt/homebrew/bin/brew --version`。Apple Silicon 上如果 SSH 找不到 `brew`，先用绝对路径或在当前会话执行 `eval "$(/opt/homebrew/bin/brew shellenv)"`。
+2. **恢复入口**：`brew install git jj mise`。检查三个版本，确认 mise 满足根 `mise.toml` 的 `min_version`。将仓库检出到 `~/config/dotfiles`，审查后再运行 `mise trust`。
+3. **命令行工作底座**：按下面的能力逐批安装，不为首轮恢复执行整份 Fish 或 Pi 安装任务。
+
+   | 能力 | 首轮 Homebrew 软件 |
+   |---|---|
+   | 仓库操作与发布检查 | `gh`、`hunk`、`gitleaks` |
+   | Shell、搜索与编辑 | `fish`、`starship`、`zoxide`、`neovim`、`ripgrep`、`fd`、`bat`、`eza` |
+   | 脚本与文件迁移 | `node`、`python`、`uv`、`yq`、`rsync` |
+   | AI 与密码库 | `pi-coding-agent`、`rbw`、`pinentry-mac` |
+
+   只补表中的包可用 `brew install <package ...>`；安装后先检查命令版本，再按应用预览和部署配置。`pi` 不依赖 zmx；需要 `zpi` 才单独运行 `mise zmx:install`。`rbw` 的账号和密码库在本机另行配置。
+4. **桌面底座**：Rex 本体手动安装，仓库只管字体依赖与配置。Chrome 如需安装，用 `mise apps:install google-chrome`。在桌面验证启动及权限，不把设备权限或账号状态复制进仓库。
+
+## 按应用操作
 
 每个应用包含：
 
