@@ -1,16 +1,5 @@
 local function bootstrap()
-	hs.loadSpoon("SpoonInstall")
-	spoon.SpoonInstall.use_syncinstall = true
-
-	local install = spoon.SpoonInstall
-	if false then install:andUse("EmmyLua") end
-
-	local prefix = os.getenv("HOME") .. "/.local"
-	for _, suffix in ipairs({ "", "/bin", "/share", "/share/man", "/share/man/man1" }) do
-		local path = prefix .. suffix
-		if not hs.fs.attributes(path, "mode") then assert(hs.fs.mkdir(path)) end
-	end
-	assert(hs.ipc.cliInstall(prefix) == true, "Failed to install Hammerspoon CLI")
+	require("hs.ipc")
 	hs.window.animationDuration = 0
 	require("sids.router").setup() -- before any hs.urlevent.bind
 end
@@ -24,10 +13,14 @@ local alertColors = {
 }
 
 local function configureAlerts()
+	local font = "LXGWWenKaiGB-Regular"
+	if not hs.styledtext.validFont(font) then
+		hs.styledtext.loadFont(os.getenv("HOME") .. "/Library/Fonts/" .. font .. ".ttf")
+	end
 	hs.alert.defaultStyle = {
 		strokeWidth = 0,
 		textColor = { white = 1, alpha = 1 },
-		textFont = "LXGW WenKai GB",
+		textFont = hs.styledtext.validFont(font) and font or nil,
 		textSize = 28,
 		radius = 8,
 		atScreenEdge = 0,

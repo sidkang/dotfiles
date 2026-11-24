@@ -33,14 +33,14 @@ HOTKEY_LOCK_WAIT_SEC = 1.0
 HOTKEY_STATE_DIR = Path(os.path.expanduser("~/.local/state/aerospace"))
 HOTKEY_LOCK_FILE = HOTKEY_STATE_DIR / "hotkey-lock"
 FOCUS_RETRY_DELAY_SEC = 0.05
-HS_CLI = os.path.expanduser("~/.local/bin/hs")
+HS_CLI = "/opt/homebrew/bin/hs"
 URL_SAFE = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~")
 REX_BIN_CANDIDATES = (
-    "/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex",
-    "/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex",
     os.path.expanduser(
         "~/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
     ),
+    "/Applications/Rex Beta.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex",
+    "/Applications/Rex.app/Contents/Helpers/Rex Server.rex/Contents/MacOS/rex",
 )
 REX_APP_CANDIDATES = ("Rex Beta", "Rex")
 
@@ -452,12 +452,17 @@ def wait_for_new_rex_window(before_ids: set[str]) -> RexWindow | None:
 
 
 def rex_local_client() -> str:
-    """This Mac's Rex app client, addressed by its label (the local host name).
-
-    Rex apps on other Macs also connect to this server, over TCP. Driving one
-    of them would open windows on that machine.
-    """
-    return check_cmd(("scutil", "--get", "LocalHostName"))
+    result = rex_run("--autostart=false", "client", "ls", "--json", check=True)
+    local_apps = [
+        client["client_id"]
+        for client in json.loads(result.stdout)["clients"]
+        if (client.get("info") or {}).get("kind") == "app"
+        and (client.get("principal") or {}).get("transport") == "unix"
+        and client.get("connection_state") == "connected"
+    ]
+    if len(local_apps) != 1:
+        raise RuntimeError(f"Expected one connected local Rex app; found {len(local_apps)}")
+    return local_apps[0]
 
 
 def ensure_rex_terminal() -> None:
@@ -580,6 +585,8 @@ def main(argv: Sequence[str]) -> int:
             aerospace_soft(args)
         case ["rex", "toggle-hotkey"]:
             toggle_rex_hotkey()
+        case ["rex", "do", *args] if args:
+            rex_run("-C", rex_local_client(), "do", *args, check=True)
         case ["window", "cycle-app", direction]:
             cycle_app_win(direction)
         case ["window", "smart-move", axis, size, direction]:

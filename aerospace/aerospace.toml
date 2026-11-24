@@ -55,7 +55,7 @@ persistent-workspaces = ["1", "2", "3", "4", "5", "6", "Q", "W", "E", "A", "S", 
 # /bin/sh + Hammerspoon IPC: roughly 3x cheaper than fish -c + open.
 exec-on-workspace-change = ["/bin/sh", "-c", '''
 url="notify?msg=$AEROSPACE_FOCUSED_WORKSPACE&level=info"
-"$HOME/.local/bin/hs" -q -c "hsurl(\"$url\")" || open -g "hammerspoon://$url"
+"/opt/homebrew/bin/hs" -q -c "hsurl(\"$url\")" || open -g "hammerspoon://$url"
 ''']
 
 # Gaps between windows (inner-*) and between monitor edges (outer-*).

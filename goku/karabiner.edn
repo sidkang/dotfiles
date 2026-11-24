@@ -2,11 +2,11 @@
  {:goku
   {:default true :sim 50 :delay 180 :alone 150 :held 140}}
  :simlayer-threshold 180
- :templates {:rex-do "\"$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex\" -C \"$(scutil --get LocalHostName)\" do %s"
+ :templates {:rex-do "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py rex do %s"
              :as "/opt/homebrew/bin/aerospace %s"
              :as-py "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";python3 $HOME/.config/aerospace/as.py %s"
              :sh "export PATH=\"/opt/homebrew/bin:/usr/bin:$PATH\";%s"
-             :hs "$HOME/.local/bin/hs -q -c 'hsurl(\"%s\")'"
+             :hs "/opt/homebrew/bin/hs -q -c 'hsurl(\"%s\")'"
              :m1ddc "/opt/homebrew/bin/m1ddc %s"}
  :simlayers {:z-mode {:key :z}
              :f-mode {:key :f}
