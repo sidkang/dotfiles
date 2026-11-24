@@ -209,6 +209,7 @@ if command -q zoxide
 end
 
 abbr -a vim nvim
+alias darkbloom '~/.darkbloom/bin/darkbloom'
 
 abbr -a yt4 "yt-dlp -f \"bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4\""
 
