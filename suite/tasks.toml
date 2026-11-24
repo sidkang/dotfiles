@@ -1,0 +1,67 @@
+["suite:install"]
+description = "Install suite applications and their dependencies"
+run = [
+  "mise hammerspoon:install",
+  "mise aerospace:install",
+  "mise goku:install",
+  "mise git:install",
+  "mise jj:install",
+  "mise hunk:install",
+  "mise yazi:install",
+  "mise zellij:install",
+  "mise swiftbar:install",
+  "mise espanso:install",
+  "mise btop:install",
+  "mise bat:install",
+  "mise bottom:install",
+  "mise nvim:install",
+  "mise mise:install",
+  "mise agy:install",
+]
+
+["suite:plan"]
+description = "Preview macOS desktop deployment and list runtime changes"
+run = [
+  "mise hammerspoon:plan",
+  "mise aerospace:plan",
+  "mise goku:plan",
+  "mise git:plan",
+  "mise jj:plan",
+  "mise hunk:plan",
+  "mise yazi:plan",
+  "mise zellij:plan",
+  "mise swiftbar:plan",
+  "mise espanso:plan",
+  "mise btop:plan",
+  "mise bat:plan",
+  "mise bottom:plan",
+  "mise nvim:plan",
+  "mise mise:plan",
+  "mise agy:plan",
+  "echo 'Apply also sets the Hammerspoon entry point, reloads AeroSpace, generates and selects the goku profile, and applies Dock, Mission Control, Spaces, desktop and trackpad settings.'",
+]
+
+["suite:apply"]
+description = "Apply macOS desktop configuration in order; no installs or service starts"
+dir = "{{ config_root }}"
+run = [
+  "mise hammerspoon:apply",
+  "mise hammerspoon:setup",
+  "mise aerospace:apply",
+  "aerospace reload-config",
+  "mise goku:apply",
+  "mise git:apply",
+  "mise jj:apply",
+  "mise hunk:apply",
+  "mise yazi:apply",
+  "mise zellij:apply",
+  "mise swiftbar:apply",
+  "mise espanso:apply",
+  "mise btop:apply",
+  "mise bat:apply",
+  "mise bottom:apply",
+  "mise nvim:apply",
+  "mise mise:apply",
+  "mise agy:apply",
+  "./scripts/apply-macos-defaults.sh",
+]
