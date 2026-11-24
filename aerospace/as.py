@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import fcntl
+import json
 import os
 import signal
 import subprocess
@@ -422,6 +423,7 @@ def show_hotkey(window: RexWindow, workspace: str, center: bool = False) -> bool
         focus_window_robustly(window_id)
     if center:
         hammerspoon("floatwindow", action="move", target="center", window=window_id)
+    ensure_rex_terminal()
     return True
 
 
@@ -456,6 +458,16 @@ def rex_local_client() -> str:
     of them would open windows on that machine.
     """
     return check_cmd(("scutil", "--get", "LocalHostName"))
+
+
+def ensure_rex_terminal() -> None:
+    # A Rex GUI window can show a session with no tabs. Rex calls tabs windows.
+    client = rex_local_client()
+    state = json.loads(rex_run("client", "inspect", client, "--json", check=True).stdout)
+    for session in state["client"]["session_ids"]:
+        tabs = rex_run("window", "ls", "-s", session, "-q", check=True)
+        if not tabs.stdout.strip():
+            rex_run("window", "new", "-s", session, check=True)
 
 
 def launch_rex_hotkey(workspace: str, before_ids: set[str]) -> None:
