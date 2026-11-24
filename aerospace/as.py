@@ -24,7 +24,6 @@ REX_BUNDLE_ID = "com.superlogical.rex"
 # windows must stay tiled.
 REX_HOTKEY_HIDE_WORKSPACE = "T"
 DEFAULT_WORKSPACE = "1"
-REX_CLIENT_WAIT_SEC = 5.0
 REX_WINDOW_WAIT_SEC = 3.0
 # Rex's own Settings window ("Settings - Server") is not a terminal window and
 # must never be taken for the hotkey window.
@@ -459,33 +458,19 @@ def rex_local_client() -> str:
     return check_cmd(("scutil", "--get", "LocalHostName"))
 
 
-def ensure_rex_app(client: str) -> None:
-    if rex_run("-C", client, "actions").returncode == 0:
-        return
-
-    for app_name in REX_APP_CANDIDATES:
-        if os.path.isdir(f"/Applications/{app_name}.app"):
-            run_cmd(("open", "-a", app_name))
-            break
+def launch_rex_hotkey(workspace: str, before_ids: set[str]) -> None:
+    if before_ids:
+        result = rex_run("-C", rex_local_client(), "do", "client.window.new")
     else:
-        raise FileNotFoundError("Rex app not found")
-
-    deadline = time.time() + REX_CLIENT_WAIT_SEC
-    while time.time() < deadline:
-        time.sleep(0.1)
-        if rex_run("-C", client, "actions").returncode == 0:
-            return
-    raise TimeoutError("Rex app client did not connect")
-
-
-def launch_rex_hotkey(workspace: str) -> None:
-    client = rex_local_client()
-    ensure_rex_app(client)
-    # Read the windows only now: starting the app may have restored some.
-    before_ids = {w.window_id for w in hotkey_state()[0]}
-
-    if rex_run("-C", client, "do", "client.window.new").returncode != 0:
-        notify("Failed to open Rex window", ERROR)
+        # Opening the app creates the first window; never request a second one.
+        for app in REX_APP_CANDIDATES:
+            if os.path.isdir(f"/Applications/{app}.app"):
+                result = run_cmd(("open", "-a", app))
+                break
+        else:
+            raise FileNotFoundError("Rex app not found")
+    if result.returncode:
+        notify(result.stderr.strip() or "Failed to open Rex window", ERROR)
         return
 
     window = wait_for_new_rex_window(before_ids)
@@ -519,7 +504,7 @@ def toggle_rex_hotkey() -> None:
         else:
             hotkey = find_hotkey_window(windows)
             if hotkey is None:
-                launch_rex_hotkey(mouse_workspace)
+                launch_rex_hotkey(mouse_workspace, {w.window_id for w in windows})
                 return
             ok = show_hotkey(hotkey, mouse_workspace)
             action = "show"
