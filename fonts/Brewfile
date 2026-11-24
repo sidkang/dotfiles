@@ -1,0 +1,8 @@
+tap "sidkang/homebrew", "https://github.com/sidkang/homebrew"
+
+cask "font-iosevka-nerd-font"
+cask "font-iosevka-ss17"
+cask "font-iosevka-term-nerd-font"
+cask "sidkang/homebrew/font-iosevka-term-slab-ss17"
+cask "sidkang/homebrew/font-sarasa-ss17-sc-nerd-font"
+cask "font-lxgw-wenkai-gb"

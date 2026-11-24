@@ -1,0 +1,3 @@
+["fonts:install"]
+description = "Install the default Homebrew font collection"
+run = "brew bundle install --no-upgrade --file=\"{{ config_root }}/fonts/Brewfile\""
