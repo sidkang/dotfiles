@@ -20,6 +20,18 @@ jj 管版本，`mise dot` 管部署。根 `mise.toml` 保存部署映射；各�
    只补表中的包可用 `brew install <package ...>`；安装后先检查命令版本，再按应用预览和部署配置。`pi` 不依赖 zmx；需要 `zpi` 才单独运行 `mise zmx:install`。`rbw` 的账号和密码库在本机另行配置。
 4. **桌面底座**：Rex 本体手动安装，仓库只管字体依赖与配置。Chrome 如需安装，用 `mise apps:install google-chrome`。在桌面验证启动及权限，不把设备权限或账号状态复制进仓库。
 
+### Mac App Store 底座
+
+不随 Homebrew 应用任务安装。先在桌面登录 App Store；确认本机缺少且当前账户已获取的应用，再从 App Store 安装，或用 `mas install <ID>` 逐项恢复。Safari 扩展装好后还需在 Safari 中启用。
+
+| 类别 | 应用（App Store ID） |
+|---|---|
+| 开发 | Xcode（完整版）`497799835` |
+| Safari 扩展 | Tampermonkey `6738342400`、uBlacklist for Safari `1547912640`、uBlock Origin Lite `6745342698`、Vimlike `1584519802` |
+| 创作 | Final Cut Pro `424389933`、Compressor `424390742`、Motion `434290957`、Logic Pro `634148309`、Pixelmator Pro `1289583905` |
+| 日常工具 | Bitwarden `1352778147`、Bob `1630034110`、Keka `470158793`、Xnip `1221250572`、Actions `1586435171`、PDF Viewer `1120099014`、Dictionaries `1380563956` |
+| 沟通与远程 | 微信 `836500024`、Telegram `747648890`、Windows App `1295203466` |
+
 ## 按应用操作
 
 每个应用包含：
