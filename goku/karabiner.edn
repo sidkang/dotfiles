@@ -153,27 +153,6 @@
                  [:l [["as-swap" 0] [:as-py "aerospace swap right"]] nil {:afterup [:hs "whichkey?action=hide&group=as-swap"]}]
                  ;; END menus:aerospace
                  ]}
-        {:des "aerospace []"
-         :rules [[:open_bracket ["bracket-l-mode" 1] nil {:afterup ["bracket-l-mode" 0] :alone :open_bracket}]
-                 [:close_bracket ["bracket-r-mode" 1] nil {:afterup ["bracket-r-mode" 0] :alone :close_bracket}]
-
-                 :bracket-l-mode
-                 [:a [:as-py "window cycle-app prev"]]
-                 [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin prev"]]
-                 [:s [:as "workspace prev --no-stdin"]]
-                 [:h [:as-py "window smart-resize width -50"]]
-                 [:v [:as-py "window smart-resize height -50"]]
-                 [:d :delete_or_backspace]
-                 [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around prev"]]
-
-                 :bracket-r-mode
-                 [:a [:as-py "window cycle-app next"]]
-                 [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin next"]]
-                 [:s [:as "workspace next --no-stdin"]]
-                 [:h [:as-py "window smart-resize width +50"]]
-                 [:v [:as-py "window smart-resize height +50"]]
-                 [:d :delete_forward]
-                 [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around next"]]]}
         {:des "rex ,."
          :rules [[:condi :rex]
                  [:comma ["rex-comma-mode" 1] :!app-mode {:afterup ["rex-comma-mode" 0] :alone :comma}]
@@ -262,6 +241,27 @@
                  [:condi]
                  [:!Treturn_or_enter :!CTreturn_or_enter :!rex]
                  [:x :!Cw :app-mode]]}
+        {:des "aerospace []"
+         :rules [[:open_bracket ["bracket-l-mode" 1] nil {:afterup ["bracket-l-mode" 0] :alone :open_bracket}]
+                 [:close_bracket ["bracket-r-mode" 1] nil {:afterup ["bracket-r-mode" 0] :alone :close_bracket}]
+
+                 :bracket-l-mode
+                 [:a [:as-py "window cycle-app prev"]]
+                 [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin prev"]]
+                 [:s [:as "workspace prev --no-stdin"]]
+                 [:h [:as-py "window smart-resize width -50"]]
+                 [:v [:as-py "window smart-resize height -50"]]
+                 [:d :delete_or_backspace]
+                 [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around prev"]]
+
+                 :bracket-r-mode
+                 [:a [:as-py "window cycle-app next"]]
+                 [:w [:as "move-node-to-workspace --focus-follows-window --no-stdin next"]]
+                 [:s [:as "workspace next --no-stdin"]]
+                 [:h [:as-py "window smart-resize width +50"]]
+                 [:v [:as-py "window smart-resize height +50"]]
+                 [:d :delete_forward]
+                 [:m [:as "move-node-to-monitor --focus-follows-window --wrap-around next"]]]}
         {:des "Mouse mode"
          :rules [:f-mode
                  [:n {:pkey :button1}]

@@ -453,24 +453,22 @@ def wait_for_new_rex_window(before_ids: set[str]) -> RexWindow | None:
 
 def rex_local_client() -> str:
     result = rex_run("--autostart=false", "client", "ls", "--json", check=True)
+    # SSH-backed clients can also report kind=app, transport=unix, and a live PID.
+    gui_pids = {
+        app["app-pid"]
+        for app in json.loads(check_cmd(("aerospace", "list-apps", "--json")))
+        if app.get("app-bundle-id") == REX_BUNDLE_ID
+    }
     local_apps = []
     for client in json.loads(result.stdout)["clients"]:
         principal = client.get("principal") or {}
-        pid = principal.get("pid")
         if (
-            (client.get("info") or {}).get("kind") != "app"
-            or principal.get("transport") != "unix"
-            or client.get("connection_state") != "connected"
-            or not isinstance(pid, int)
-            or pid <= 0
+            (client.get("info") or {}).get("kind") == "app"
+            and principal.get("transport") == "unix"
+            and client.get("connection_state") == "connected"
+            and principal.get("pid") in gui_pids
         ):
-            continue
-        # Rex can still report a client as connected after its process exits.
-        try:
-            os.kill(pid, 0)
-        except (ProcessLookupError, PermissionError):
-            continue
-        local_apps.append(client["client_id"])
+            local_apps.append(client["client_id"])
     if len(local_apps) != 1:
         raise RuntimeError(f"Expected one live local Rex app; found {len(local_apps)}")
     return local_apps[0]
