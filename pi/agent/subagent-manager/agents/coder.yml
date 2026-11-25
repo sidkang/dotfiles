@@ -1,9 +1,6 @@
-description: Own iterative implementation, refactoring, debugging, and frontend UI through a checked patch. Pick claude/sonnet-5.5 for frontend and UI, codex/gpt-6.2-sol for backend, claude/opus-5.5 for complex debugging, ambiguous features, and cross-module refactoring, and ds/deepseek-flash for bulk mechanical edits. Not for lookup-only questions, review-only passes, or long-form prose.
+description: Own iterative implementation, refactoring, debugging, and frontend UI through a checked patch. Use codex/gpt-6.2-sol for feature work, debugging, and refactoring, and ds/deepseek-flash for bulk mechanical edits. Not for lookup-only questions, review-only passes, or long-form prose.
 models:
-  - claude/sonnet-5.5
   - codex/gpt-6.2-sol
-  - claude/opus-5.5
-  - claude/fable-5.2
   - ds/deepseek-flash
   - xai/grok-4.6
 thinkingLevel: medium

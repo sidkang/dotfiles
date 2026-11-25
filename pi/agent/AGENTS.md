@@ -7,4 +7,4 @@
 
 ## Subagents
 
-- Agent types set default thinking levels. For very hard tasks, raise the level with a `:thinking` suffix on the `agent_spawn` model, e.g. `claude/opus-5.5:high`.
+- Agent types set default thinking levels. For very hard tasks, raise the level with a `:thinking` suffix on the `agent_spawn` model, e.g. `codex/gpt-6.2-astra:high`.

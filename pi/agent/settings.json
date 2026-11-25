@@ -2,24 +2,17 @@
   "lastChangelogVersion": "1.5.2",
   "theme": "catppuccin-latte-custom",
   "defaultProvider": "codex",
-  "defaultModel": "sonnet-5.5",
+  "defaultModel": "gpt-6.2-sol",
   "defaultThinkingLevel": "medium",
   "modelThinkingLevels": {
     "codex/gpt-6.2-astra": "low",
     "codex/gpt-6.2-sol": "medium",
-    "claude/opus-5.5": "medium",
-    "claude/opus-safe": "medium",
-    "claude/sonnet-5.5": "high",
-    "claude/sonnet-safe": "high",
     "ds/deepseek-flash": "high",
     "gemini/gemini-3.8-flash": "high",
     "xai/grok-4.6": "high"
   },
   "editorPaddingX": 1,
   "enabledModels": [
-    "claude/fable-5.2",
-    "claude/opus-5.5",
-    "claude/sonnet-5.5",
     "ds/deepseek-flash",
     "codex/gpt-6.2-sol"
   ],
